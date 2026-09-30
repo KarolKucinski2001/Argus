@@ -372,7 +372,7 @@ az webapp deploy `
 - Consumes: GitHub owner/repository, subscription ID, tenant ID, Web App resource ID from Tasks 1 and 3.
 - Produces: an OIDC identity usable only by the deployment workflow for `master`.
 
-- [ ] **Step 1: Create a deployment identity**
+- [x] **Step 1: Create a deployment identity**
 
 Use the approved identity-management path for the tenant. The identity must have:
 
@@ -382,7 +382,7 @@ Use the approved identity-management path for the tenant. The identity must have
 - no client secret stored in the repository;
 - no subscription-wide Contributor role unless the owner explicitly approves that exception.
 
-- [ ] **Step 2: Assign the minimum deployment role**
+- [x] **Step 2: Assign the minimum deployment role**
 
 Assign the narrowest role supported by the tenant at the Web App scope, such as an App Service deployment role, rather than granting broad subscription permissions:
 
@@ -395,6 +395,17 @@ az role assignment create `
 ```
 
 Expected: the role assignment is visible at the Web App scope and does not grant unrelated resource access.
+
+### Azure OIDC identity execution record
+
+- App registration/service principal: `argus-github-deployer`
+- Federated subject: `repo:KarolKucinski2001/Argus:ref:refs/heads/master`
+- Audience: `api://AzureADTokenExchange`
+- Role: `Website Contributor`
+- Scope: Web App resource `argus-api-kucink01`
+- Role assignment: `5f9b473f-312d-4dc5-b2f4-59c2d889bc24`
+
+The GitHub repository values and workflow were not configured in this step. No client secret was created.
 
 - [ ] **Step 3: Configure GitHub Actions values**
 
