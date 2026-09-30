@@ -67,7 +67,7 @@ If any input is unknown, stop before provisioning and record the missing value. 
 **Interfaces:**
 - Produces: verified Azure subscription, tenant, region, runtime, repository, and branch values for later tasks.
 
-- [ ] **Step 1: Check the local SDK and CLI versions**
+- [x] **Step 1: Check the local SDK and CLI versions**
 
 Run from the repository root:
 
@@ -85,7 +85,7 @@ Expected:
 - The repository status is understood before any deployment files are added.
 - A GitHub remote exists before GitHub Actions setup begins.
 
-- [ ] **Step 2: Authenticate to Azure and select the intended subscription**
+- [x] **Step 2: Authenticate to Azure and select the intended subscription**
 
 ```powershell
 az login
@@ -97,7 +97,7 @@ az account show --query "{subscriptionId:id,tenantId:tenantId,name:name,user:use
 
 Expected: the selected subscription ID and tenant ID match the approved deployment inputs.
 
-- [ ] **Step 3: Configure CLI defaults without storing credentials**
+- [x] **Step 3: Configure CLI defaults without storing credentials**
 
 ```powershell
 az configure --defaults group="<RESOURCE_GROUP>" location="<AZURE_REGION>"
@@ -106,7 +106,7 @@ az config set core.only_show_errors=true
 
 Expected: future commands use the selected resource group and region by default; no token or secret is written to the repository.
 
-- [ ] **Step 4: Verify the App Service runtime**
+- [x] **Step 4: Verify the App Service runtime**
 
 ```powershell
 az webapp list-runtimes --os-type linux --output table
@@ -122,7 +122,7 @@ az provider show --namespace Microsoft.Web --query registrationState --output ts
 
 Expected: an available Linux App Service runtime corresponding to .NET 10 is identified. If it is unavailable, stop rather than deploying a different runtime.
 
-- [ ] **Step 5: Verify the GitHub repository and branch**
+- [x] **Step 5: Verify the GitHub repository and branch**
 
 ```powershell
 git branch --show-current
@@ -141,7 +141,7 @@ Expected: the intended GitHub repository is reachable and the deployment branch 
 - Consumes: verified .NET 10 SDK from Task 1.
 - Produces: a known-good Release publish directory and ZIP package for the manual deployment.
 
-- [ ] **Step 1: Restore the project**
+- [x] **Step 1: Restore the project**
 
 ```powershell
 dotnet restore .bootstrap-scaffold.csproj
@@ -149,7 +149,7 @@ dotnet restore .bootstrap-scaffold.csproj
 
 Expected: restore completes without errors.
 
-- [ ] **Step 2: Build without restoring**
+- [x] **Step 2: Build without restoring**
 
 ```powershell
 dotnet build .bootstrap-scaffold.csproj --configuration Release --no-restore
@@ -157,7 +157,7 @@ dotnet build .bootstrap-scaffold.csproj --configuration Release --no-restore
 
 Expected: build succeeds with zero errors.
 
-- [ ] **Step 3: Publish to a uniquely identified local directory**
+- [x] **Step 3: Publish to a uniquely identified local directory**
 
 ```powershell
 $artifactId = "argus-$((Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss'))"
@@ -168,7 +168,7 @@ Write-Output $publishDir
 
 Expected: the output directory contains the published application and the artifact ID is recorded in the deployment notes or terminal log.
 
-- [ ] **Step 4: Create a ZIP containing the publish output**
+- [x] **Step 4: Create a ZIP containing the publish output**
 
 ```powershell
 $zipPath = Join-Path (Join-Path $PWD "artifacts") "$artifactId.zip"
@@ -188,7 +188,7 @@ Expected: the ZIP contains the contents of the publish directory at its root, no
 - Consumes: Azure identifiers and runtime from Task 1.
 - Produces: a running production Web App with a stable HTTPS hostname.
 
-- [ ] **Step 1: Create or verify the Resource Group**
+- [x] **Step 1: Create or verify the Resource Group**
 
 ```powershell
 az group create `
@@ -200,7 +200,7 @@ az group create `
 
 Expected: the command returns the intended resource group in the intended region.
 
-- [ ] **Step 2: Create the App Service Plan with the approved SKU**
+- [x] **Step 2: Create the App Service Plan with the approved SKU**
 
 For a Linux plan, use the approved non-F1 SKU:
 
@@ -216,7 +216,7 @@ az appservice plan create `
 
 Expected: the plan exists with the approved SKU. Record the SKU and its expected monthly cost; do not continue if the subscription or budget owner has not approved it.
 
-- [ ] **Step 3: Create the Web App with the verified .NET 10 runtime**
+- [x] **Step 3: Create the Web App with the verified .NET 10 runtime**
 
 ```powershell
 az webapp create `
@@ -231,7 +231,7 @@ az webapp create `
 
 Expected: the Web App is created and its default hostname is available.
 
-- [ ] **Step 4: Configure non-secret production settings**
+- [x] **Step 4: Configure non-secret production settings**
 
 ```powershell
 az webapp config appsettings set `
@@ -243,7 +243,7 @@ az webapp config appsettings set `
 
 Expected: only the required non-secret setting is configured. Do not add placeholder API keys or credentials.
 
-- [ ] **Step 5: Record the resource identity for later commands**
+- [x] **Step 5: Record the resource identity for later commands**
 
 ```powershell
 az webapp show `
@@ -265,7 +265,7 @@ Expected: the name, hostname, running state, HTTPS-only setting, and resource ID
 - Consumes: Web App from Task 3 and ZIP artifact from Task 2.
 - Produces: a manually verified production deployment and a known-good rollback artifact.
 
-- [ ] **Step 1: Deploy the ZIP package**
+- [x] **Step 1: Deploy the ZIP package**
 
 ```powershell
 az webapp deploy `
@@ -279,7 +279,7 @@ az webapp deploy `
 
 Expected: deployment status is successful and the deployment ID/time is recorded.
 
-- [ ] **Step 2: Read deployment and application diagnostics**
+- [x] **Step 2: Read deployment and application diagnostics**
 
 ```powershell
 az webapp deployment list `
@@ -301,7 +301,7 @@ az webapp show `
 
 Expected: the app is running and the latest deployment is successful.
 
-- [ ] **Step 3: Verify HTTPS and the application endpoint**
+- [x] **Step 3: Verify HTTPS and the application endpoint**
 
 ```powershell
 $baseUrl = "https://<WEB_APP_NAME>.azurewebsites.net"
@@ -318,7 +318,7 @@ Invoke-WebRequest "http://<WEB_APP_NAME>.azurewebsites.net/weatherforecast" -Max
 
 Expected: the request redirects to HTTPS because the application enables HTTPS redirection and the App Service is HTTPS-only.
 
-- [ ] **Step 4: Verify the production OpenAPI boundary**
+- [x] **Step 4: Verify the production OpenAPI boundary**
 
 ```powershell
 try {
@@ -333,9 +333,34 @@ try {
 
 Expected: OpenAPI is not exposed in Production because `Program.cs` maps it only inside the Development environment guard.
 
-- [ ] **Step 5: Preserve rollback information**
+- [x] **Step 5: Preserve rollback information**
 
 Record the ZIP path, artifact ID, deployment timestamp, Web App name, resource group, and successful smoke-test result. Rollback for this scaffold means redeploying the last known-good ZIP; it does not roll back any future database migration or external side effect.
+
+### Manual deployment execution record
+
+- Verified on: `2026-09-30`
+- Subscription: `0ed38a37-bb2c-4424-b5e4-9452cd8ea351`
+- Tenant: `074e3485-8e25-4d93-be5f-a5777052131c`
+- Resource Group: `argus-prod-rg`
+- App Service Plan: `argus-prod-plan` (`Linux`, `B1`, `Poland Central`)
+- Web App: `argus-api-kucink01`
+- Runtime: `DOTNETCORE|10.0`
+- Artifact: `artifacts/argus-20260930-090356.zip` in the local deployment worktree
+- Deployment ID: `89419dfd-a467-4f08-bdfd-6286e56181b3`
+- Hostname: `argus-api-kucink01-fsccdxexckcqhwb6.polandcentral-01.azurewebsites.net`
+- Smoke test: HTTPS `/weatherforecast` returned `200`; HTTP redirected with `301`; production `/openapi/v1.json` returned `404`
+
+The artifact remains local and ignored by Git. Redeploy it with:
+
+```powershell
+az webapp deploy `
+  --name "argus-api-kucink01" `
+  --resource-group "argus-prod-rg" `
+  --src-path ".\artifacts\argus-20260930-090356.zip" `
+  --type zip `
+  --clean true
+```
 
 ## Task 5: Configure GitHub OIDC and Least-Privilege Azure Access
 
