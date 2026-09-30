@@ -434,7 +434,7 @@ Expected: the workflow can authenticate without a client secret and cannot authe
 - Consumes: OIDC values and resource names from Task 5.
 - Produces: automatic deployment after each push to `master`.
 
-- [ ] **Step 1: Create the workflow with the fixed trigger and permissions**
+- [x] **Step 1: Create the workflow with the fixed trigger and permissions**
 
 Create `.github/workflows/deploy.yml`:
 
@@ -493,7 +493,9 @@ jobs:
 
 Pin action versions according to the repository's security policy if it requires commit SHAs. Do not add a publish profile or client secret to this workflow.
 
-- [ ] **Step 2: Validate the workflow file locally**
+The workflow was created at `.github/workflows/deploy.yml` with a `master`-only trigger, OIDC permissions, the existing project path, Release configuration, and no embedded credentials.
+
+- [x] **Step 2: Validate the workflow file locally**
 
 Run:
 
