@@ -407,7 +407,7 @@ Expected: the role assignment is visible at the Web App scope and does not grant
 
 The GitHub repository values and workflow were not configured in this step. No client secret was created.
 
-- [ ] **Step 3: Configure GitHub Actions values**
+- [x] **Step 3: Configure GitHub Actions values**
 
 Configure these repository-level Actions values:
 
@@ -419,11 +419,13 @@ Configure these repository-level Actions values:
 
 The first three are credentials/identity values and must be protected as repository secrets. Resource names may be repository variables if the repository policy permits it.
 
-- [ ] **Step 4: Verify OIDC before adding deployment steps**
+- [x] **Step 4: Verify OIDC before adding deployment steps**
 
 Use a temporary, non-deploying workflow or the repository's normal validation process to confirm that `azure/login` can acquire an OIDC token for `master`. Do not test OIDC from an untrusted pull request or fork.
 
 Expected: the workflow can authenticate without a client secret and cannot authenticate for an unrelated branch.
+
+GitHub Actions values were configured manually. OIDC run `36696684144` authenticated with the production environment subject and used no client secret.
 
 ## Task 6: Add and Verify GitHub Actions Auto-Deploy
 
@@ -511,7 +513,7 @@ Then inspect the workflow for:
 - the same project path and Release configuration used by the manual deployment;
 - a production environment if repository protection requires approval.
 
-- [ ] **Step 3: Commit the workflow and push to `master`**
+- [x] **Step 3: Commit the workflow and push to `master`**
 
 ```powershell
 git add .github/workflows/deploy.yml
@@ -521,7 +523,7 @@ git push origin master
 
 Expected: the push starts exactly one deployment workflow.
 
-- [ ] **Step 4: Verify workflow and runtime results**
+- [x] **Step 4: Verify workflow and runtime results**
 
 In GitHub Actions, verify restore, build, publish, Azure login, and deployment steps. Then repeat the production smoke test from Task 4.
 
@@ -542,7 +544,7 @@ Expected:
 - Consumes: successful manual and automated deployment evidence from Tasks 4 and 6.
 - Produces: repeatable rollback instructions and an explicit limitation record.
 
-- [ ] **Step 1: Document artifact rollback**
+- [x] **Step 1: Document artifact rollback**
 
 For an application-only rollback:
 
@@ -558,7 +560,7 @@ az webapp deploy `
 
 After redeployment, repeat the HTTPS and `/weatherforecast` smoke tests.
 
-- [ ] **Step 2: Record limitations**
+- [x] **Step 2: Record limitations**
 
 Record that this first deployment does not provide:
 
@@ -570,21 +572,21 @@ Record that this first deployment does not provide:
 - production-scale reliability or disaster recovery;
 - a cost estimate beyond the selected App Service SKU and Azure billing alerts.
 
-- [ ] **Step 3: Define the next hardening change**
+- [x] **Step 3: Define the next hardening change**
 
 The next deployment change should add health checks, structured diagnostics, budget alerts, and a staging path before Argus receives authentication, market-data integrations, or AI provider credentials.
 
 ## Acceptance Criteria
 
-- [ ] Azure CLI authenticates to the intended tenant and subscription.
-- [ ] The selected region and available App Service runtime are recorded before provisioning.
-- [ ] The production Resource Group, App Service Plan, and Web App use the approved names, region, runtime, and SKU.
-- [ ] The manual ZIP deployment succeeds before the GitHub workflow is enabled.
-- [ ] `https://<WEB_APP_NAME>.azurewebsites.net/weatherforecast` returns HTTP 200 JSON.
-- [ ] The HTTP endpoint redirects to HTTPS.
-- [ ] The production OpenAPI document is not exposed.
-- [ ] GitHub Actions authenticates with OIDC and no client secret or publish profile.
-- [ ] Only pushes to `master` trigger deployment.
-- [ ] The automated deployment succeeds and passes the same smoke test.
-- [ ] A known-good ZIP artifact and redeploy command are recorded.
-- [ ] The scaffold/demo limitations are explicit and not represented as full production readiness.
+- [x] Azure CLI authenticates to the intended tenant and subscription.
+- [x] The selected region and available App Service runtime are recorded before provisioning.
+- [x] The production Resource Group, App Service Plan, and Web App use the approved names, region, runtime, and SKU.
+- [x] The manual ZIP deployment succeeds before the GitHub workflow is enabled.
+- [x] `https://<WEB_APP_NAME>.azurewebsites.net/weatherforecast` returns HTTP 200 JSON.
+- [x] The HTTP endpoint redirects to HTTPS.
+- [x] The production OpenAPI document is not exposed.
+- [x] GitHub Actions authenticates with OIDC and no client secret or publish profile.
+- [x] Only pushes to `master` trigger deployment.
+- [x] The automated deployment succeeds and passes the same smoke test.
+- [x] A known-good ZIP artifact and redeploy command are recorded.
+- [x] The scaffold/demo limitations are explicit and not represented as full production readiness.
