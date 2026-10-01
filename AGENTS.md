@@ -8,6 +8,7 @@ Argus is an early ASP.NET Core Web API scaffold targeting .NET 10. The runnable 
 - Never write resolved work into `context/archive/`; archived material is immutable. Put bootstrap audit output under `context/changes/bootstrap-verification/`.
 - Preserve the 10x workflow and conflict rules in `@.github/copilot-instructions.md`; keep implementation guidance separate from generated scaffold instructions.
 - Treat `/weatherforecast` in `@Program.cs` as starter code, not Argus domain architecture.
+- Keep the authentication contract and configuration handoff in `@docs/authentication.md`; do not commit Entra secrets or tenant credentials.
 
 ## Structure and architecture
 
@@ -22,9 +23,10 @@ Argus is an early ASP.NET Core Web API scaffold targeting .NET 10. The runnable 
 - `dotnet restore .bootstrap-scaffold.csproj` — restore NuGet dependencies.
 - `dotnet build .bootstrap-scaffold.csproj --no-restore` — compile the API.
 - `dotnet run --project .bootstrap-scaffold.csproj` — run the Development API using launch profiles.
-- `dotnet test .bootstrap-scaffold.csproj --no-restore` — current test check; no test project or cases exist yet.
+- `dotnet test .bootstrap-scaffold.csproj --no-restore` — the production project has no test cases; use the focused authentication test project below.
+- `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` — deterministic authentication contract tests; no network or production secrets required.
 
-There is no lint configuration, single-test command, or GitHub Actions workflow. Add and document each with the first corresponding tooling or test change. The bootstrap audit is recorded in `@context/changes/bootstrap-verification/verification.md`.
+There is no lint configuration or single-test command. The deployment workflow is `@.github/workflows/deploy.yml`; it builds and publishes the API and deploys to Azure App Service, but does not provision authentication settings or run against a live Entra tenant. The bootstrap audit is recorded in `@context/changes/bootstrap-verification/verification.md`.
 
 ## Code and change conventions
 
