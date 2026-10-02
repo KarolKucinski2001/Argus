@@ -182,27 +182,27 @@ There are no existing users, database schema, or authenticated routes to migrate
 
 #### Automated
 
-- [x] 1.1 Restore the project with the selected authentication dependency
-- [x] 1.2 Build the API with authentication and authorization services registered
-- [x] 1.3 Confirm no identity secret or credential is committed
+- [x] 1.1 Restore the project with the selected authentication dependency — 31a4fbf
+- [x] 1.2 Build the API with authentication and authorization services registered — 31a4fbf
+- [x] 1.3 Confirm no identity secret or credential is committed — 31a4fbf
 
 #### Manual
 
 - [ ] 1.4 Verify the Entra-backed secure session and current-user route manually
-- [x] 1.5 Verify unauthenticated current-user requests return 401 ProblemDetails
-- [x] 1.6 Verify existing OpenAPI and HTTPS behavior remains unchanged
+- [x] 1.5 Verify unauthenticated current-user requests return 401 ProblemDetails — 31a4fbf
+- [x] 1.6 Verify existing OpenAPI and HTTPS behavior remains unchanged — 31a4fbf
 
 ### Phase 2: Add deterministic verification and operational handoff
 
 #### Automated
 
-- [x] 2.1 Pass the authentication contract test project without network access or production secrets
-- [x] 2.2 Pass API and test-project builds together
-- [x] 2.3 Confirm the repository contains no committed identity credentials
-- [x] 2.4 Confirm the test suite proves both unauthenticated rejection and authenticated current-user response
+- [x] 2.1 Pass the authentication contract test project without network access or production secrets — 31a4fbf
+- [x] 2.2 Pass API and test-project builds together — 31a4fbf
+- [x] 2.3 Confirm the repository contains no committed identity credentials — 31a4fbf
+- [x] 2.4 Confirm the test suite proves both unauthenticated rejection and authenticated current-user response — 31a4fbf
 
 #### Manual
 
-- [ ] 2.5 Follow the local Entra configuration handoff successfully
-- [ ] 2.6 Supply Azure App Service settings without editing committed JSON files
-- [ ] 2.7 Confirm S-01 can consume the protected-route contract without F-01 implementing account-access UX
+- [x] 2.5 Follow the local Entra configuration handoff successfully
+- [x] 2.6 Supply Azure App Service settings without editing committed JSON files
+- [x] 2.7 Confirm S-01 can consume the protected-route contract without F-01 implementing account-access UX
