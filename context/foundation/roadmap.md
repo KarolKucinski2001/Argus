@@ -3,7 +3,7 @@ project: "Argus"
 version: 1
 status: draft
 created: 2026-09-30
-updated: 2026-09-30
+updated: 2026-10-02
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -41,7 +41,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
-| F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | ready |
+| F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | done |
 | F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | blocked |
 | S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | proposed |
 | S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | blocked |
@@ -80,7 +80,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** The MVP cannot begin its stated user story without authenticated access, but the foundation must stay minimal so it does not consume the analysis path's scope.
-- **Status:** ready
+- **Status:** done
 
 ### F-02: Minimum market-data access contract
 
@@ -138,18 +138,18 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
-| --- | --- | --- | --- | --- |
-| F-01 | minimal-auth-foundation | Establish minimum authenticated access | yes | Run `/10x-plan minimal-auth-foundation`. |
-| F-02 | market-data-access-contract | Resolve and verify MVP market-data access | no | Resolve the blocking market-data question first. |
-| S-01 | account-access-flow | Deliver account access and Argus purpose screen | no | Requires F-01 to be completed. |
-| S-02 | select-and-start-analysis | Let users select assets and start analysis | no | Requires S-01 and F-02. |
-| S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | no | North star; requires S-02. |
+| Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
+| --- | --- | --- | --- | --- | --- |
+| F-01 | minimal-auth-foundation | Establish minimum authenticated access | [#3](https://github.com/KarolKucinski2001/Argus/issues/3) | yes | Run `/10x-plan minimal-auth-foundation`. |
+| F-02 | market-data-access-contract | Resolve and verify MVP market-data access | [#4](https://github.com/KarolKucinski2001/Argus/issues/4) | no | Resolve the blocking market-data question first. |
+| S-01 | account-access-flow | Deliver account access and Argus purpose screen | [#5](https://github.com/KarolKucinski2001/Argus/issues/5) | no | Requires F-01 to be completed. |
+| S-02 | select-and-start-analysis | Let users select assets and start analysis | [#6](https://github.com/KarolKucinski2001/Argus/issues/6) | no | Requires S-01 and F-02. |
+| S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | [#7](https://github.com/KarolKucinski2001/Argus/issues/7) | no | North star; requires S-02. |
 
 ## Open Roadmap Questions
 
-1. **Which market-data source and access limits are acceptable for the MVP?** — Owner: user. Block: F-02, S-02, S-03.
-2. **Should AI Copilot be included in the MVP?** — Owner: user. Block: roadmap-wide only if included; otherwise parked as a later capability.
+1. **Which market-data source and access limits are acceptable for the MVP?** — Owner: user. Block: F-02, S-02, S-03. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
+2. **Should AI Copilot be included in the MVP?** — Owner: user. Block: roadmap-wide only if included; otherwise parked as a later capability. GitHub decision issue: [#2](https://github.com/KarolKucinski2001/Argus/issues/2).
 
 ## Parked
 
@@ -166,4 +166,4 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends entries here when matching changes are archived.)
+- **F-01: (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.** — Archived 2026-10-02 → `context/archive/2026-10-01-minimal-auth-foundation/`. Lesson: —.
