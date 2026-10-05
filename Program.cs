@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddRazorPages();
 
 var entraSection = builder.Configuration.GetSection("Entra");
 builder.Services.AddOptions<EntraOptions>()
@@ -59,6 +60,18 @@ builder.Services
         options.SaveTokens = false;
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.RequireHttpsMetadata = true;
+        options.Events.OnAccessDenied = context =>
+        {
+            context.HandleResponse();
+            context.Response.Redirect("/account/error?code=access-denied");
+            return Task.CompletedTask;
+        };
+        options.Events.OnRemoteFailure = context =>
+        {
+            context.HandleResponse();
+            context.Response.Redirect("/account/error?code=provider-failure");
+            return Task.CompletedTask;
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -77,6 +90,8 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.MapGet("/api/me", (ClaimsPrincipal user) =>
 {

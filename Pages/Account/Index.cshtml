@@ -1,0 +1,19 @@
+@page
+@model _bootstrap_scaffold.Pages.Account.IndexModel
+@{
+    ViewData["Title"] = "Account";
+}
+
+<main>
+    <h1>Account</h1>
+    <p>You are signed in to Argus.</p>
+    <dl>
+        <dt>Subject</dt>
+        <dd>@Model.SubjectId</dd>
+        <dt>Display name</dt>
+        <dd>@(Model.DisplayName ?? "Not provided")</dd>
+        <dt>Email</dt>
+        <dd>@(Model.Email ?? "Not provided")</dd>
+    </dl>
+    <p><a href="/account/signout">Log out</a></p>
+</main>
