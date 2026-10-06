@@ -52,6 +52,24 @@ public sealed class AccountAccessContractTests
         Assert.DoesNotContain("evil.example", response.Headers.Location?.ToString());
         Assert.Contains("test.invalid", response.Headers.Location?.ToString());
         Assert.Equal(OpenIdConnectDefaults.AuthenticationScheme, TestAuthenticationService.LastChallengeScheme);
+        Assert.Equal("/account", TestAuthenticationService.LastChallengeRedirectUri);
+    }
+
+    [Fact]
+    public async Task Sign_in_preserves_a_valid_local_return_url()
+    {
+        await using var factory = new AccountAccessFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync(
+            "/account/signin?returnUrl=%2Faccount%3Ftab%3Dprofile");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/account?tab=profile", TestAuthenticationService.LastChallengeRedirectUri);
     }
 
     [Fact]
@@ -112,6 +130,24 @@ public sealed class AccountAccessContractTests
     }
 
     [Fact]
+    public async Task Account_error_maps_access_denied_to_a_friendly_message()
+    {
+        await using var factory = new AccountAccessFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/account/error?code=access-denied");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Access was denied", html);
+        Assert.DoesNotContain("provider-failure", html);
+    }
+
+    [Fact]
     public async Task Logout_signs_out_cookie_and_provider_without_external_return_url()
     {
         await using var factory = new AccountAccessFactory();
@@ -132,6 +168,24 @@ public sealed class AccountAccessContractTests
                 OpenIdConnectDefaults.AuthenticationScheme
             ],
             TestAuthenticationService.LastSignOutSchemes);
+        Assert.Equal("/", TestAuthenticationService.LastSignOutRedirectUri);
+    }
+
+    [Fact]
+    public async Task Logout_preserves_a_valid_local_return_url()
+    {
+        await using var factory = new AccountAccessFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync(
+            "/account/signout?returnUrl=%2Faccount%3Ftab%3Dprofile");
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/account?tab=profile", TestAuthenticationService.LastSignOutRedirectUri);
     }
 
     private sealed class AccountAccessFactory : WebApplicationFactory<Program>
@@ -184,12 +238,16 @@ public sealed class AccountAccessContractTests
 internal sealed class TestAuthenticationService : IAuthenticationService
 {
     public static string? LastChallengeScheme { get; private set; }
+    public static string? LastChallengeRedirectUri { get; private set; }
     public static List<string?> LastSignOutSchemes { get; } = [];
+    public static string? LastSignOutRedirectUri { get; private set; }
 
     public static void Reset()
     {
         LastChallengeScheme = null;
+        LastChallengeRedirectUri = null;
         LastSignOutSchemes.Clear();
+        LastSignOutRedirectUri = null;
     }
 
     public Task<AuthenticateResult> AuthenticateAsync(HttpContext context, string? scheme)
@@ -201,6 +259,7 @@ internal sealed class TestAuthenticationService : IAuthenticationService
         AuthenticationProperties? properties)
     {
         LastChallengeScheme = scheme;
+        LastChallengeRedirectUri = properties?.RedirectUri;
         context.Response.Redirect("https://test.invalid/authorize");
         return Task.CompletedTask;
     }
@@ -227,6 +286,7 @@ internal sealed class TestAuthenticationService : IAuthenticationService
         AuthenticationProperties? properties)
     {
         LastSignOutSchemes.Add(scheme);
+        LastSignOutRedirectUri = properties?.RedirectUri;
         if (context.Response.StatusCode == StatusCodes.Status200OK)
         {
             context.Response.Redirect(properties?.RedirectUri ?? "/");

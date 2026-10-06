@@ -1,15 +1,15 @@
-# Authentication configuration
+# Authentication and account access
 
-Argus uses Microsoft Entra External ID through OpenID Connect. The API keeps the
-provider session in a secure, HTTP-only cookie and exposes the protected
-`GET /api/me` route. Registration, login UX, and account persistence are
-outside this foundation.
+Argus uses Microsoft Entra External ID through OpenID Connect. The browser
+account flow uses the provider for both sign-in and account creation, then
+stores the authenticated session in a secure, HTTP-only cookie. Argus does not
+persist local profiles, passwords, tokens, or provider credentials.
 
 ## Required settings
 
-Configure these values through environment variables or an equivalent
-configuration provider. ASP.NET Core maps the double underscore form to nested
-configuration keys:
+Configure these values through user secrets, environment variables, or Azure
+App Service application settings. ASP.NET Core maps the double-underscore form
+to nested configuration keys:
 
 | Environment variable | Configuration key | Secret? | Purpose |
 | --- | --- | --- | --- |
@@ -19,28 +19,50 @@ configuration keys:
 | `Entra__ClientSecret` | `Entra:ClientSecret` | Yes | Confidential-client secret |
 | `Entra__CallbackPath` | `Entra:CallbackPath` | No | Relative callback path; use `/signin-oidc` |
 
-In non-Development environments all five values are required. Never commit a
-client secret, signing key, tenant credential, or a real environment-specific
-identifier. Development configuration may contain placeholders, but a real
-local provider flow still requires the environment variables above.
+Outside Development, all five values are required at startup. Keep secrets
+and tenant-specific values out of tracked files. Never commit a client secret,
+signing key, tenant credential, authorization code, access token, or refresh
+token.
+
+## Browser contract
+
+The public root route `/` explains Argus's educational purpose and provides one
+unified **Sign in or create an account** action at `/account/signin`. The action
+starts an explicit OpenID Connect challenge; it does not change the API's
+default challenge behavior.
+
+After a successful provider callback at `/signin-oidc`, the user is sent to
+`/account`. The account page displays available subject, display-name, and
+email claims and is the stable entry point for future analysis navigation. It
+does not create or update a local profile. `/account` also explicitly starts
+the provider challenge when no local session exists.
+
+The account logout action at `/account/signout` signs out both the Argus cookie
+and the Entra provider session, then returns to `/`. A local return path may be
+provided for browser navigation, but external absolute URLs and protocol-relative
+URLs are rejected and replaced with the safe default. Do not use return paths
+from untrusted provider or client data without this local-path validation.
+
+Provider cancellation, access denial, and remote callback failures are routed
+to `/account/error` with a bounded, friendly message. Raw provider exceptions,
+query-string details, authorization codes, tokens, and credentials are not
+rendered.
 
 ## Local development
 
-Register a web application in a non-production Entra External ID tenant and
-add this redirect URI:
+Register a web application in a non-production Entra External ID tenant and add
+this exact redirect URI:
 
 ```text
 https://localhost:7219/signin-oidc
 ```
 
-The HTTP launch profile is available for local diagnostics, but the secure
-cookie and OpenID Connect callback should be tested with the HTTPS profile.
+Use the HTTPS launch profile. The HTTP profile is useful for diagnostics, but
+the secure cookie and OpenID Connect callback require HTTPS.
 
 ### Preferred: user secrets
 
-Store the values once in the per-user secret store, outside the repository.
-They persist across shells and reboots, and `dotnet user-secrets` cannot write
-into tracked files:
+Store values in the per-user secret store, outside the repository:
 
 ```powershell
 dotnet user-secrets set "Entra:Authority" "https://<tenant-or-policy-authority>"
@@ -48,28 +70,22 @@ dotnet user-secrets set "Entra:TenantId" "<tenant-id>"
 dotnet user-secrets set "Entra:ClientId" "<client-id>"
 dotnet user-secrets set "Entra:CallbackPath" "/signin-oidc"
 dotnet user-secrets set "Entra:ClientSecret" "<secret>"
+dotnet run --project .bootstrap-scaffold.csproj --launch-profile https
 ```
 
-Use the secret **Value** shown once at creation time, never the Secret ID.
+Use the secret **Value** shown at creation time, never the Secret ID. Replace
+the placeholders locally; do not edit tracked configuration files.
 
-User secrets load only in the Development environment, which keeps local
-credentials from reaching deployed environments. When launching the built
-assembly directly, pass the environment explicitly — otherwise the host
-defaults to Production, ignores user secrets, and fails startup validation:
+If Windows blocks the generated `.bootstrap-scaffold.exe` with `Access is
+denied`, start the compiled assembly through `dotnet` instead:
 
 ```powershell
 dotnet build .bootstrap-scaffold.csproj
-dotnet .\bin\Debug\net10.0\.bootstrap-scaffold.dll --environment Development --urls "https://localhost:7219"
+dotnet .\bin\Debug\net10.0\.bootstrap-scaffold.dll `
+  --environment Development --urls "https://localhost:7219"
 ```
 
-On machines where policy blocks running the generated `.exe` apphost,
-launching the `.dll` through `dotnet` as shown above is the supported
-workaround.
-
 ### Alternative: environment variables
-
-Environment variables also work, but they live only in the shell that set
-them:
 
 ```powershell
 $env:Entra__Authority = "https://<tenant-or-policy-authority>"
@@ -80,58 +96,61 @@ $env:Entra__CallbackPath = "/signin-oidc"
 dotnet run --project .bootstrap-scaffold.csproj --launch-profile https
 ```
 
-The callback URL is the public application origin plus
-`Entra:CallbackPath`. Do not place the secret in `appsettings*.json`.
+The callback URL is the public HTTPS origin plus `Entra:CallbackPath`.
 
-### Expected local result
+### Local smoke test
 
-This foundation registers no sign-in endpoint, so a browser login cannot be
-exercised yet; that belongs to the account-access slice. A correct local smoke
-test is:
+1. Open `https://localhost:7219/`.
+2. Choose **Sign in or create an account**.
+3. Complete the provider flow and verify that `/account` displays the claims
+   available from the provider.
+4. Choose logout and confirm the browser returns to `/`.
+5. Request `/api/me` after logout. It must return `401` with
+   `application/problem+json` and no `Location` header.
+6. Repeat the flow with provider cancellation or denial and confirm the
+   friendly `/account/error` page.
 
-| Route | Expected |
-| --- | --- |
-| `/api/me` | `401` with `application/problem+json` and no `Location` header |
-| `/openapi/v1.json` | `200` |
-| `/` | `404` — no route is mapped at the root |
+## API contract
 
-A `302` to the identity provider on `/api/me` is a defect: API callers must
-receive `401` rather than a redirect.
+`GET /api/me` remains an API endpoint, not a browser redirect. Without an
+authenticated session it returns:
+
+- HTTP `401 Unauthorized`
+- `Content-Type: application/problem+json`
+- no `Location` header
+
+The response title is `Authentication required`. Keep the cookie scheme as the
+default API challenge scheme; browser pages must explicitly name the OpenID
+Connect scheme.
 
 ## Azure App Service
 
-In the App Service portal, open **Configuration → Application settings** and
-add the same five names (`Entra__Authority`, `Entra__TenantId`,
-`Entra__ClientId`, `Entra__ClientSecret`, and `Entra__CallbackPath`). Mark the
-secret setting for restricted access according to the deployment policy, then
-save and restart the app. The equivalent CLI form is:
+In **Configuration → Application settings**, add the same five names:
+`Entra__Authority`, `Entra__TenantId`, `Entra__ClientId`,
+`Entra__ClientSecret`, and `Entra__CallbackPath`. Keep the secret restricted
+according to the deployment policy, then save and restart the app. Do not put
+the secret in workflow files or shared scripts.
 
-```powershell
-az webapp config appsettings set --name <app-name> --resource-group <rg> `
-  --settings Entra__Authority="<authority>" Entra__TenantId="<tenant-id>" `
-             Entra__ClientId="<client-id>" Entra__CallbackPath="/signin-oidc"
-```
-
-Set `Entra__ClientSecret` separately so the value stays out of shared scripts
-and shell history. The deployed redirect URI must be:
+For the default App Service hostname, register:
 
 ```text
 https://<app-service-hostname>/signin-oidc
 ```
 
-Add that exact URI to the Entra application registration. For a custom domain,
-use the custom HTTPS origin instead. The existing workflow in
-`.github/workflows/deploy.yml` builds and publishes the app and deploys it to
-App Service; it does not provision identity settings or require a live Entra
-tenant during CI.
+For a custom domain, register the exact public HTTPS origin plus
+`/signin-oidc`. The existing deployment workflow builds and publishes
+`.bootstrap-scaffold.csproj` and deploys the package; it does not provision
+Entra settings or require a live tenant in CI.
 
-## Deterministic tests
+## Deterministic contract tests
 
-Run the contract tests without network access or production credentials:
+Run the offline authentication contract tests without production credentials
+or network access:
 
 ```powershell
-dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj
+dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore
 ```
 
-The test host replaces the external handler with a deterministic principal and
-also verifies that missing required settings fail during production startup.
+The test host supplies deterministic claims and authentication services. It
+also verifies production startup validation and the unchanged `/api/me`
+ProblemDetails contract. No live-provider or browser-E2E dependency is needed.

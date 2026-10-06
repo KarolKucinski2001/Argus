@@ -208,29 +208,29 @@ No local users, profiles, or schema exist, so no data migration is required. The
 
 #### Automated
 
-- [x] 1.1 Build the API with Razor Pages registered
-- [x] 1.2 Verify the public landing page renders the purpose and educational boundary
-- [x] 1.3 Verify explicit OIDC challenge and validated local return paths
-- [x] 1.4 Verify authenticated account rendering and unauthenticated interactive behavior
-- [x] 1.5 Verify logout clears the local session and preserves a local destination
-- [x] 1.6 Verify OIDC failures reach a safe error page without sensitive details
+- [x] 1.1 Build the API with Razor Pages registered — 55d9b94
+- [x] 1.2 Verify the public landing page renders the purpose and educational boundary — 55d9b94
+- [x] 1.3 Verify explicit OIDC challenge and validated local return paths — 55d9b94
+- [x] 1.4 Verify authenticated account rendering and unauthenticated interactive behavior — 55d9b94
+- [x] 1.5 Verify logout clears the local session and preserves a local destination — 55d9b94
+- [x] 1.6 Verify OIDC failures reach a safe error page without sensitive details — 55d9b94
 
 #### Manual
 
-- [x] 1.7 Complete the HTTPS Entra browser flow from `/` to `/account`
-- [x] 1.8 Confirm logout and provider cancellation/denial behavior manually
+- [x] 1.7 Complete the HTTPS Entra browser flow from `/` to `/account` — 55d9b94
+- [x] 1.8 Confirm logout and provider cancellation/denial behavior manually — 55d9b94
 
 ### Phase 2: Lock the contract and operational handoff
 
 #### Automated
 
-- [ ] 2.1 Pass the deterministic account-access and existing authentication contract tests
-- [ ] 2.2 Pass the API and authentication test-project builds together
-- [ ] 2.3 Confirm no identity credentials or tokens are committed
-- [ ] 2.4 Confirm the existing `/api/me` 401/no-Location/application-problem+json contract remains unchanged
+- [x] 2.1 Pass the deterministic account-access and existing authentication contract tests
+- [x] 2.2 Pass the API and authentication test-project builds together
+- [x] 2.3 Confirm no identity credentials or tokens are committed
+- [x] 2.4 Confirm the existing `/api/me` 401/no-Location/application-problem+json contract remains unchanged
 
 #### Manual
 
-- [ ] 2.5 Follow the updated local and Azure authentication handoff
-- [ ] 2.6 Confirm the documentation callback examples match the configured `/signin-oidc` callback
-- [ ] 2.7 Confirm the account page leaves a stable entry point for the next analysis slice
+- [x] 2.5 Follow the updated local and Azure authentication handoff
+- [x] 2.6 Confirm the documentation callback examples match the configured `/signin-oidc` callback
+- [x] 2.7 Confirm the account page leaves a stable entry point for the next analysis slice
