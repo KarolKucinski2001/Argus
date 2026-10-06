@@ -3,7 +3,7 @@ project: "Argus"
 version: 1
 status: draft
 created: 2026-09-30
-updated: 2026-10-02
+updated: 2026-10-06
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -43,7 +43,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | --- | --- | --- | --- | --- | --- |
 | F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | done |
 | F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | blocked |
-| S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | proposed |
+| S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
 | S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | blocked |
 | S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02 | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | proposed |
 
@@ -108,7 +108,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Unknowns:**
   - —
 - **Risk:** Delivering this before analysis keeps the protected entry path explicit while avoiding guest-flow rework later.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Asset selection and analysis start
 
@@ -167,3 +167,4 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 ## Done
 
 - **F-01: (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.** — Archived 2026-10-02 → `context/archive/2026-10-01-minimal-auth-foundation/`. Lesson: —.
+- **S-01: user can create an account, log in, and see a short explanation that Argus provides educational analysis rather than investment advice.** — Archived 2026-10-06 → `context/archive/2026-10-05-account-access-flow/`. Lesson: —.
