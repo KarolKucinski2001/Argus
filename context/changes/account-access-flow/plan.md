@@ -224,13 +224,13 @@ No local users, profiles, or schema exist, so no data migration is required. The
 
 #### Automated
 
-- [x] 2.1 Pass the deterministic account-access and existing authentication contract tests
-- [x] 2.2 Pass the API and authentication test-project builds together
-- [x] 2.3 Confirm no identity credentials or tokens are committed
-- [x] 2.4 Confirm the existing `/api/me` 401/no-Location/application-problem+json contract remains unchanged
+- [x] 2.1 Pass the deterministic account-access and existing authentication contract tests — 2d19979
+- [x] 2.2 Pass the API and authentication test-project builds together — 2d19979
+- [x] 2.3 Confirm no identity credentials or tokens are committed — 2d19979
+- [x] 2.4 Confirm the existing `/api/me` 401/no-Location/application-problem+json contract remains unchanged — 2d19979
 
 #### Manual
 
-- [x] 2.5 Follow the updated local and Azure authentication handoff
-- [x] 2.6 Confirm the documentation callback examples match the configured `/signin-oidc` callback
-- [x] 2.7 Confirm the account page leaves a stable entry point for the next analysis slice
+- [x] 2.5 Follow the updated local and Azure authentication handoff — 2d19979
+- [x] 2.6 Confirm the documentation callback examples match the configured `/signin-oidc` callback — 2d19979
+- [x] 2.7 Confirm the account page leaves a stable entry point for the next analysis slice — 2d19979
