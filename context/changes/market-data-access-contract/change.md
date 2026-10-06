@@ -1,7 +1,7 @@
 ---
 change_id: market-data-access-contract
 title: Market data access contract
-status: implementing
+status: impl_reviewed
 created: 2026-10-06
 updated: 2026-10-06
 archived_at: null

@@ -45,14 +45,14 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
             errors.Add($"{nameof(ApplicationRequestBudget)} must be greater than zero.");
         }
 
-        if (string.IsNullOrWhiteSpace(options.ProviderId))
+        if (options.PublicDisplayApproved && string.IsNullOrWhiteSpace(options.ProviderId))
         {
-            errors.Add($"{nameof(ProviderId)} is required.");
+            errors.Add($"{nameof(ProviderId)} is required when public display is approved.");
         }
 
-        if (!options.PublicDisplayApproved)
+        if (!options.PublicDisplayApproved && !string.IsNullOrWhiteSpace(options.ProviderId))
         {
-            errors.Add($"{nameof(PublicDisplayApproved)} must be true before a provider can be enabled.");
+            errors.Add($"{nameof(ProviderId)} cannot be configured before public display is approved.");
         }
 
         return errors.Count == 0

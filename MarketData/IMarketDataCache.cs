@@ -1,7 +1,8 @@
 namespace _bootstrap_scaffold.MarketData;
 
 public sealed record MarketDataCacheKey(
-    AssetReference Asset,
+    string AssetId,
+    MarketAssetClass AssetClass,
     DateOnly Start,
     DateOnly End,
     MarketDataGranularity Granularity);

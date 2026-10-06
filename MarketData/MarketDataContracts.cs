@@ -68,8 +68,9 @@ public sealed record MarketDataRequest(
     MarketDataHistoryRequest History)
 {
     public bool IsValid =>
-        Assets.Count > 0 &&
+        Assets is { Count: > 0 } &&
         Assets.All(asset => asset.IsValid) &&
+        History is not null &&
         History.IsValid;
 }
 

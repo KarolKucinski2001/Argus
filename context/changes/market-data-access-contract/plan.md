@@ -250,14 +250,14 @@ No database migration is required because the selected foundation stores no dura
 
 #### Automated
 
-- [x] 1.1 Solution builds with the new contracts and options without adding an unapproved provider dependency
-- [x] 1.2 Contract tests compile against normalized types without requiring provider-specific fields
-- [x] 1.3 Options validation rejects invalid history, asset-count, timeout, cache, and provider-approval settings
+- [x] 1.1 Solution builds with the new contracts and options without adding an unapproved provider dependency — 4f4f92f
+- [x] 1.2 Contract tests compile against normalized types without requiring provider-specific fields — 4f4f92f
+- [x] 1.3 Options validation rejects invalid history, asset-count, timeout, cache, and provider-approval settings — 4f4f92f
 
 #### Manual
 
-- [ ] 1.4 Review the market-data contract documentation and confirm the agreed public-display, attribution, 12-month, and free-tier constraints
-- [ ] 1.5 Confirm no provider credential or tenant secret is present in committed configuration
+- [x] 1.4 Review the market-data contract documentation and confirm the agreed public-display, attribution, 12-month, and free-tier constraints — 4f4f92f
+- [x] 1.5 Confirm no provider credential or tenant secret is present in committed configuration — 4f4f92f
 
 ### Phase 2: Add the protected endpoint and in-memory cache
 
