@@ -42,7 +42,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
 | F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | done |
-| F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | blocked |
+| F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | in-progress |
 | S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
 | S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | blocked |
 | S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02 | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | proposed |
@@ -93,7 +93,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Blockers:** —
 - **Unknowns:** Which market-data source and access limits are acceptable for the MVP? Owner: user. Block: yes.
 - **Risk:** Choosing a source implicitly without resolving reliability, coverage, and access constraints could make the first ranking unverifiable or exceed the launch scope.
-- **Status:** blocked
+- **Status:** in-progress
 
 ## Slices
 
