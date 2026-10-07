@@ -265,25 +265,25 @@ No database migration is required because the selected foundation stores no dura
 
 #### Automated
 
-- [x] 2.1 Unauthenticated market-data requests return the repository-standard 401 Problem Details response
-- [x] 2.2 Valid authenticated requests return normalized per-asset results and warnings
-- [x] 2.3 Invalid asset, over-limit, invalid-range, unconfigured-provider, timeout, quota, and upstream-error cases return stable explicit error categories
-- [x] 2.4 Fresh cache hits avoid a second provider call and expired entries expose freshness/evidence warnings
+- [x] 2.1 Unauthenticated market-data requests return the repository-standard 401 Problem Details response — c567bbf
+- [x] 2.2 Valid authenticated requests return normalized per-asset results and warnings — c567bbf
+- [x] 2.3 Invalid asset, over-limit, invalid-range, unconfigured-provider, timeout, quota, and upstream-error cases return stable explicit error categories — c567bbf
+- [x] 2.4 Fresh cache hits avoid a second provider call and expired entries expose freshness/evidence warnings — c567bbf
 
 #### Manual
 
-- [x] 2.5 Inspect the endpoint response for understandable values, timestamps, attribution metadata, and warnings
-- [x] 2.6 Confirm mixed usable/unavailable requests preserve usable results and identify the evidence gap
+- [x] 2.5 Inspect the endpoint response for understandable values, timestamps, attribution metadata, and warnings — c567bbf
+- [x] 2.6 Confirm mixed usable/unavailable requests preserve usable results and identify the evidence gap — c567bbf
 
 ### Phase 3: Add deterministic provider tests and readiness gate
 
 #### Automated
 
-- [x] 3.1 Focused authentication and market-data tests pass without network access, API keys, or production secrets
-- [x] 3.2 Tests cover success, multi-asset requests, partial evidence, stale cache, invalid assets, quota exhaustion, timeout, upstream outage, and provider-not-approved states
-- [x] 3.3 The application build passes with the repository's configured project
+- [x] 3.1 Focused authentication and market-data tests pass without network access, API keys, or production secrets — c567bbf
+- [x] 3.2 Tests cover success, multi-asset requests, partial evidence, stale cache, invalid assets, quota exhaustion, timeout, upstream outage, and provider-not-approved states — c567bbf
+- [x] 3.3 The application build passes with the repository's configured project — c567bbf
 
 #### Manual
 
-- [x] 3.4 Review the provider readiness checklist and confirm no provider is approved without official public-display evidence
-- [x] 3.5 Run an authenticated fake-provider smoke test and verify attribution metadata, evidence warnings, and educational boundary data
+- [x] 3.4 Review the provider readiness checklist and confirm no provider is approved without official public-display evidence — c567bbf
+- [x] 3.5 Run an authenticated fake-provider smoke test and verify attribution metadata, evidence warnings, and educational boundary data — c567bbf
