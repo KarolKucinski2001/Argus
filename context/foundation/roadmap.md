@@ -42,9 +42,9 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
 | F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | done |
-| F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | in-progress |
+| F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | done |
 | S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
-| S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | blocked |
+| S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | proposed |
 | S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02 | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | proposed |
 
 ## Streams
@@ -91,9 +91,9 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Prerequisites:** —
 - **Parallel with:** F-01
 - **Blockers:** —
-- **Unknowns:** Which market-data source and access limits are acceptable for the MVP? Owner: user. Block: yes.
+- **Unknowns:** Which approved market-data source should be activated for production display? Owner: team. Block: no for contract/UI work; yes for real-provider activation.
 - **Risk:** Choosing a source implicitly without resolving reliability, coverage, and access constraints could make the first ranking unverifiable or exceed the launch scope.
-- **Status:** in-progress
+- **Status:** done
 
 ## Slices
 
@@ -119,7 +119,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Which market-data source and access limits are acceptable for the MVP? Owner: user. Block: yes.
+  - Which approved market-data source should be activated for production display? Owner: team. Block: no for contract/UI work; yes for real-provider activation.
 - **Risk:** This slice exposes the external-data dependency early; postponing it would allow UI work that cannot produce trustworthy results.
 - **Status:** blocked
 
@@ -141,14 +141,14 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 | Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
 | --- | --- | --- | --- | --- | --- |
 | F-01 | minimal-auth-foundation | Establish minimum authenticated access | [#3](https://github.com/KarolKucinski2001/Argus/issues/3) | yes | Run `/10x-plan minimal-auth-foundation`. |
-| F-02 | market-data-access-contract | Resolve and verify MVP market-data access | [#4](https://github.com/KarolKucinski2001/Argus/issues/4) | no | Resolve the blocking market-data question first. |
+| F-02 | market-data-access-contract | Resolve and verify MVP market-data access | [#4](https://github.com/KarolKucinski2001/Argus/issues/4) | yes | Contract verified; keep real-provider activation behind the licensing gate. |
 | S-01 | account-access-flow | Deliver account access and Argus purpose screen | [#5](https://github.com/KarolKucinski2001/Argus/issues/5) | no | Requires F-01 to be completed. |
-| S-02 | select-and-start-analysis | Let users select assets and start analysis | [#6](https://github.com/KarolKucinski2001/Argus/issues/6) | no | Requires S-01 and F-02. |
+| S-02 | select-and-start-analysis | Let users select assets and start analysis | [#6](https://github.com/KarolKucinski2001/Argus/issues/6) | yes | Requires S-01 and F-02; start with the protected contract and fake provider. |
 | S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | [#7](https://github.com/KarolKucinski2001/Argus/issues/7) | no | North star; requires S-02. |
 
 ## Open Roadmap Questions
 
-1. **Which market-data source and access limits are acceptable for the MVP?** — Owner: user. Block: F-02, S-02, S-03. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
+1. **Which approved market-data source should be activated for production display?** — Owner: team. Block: real-provider activation only; contract/UI work can proceed. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
 2. **Should AI Copilot be included in the MVP?** — Owner: user. Block: roadmap-wide only if included; otherwise parked as a later capability. GitHub decision issue: [#2](https://github.com/KarolKucinski2001/Argus/issues/2).
 
 ## Parked
@@ -163,6 +163,8 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 ## Milestone History
 
 (Empty on the first milestone.)
+
+- **F-02: (foundation) the analysis path has a verified source and evidence contract for current and historical data without committing to a provider-specific implementation.** — Completed 2026-10-07. Real-provider activation remains gated by licensing evidence.
 
 ## Done
 
