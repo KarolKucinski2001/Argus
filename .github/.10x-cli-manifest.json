@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.25.1",
   "manifestVersion": 3,
-  "lastApplied": "2026-10-05T12:23:56.314Z",
-  "lessonId": "m2l3",
+  "lastApplied": "2026-10-06T12:42:29.500Z",
+  "lessonId": "m4l4",
   "course": "10xdevs4",
   "tool": "copilot",
   "files": {
@@ -248,6 +248,32 @@
         "contentHashes": {
           "SKILL.md": "731c35ab30550bba904406818b255801f48ea962880b329269eb6d7b9010c524",
           "references/progress-format.md": "01259753af620e2bfcaa04fb34d732d2efcb6fc172f8cf062f24870fe2248642"
+        }
+      },
+      "10x-research": {
+        "files": [
+          "SKILL.md",
+          "references/research-document.md",
+          "references/task-orchestration.md",
+          "scripts/metadata-guard.mjs",
+          "scripts/prose-json-check.mjs",
+          "scripts/prose-json-check.test.mjs"
+        ],
+        "contentHashes": {
+          "SKILL.md": "976203c36eefad3a4ccd237bb1ad4cdc996e4cb9f0ecb0f83b06fa4d50d85785",
+          "references/research-document.md": "5603e342c74a3af421ab800a9ff134c4a60b6697a2e39a49384a2781059b9c91",
+          "references/task-orchestration.md": "9279b3d73779c763ca740b09a521155a71369ed4787ca2c85b13be175d5c3dc6",
+          "scripts/metadata-guard.mjs": "a6c567ca15c93fe614d6a484602bb318272da3b38f1098b755335ee4da7fab68",
+          "scripts/prose-json-check.mjs": "44696db6a11664a0369f723dd6c3b379f36dc9774385bddedbb178420aea95cf",
+          "scripts/prose-json-check.test.mjs": "873ce640fd679720da65ee145dde13cf354ed664fcfff25a3f11bc5cc6324d51"
+        }
+      },
+      "10x-frame": {
+        "files": [
+          "SKILL.md"
+        ],
+        "contentHashes": {
+          "SKILL.md": "76309143ddb63500ac5e0b75c4a09956f73e9f7441ebab4c857fcb60bfa4f9b4"
         }
       }
     },
@@ -999,6 +1025,35 @@
           "files": [
             "SKILL.md",
             "references/progress-format.md"
+          ]
+        }
+      },
+      "prompts": [],
+      "configs": []
+    },
+    "m4l3": {
+      "appliedAt": "2026-10-06T12:42:28.017Z",
+      "skills": {
+        "10x-research": {
+          "files": [
+            "SKILL.md",
+            "references/research-document.md",
+            "references/task-orchestration.md",
+            "scripts/metadata-guard.mjs",
+            "scripts/prose-json-check.mjs",
+            "scripts/prose-json-check.test.mjs"
+          ]
+        }
+      },
+      "prompts": [],
+      "configs": []
+    },
+    "m4l4": {
+      "appliedAt": "2026-10-06T12:42:29.500Z",
+      "skills": {
+        "10x-frame": {
+          "files": [
+            "SKILL.md"
           ]
         }
       },
