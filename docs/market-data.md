@@ -23,6 +23,11 @@ Missing, stale, incomplete, delayed, quota-limited, or unavailable evidence
 must remain visible to downstream ranking and explanation code. A partial
 request must not discard usable results for other assets.
 
+Performance periods such as 24-hour, 7-day, and 30-day change are intentionally
+not part of this access contract. The future analysis layer derives them from
+the normalized current quote and historical points so provider access remains
+focused on transporting evidence rather than product-specific calculations.
+
 ## Provider approval gate
 
 No provider is enabled for public Argus traffic until the following checklist
@@ -73,7 +78,10 @@ it does not constitute provider approval.
 ## Operational boundary
 
 `MarketDataOptions` keeps the 12-month window, selected-asset limit, timeout,
-cache duration, and application request budget explicit. Provider API keys are
+cache duration, and application request budget explicit. The budget is enforced
+by a process-local rolling one-minute window; Azure App Service instances do
+not share this counter, so distributed enforcement remains future work.
+Provider API keys are
 represented only by a configuration-key name (`ProviderApiKeyConfigurationKey`)
 and must never be committed to `appsettings*.json`, source code, tests, or
 workflow files.

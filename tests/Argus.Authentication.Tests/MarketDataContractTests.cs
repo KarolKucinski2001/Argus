@@ -72,6 +72,28 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
+    public async Task Mismatched_provider_result_is_rejected_and_not_cached()
+    {
+        var result = CreateResult("AAPL") with
+        {
+            RequestedHistory = CreateHistory() with
+            {
+                Start = CreateHistory().Start.AddDays(1)
+            }
+        };
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(result);
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var first = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+        var second = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(MarketDataErrorCategory.InvalidProviderResponse, first.Error?.Category);
+        Assert.Equal(MarketDataErrorCategory.InvalidProviderResponse, second.Error?.Category);
+        Assert.Equal(2, provider.CallCount);
+    }
+
+    [Fact]
     public async Task Partial_provider_evidence_keeps_usable_result_and_marks_missing_asset()
     {
         var provider = new FakeMarketDataProvider();
@@ -95,6 +117,19 @@ public sealed class MarketDataContractTests
         await using var factory = new MarketDataTestFactory(provider);
 
         Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+
+        Assert.Equal(1, provider.CallCount);
+    }
+
+    [Fact]
+    public async Task Asset_id_casing_is_canonicalized_before_cache_lookup()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(provider);
+
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("aapl"))).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
 
         Assert.Equal(1, provider.CallCount);
@@ -132,6 +167,32 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
+    public async Task Expired_cache_is_preserved_when_refresh_returns_no_result()
+    {
+        var cached = CreateResult("AAPL");
+        var cache = new SeededMarketDataCache(
+            new MarketDataCacheEntry(
+                new MarketDataCacheKey(
+                    "AAPL",
+                    MarketAssetClass.Equity,
+                    CreateHistory().Start,
+                    CreateHistory().End,
+                    MarketDataGranularity.Daily),
+                cached,
+                DateTimeOffset.UtcNow.AddMinutes(-10),
+                DateTimeOffset.UtcNow.AddMinutes(-1)));
+        await using var factory = new MarketDataTestFactory(new FakeMarketDataProvider(), cache);
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(cached.CurrentQuote?.Value, result.CurrentQuote?.Value);
+        Assert.NotEmpty(result.HistoricalPoints);
+        Assert.Equal(MarketDataErrorCategory.UpstreamUnavailable, result.Error?.Category);
+        Assert.Contains(result.Warnings, warning => warning.Category == MarketDataWarningCategory.UpstreamUnavailable);
+        Assert.True(result.Freshness.IsStale);
+    }
+
+    [Fact]
     public async Task Invalid_asset_returns_explicit_error_category()
     {
         await using var factory = new MarketDataTestFactory(new FakeMarketDataProvider());
@@ -141,6 +202,39 @@ public sealed class MarketDataContractTests
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("UnsupportedAsset", category);
+    }
+
+    [Fact]
+    public async Task Over_limit_request_returns_invalid_request_problem()
+    {
+        await using var factory = new MarketDataTestFactory(
+            new FakeMarketDataProvider(),
+            configureOptions: options => options.MaximumSelectedAssets = 1);
+
+        using var response = await PostAsync(factory, CreateRequest("AAPL", "MSFT"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("InvalidRequest", category);
+    }
+
+    [Fact]
+    public async Task Invalid_history_range_returns_invalid_request_problem()
+    {
+        await using var factory = new MarketDataTestFactory(new FakeMarketDataProvider());
+        var request = CreateRequest("AAPL") with
+        {
+            History = new MarketDataHistoryRequest(
+                DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-13)),
+                DateOnly.FromDateTime(DateTime.UtcNow),
+                MarketDataGranularity.Daily)
+        };
+
+        using var response = await PostAsync(factory, request);
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("InvalidRequest", category);
     }
 
     [Fact]
@@ -191,6 +285,44 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
+    public async Task Provider_exception_preserves_stable_error_category()
+    {
+        var provider = new FakeMarketDataProvider
+        {
+            ExceptionToThrow = new MarketDataProviderException(
+                MarketDataErrorCategory.AuthenticationFailed,
+                "fake authentication failure",
+                false,
+                401)
+        };
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(MarketDataErrorCategory.AuthenticationFailed, result.Error?.Category);
+        Assert.False(result.Error?.IsRetryable);
+        Assert.Equal(401, result.Error?.UpstreamStatusCode);
+    }
+
+    [Fact]
+    public async Task Application_request_budget_returns_too_many_requests_after_limit()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(
+            provider,
+            configureOptions: options => options.ApplicationRequestBudget = 1);
+
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+        using var response = await PostAsync(factory, CreateRequest("MSFT"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+        Assert.Equal("QuotaExceeded", category);
+        Assert.Equal(1, provider.CallCount);
+    }
+
+    [Fact]
     public async Task Provider_not_approved_returns_unavailable_problem_without_calling_provider()
     {
         var provider = new FakeMarketDataProvider();
@@ -206,6 +338,20 @@ public sealed class MarketDataContractTests
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
         Assert.Equal("ProviderNotApproved", category);
         Assert.Equal(0, provider.CallCount);
+    }
+
+    [Fact]
+    public async Task Approved_configuration_with_unavailable_provider_returns_not_configured_result()
+    {
+        await using var factory = new MarketDataTestFactory(
+            new FakeMarketDataProvider(),
+            useDefaultProvider: true);
+
+        using var response = await PostAsync(factory, CreateRequest("AAPL"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal("NotConfigured", category);
     }
 
     [Fact]
@@ -301,6 +447,7 @@ internal sealed class FakeMarketDataProvider : IMarketDataProvider
     public IReadOnlyList<MarketDataResult> Results { get; set; } = [];
     public bool DelayUntilCancelled { get; init; }
     public bool ThrowUpstreamUnavailable { get; init; }
+    public MarketDataProviderException? ExceptionToThrow { get; init; }
     public int CallCount { get; private set; }
 
     public async Task<IReadOnlyList<MarketDataResult>> GetAsync(
@@ -316,6 +463,11 @@ internal sealed class FakeMarketDataProvider : IMarketDataProvider
         if (ThrowUpstreamUnavailable)
         {
             throw new HttpRequestException("fake outage");
+        }
+
+        if (ExceptionToThrow is not null)
+        {
+            throw ExceptionToThrow;
         }
 
         return Results.Where(result => request.Assets.Any(asset =>
@@ -356,15 +508,18 @@ internal sealed class MarketDataTestFactory : WebApplicationFactory<Program>
     private readonly IMarketDataProvider provider;
     private readonly IMarketDataCache? cache;
     private readonly Action<MarketDataOptions>? configureOptions;
+    private readonly bool useDefaultProvider;
 
     public MarketDataTestFactory(
         IMarketDataProvider provider,
         IMarketDataCache? cache = null,
-        Action<MarketDataOptions>? configureOptions = null)
+        Action<MarketDataOptions>? configureOptions = null,
+        bool useDefaultProvider = false)
     {
         this.provider = provider;
         this.cache = cache;
         this.configureOptions = configureOptions;
+        this.useDefaultProvider = useDefaultProvider;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -400,8 +555,11 @@ internal sealed class MarketDataTestFactory : WebApplicationFactory<Program>
                     .Build();
             });
 
-            services.RemoveAll<IMarketDataProvider>();
-            services.AddSingleton(provider);
+            if (!useDefaultProvider)
+            {
+                services.RemoveAll<IMarketDataProvider>();
+                services.AddSingleton(provider);
+            }
             if (cache is not null)
             {
                 services.RemoveAll<IMarketDataCache>();

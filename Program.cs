@@ -21,6 +21,7 @@ builder.Services.AddOptions<MarketDataOptions>()
         "MarketData configuration is invalid.")
     .ValidateOnStart();
 builder.Services.AddSingleton<IMarketDataCache, InMemoryMarketDataCache>();
+builder.Services.AddSingleton<IMarketDataRequestBudget, InMemoryMarketDataRequestBudget>();
 builder.Services.AddSingleton<IMarketDataProvider, UnavailableMarketDataProvider>();
 
 var entraSection = builder.Configuration.GetSection("Entra");
@@ -128,6 +129,7 @@ app.MapPost("/api/market-data", async (
     MarketDataRequest? request,
     IMarketDataProvider provider,
     IMarketDataCache cache,
+    IMarketDataRequestBudget requestBudget,
     IOptions<MarketDataOptions> configuredOptions,
     CancellationToken cancellationToken) =>
 {
@@ -151,7 +153,33 @@ app.MapPost("/api/market-data", async (
             });
     }
 
-    var validRequest = request!;
+    if (provider is UnavailableMarketDataProvider)
+    {
+        return Results.Problem(
+            statusCode: StatusCodes.Status503ServiceUnavailable,
+            title: "Market data provider unavailable",
+            detail: "An approved provider is not registered for market-data access.",
+            extensions: new Dictionary<string, object?>
+            {
+                ["errorCategory"] = MarketDataErrorCategory.NotConfigured.ToString(),
+                ["retryable"] = false
+            });
+    }
+
+    var validRequest = NormalizeMarketDataRequest(request!, options);
+    if (!requestBudget.TryAcquire(options.ApplicationRequestBudget, TimeSpan.FromMinutes(1)))
+    {
+        return Results.Problem(
+            statusCode: StatusCodes.Status429TooManyRequests,
+            title: "Market data request budget exceeded",
+            detail: "The application request budget has been exhausted for the current window.",
+            extensions: new Dictionary<string, object?>
+            {
+                ["errorCategory"] = MarketDataErrorCategory.QuotaExceeded.ToString(),
+                ["retryable"] = true
+            });
+    }
+
     var results = new List<MarketDataResult>();
     var uncachedAssets = new List<AssetReference>();
     var expiredEntries = new Dictionary<string, MarketDataResult>(StringComparer.OrdinalIgnoreCase);
@@ -203,6 +231,27 @@ app.MapPost("/api/market-data", async (
                 validRequest.History,
                 new MarketDataError(MarketDataErrorCategory.Timeout, "The market data provider timed out.", true))).ToArray();
         }
+        catch (MarketDataProviderException exception)
+        {
+            providerResults = uncachedAssets.Select(asset => ErrorResult(
+                asset,
+                validRequest.History,
+                new MarketDataError(
+                    exception.Category,
+                    exception.Message,
+                    exception.IsRetryable,
+                    exception.UpstreamStatusCode))).ToArray();
+        }
+        catch (Exception exception) when (exception is InvalidDataException or FormatException)
+        {
+            providerResults = uncachedAssets.Select(asset => ErrorResult(
+                asset,
+                validRequest.History,
+                new MarketDataError(
+                    MarketDataErrorCategory.InvalidProviderResponse,
+                    "The market data provider returned invalid data.",
+                    false))).ToArray();
+        }
         catch (HttpRequestException)
         {
             providerResults = uncachedAssets.Select(asset => ErrorResult(
@@ -213,6 +262,18 @@ app.MapPost("/api/market-data", async (
 
         foreach (var result in providerResults)
         {
+            if (result.Error is null && !IsValidProviderResult(result, validRequest))
+            {
+                results.Add(ErrorResult(
+                    result.Asset,
+                    validRequest.History,
+                    new MarketDataError(
+                        MarketDataErrorCategory.InvalidProviderResponse,
+                        "The market data provider returned data that does not match the request.",
+                        false)));
+                continue;
+            }
+
             if (result.Error is null)
             {
                 var key = new MarketDataCacheKey(
@@ -248,13 +309,26 @@ app.MapPost("/api/market-data", async (
 
     var orderedResults = validRequest.Assets.Select(asset =>
         results.FirstOrDefault(result => string.Equals(result.Asset.Id, asset.Id, StringComparison.OrdinalIgnoreCase))
-        ?? ErrorResult(
-            asset,
-            validRequest.History,
-            new MarketDataError(
-                MarketDataErrorCategory.UpstreamUnavailable,
-                "The market data provider returned no result for this asset.",
-                true))).ToArray();
+        ?? (expiredEntries.TryGetValue(asset.Id, out var expired)
+            ? AddWarning(
+                expired with
+                {
+                    Error = new MarketDataError(
+                        MarketDataErrorCategory.UpstreamUnavailable,
+                        "The market data provider returned no result for this asset.",
+                        true)
+                },
+                new MarketDataWarning(
+                    MarketDataWarningCategory.UpstreamUnavailable,
+                    "Fresh evidence was unavailable; the expired cached evidence is shown.",
+                    true))
+            : ErrorResult(
+                asset,
+                validRequest.History,
+                new MarketDataError(
+                    MarketDataErrorCategory.UpstreamUnavailable,
+                    "The market data provider returned no result for this asset.",
+                    true)))).ToArray();
 
     return Results.Ok(new MarketDataResponse(orderedResults));
 })
@@ -356,6 +430,57 @@ static IResult? ValidateMarketDataRequest(MarketDataRequest? request, MarketData
 
     return null;
 }
+
+static bool IsValidProviderResult(MarketDataResult result, MarketDataRequest request)
+{
+    var requestedAsset = request.Assets.FirstOrDefault(asset =>
+        string.Equals(asset.Id, result.Asset.Id, StringComparison.OrdinalIgnoreCase));
+    if (requestedAsset is null ||
+        requestedAsset.AssetClass != result.Asset.AssetClass ||
+        result.RequestedHistory != request.History)
+    {
+        return false;
+    }
+
+    var points = result.HistoricalPoints
+        .OrderBy(point => point.Timestamp)
+        .ToArray();
+    if (points.Any(point =>
+            DateOnly.FromDateTime(point.Timestamp.UtcDateTime) < request.History.Start ||
+            DateOnly.FromDateTime(point.Timestamp.UtcDateTime) > request.History.End))
+    {
+        return false;
+    }
+
+    return request.History.Granularity switch
+    {
+        MarketDataGranularity.Daily => true,
+        MarketDataGranularity.Weekly => points.Zip(points.Skip(1))
+            .All(pair => pair.Second.Timestamp - pair.First.Timestamp >= TimeSpan.FromDays(7)),
+        MarketDataGranularity.Monthly => points.Zip(points.Skip(1))
+            .All(pair => pair.Second.Timestamp.Month != pair.First.Timestamp.Month ||
+                         pair.Second.Timestamp.Year != pair.First.Timestamp.Year),
+        _ => false
+    };
+}
+
+static MarketDataRequest NormalizeMarketDataRequest(MarketDataRequest request, MarketDataOptions options) =>
+    request with
+    {
+        Assets = request.Assets
+            .Select(asset =>
+            {
+                var configured = options.AllowedAssets.First(entry =>
+                    string.Equals(entry.Key, asset.Id, StringComparison.OrdinalIgnoreCase));
+                return asset with
+                {
+                    Id = configured.Key,
+                    DisplayName = configured.Key,
+                    AssetClass = configured.Value
+                };
+            })
+            .ToArray()
+    };
 
 static MarketDataResult ErrorResult(
     AssetReference asset,

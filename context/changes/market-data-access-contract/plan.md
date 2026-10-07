@@ -272,7 +272,7 @@ No database migration is required because the selected foundation stores no dura
 
 #### Manual
 
-- [x] 2.5 Inspect the endpoint response for understandable values, timestamps, attribution metadata, and warnings — c567bbf
+- [x] 2.5 Inspect the endpoint response for understandable current values, historical points, timestamps, attribution metadata, and warnings; derived 24-hour, 7-day, and 30-day performance remains an analysis-layer responsibility — c567bbf
 - [x] 2.6 Confirm mixed usable/unavailable requests preserve usable results and identify the evidence gap — c567bbf
 
 ### Phase 3: Add deterministic provider tests and readiness gate
