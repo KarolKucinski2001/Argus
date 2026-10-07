@@ -13,6 +13,9 @@ env:
   DOTNET_VERSION: '10.0.x'
   PROJECT_PATH: '.bootstrap-scaffold.csproj'
   PUBLISH_PATH: '${{ github.workspace }}/publish'
+  # Future MarketData provider settings are deployment configuration only.
+  # They must be supplied through App Service configuration or Key Vault after
+  # the readiness record in docs/market-data.md has been approved.
 
 jobs:
   deploy:
@@ -48,3 +51,7 @@ jobs:
         with:
           app-name: ${{ vars.AZURE_WEBAPP_NAME }}
           package: ${{ env.PUBLISH_PATH }}
+      # Do not add provider credentials or echo secret values here. Future
+      # MarketData:* settings belong in Azure App Service configuration/
+      # Key Vault references and must not be provisioned by this workflow
+      # before the provider readiness gate is approved.

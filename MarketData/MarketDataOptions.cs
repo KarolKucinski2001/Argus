@@ -15,6 +15,13 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
     public string ProviderId { get; set; } = string.Empty;
     public bool PublicDisplayApproved { get; set; }
     public string? ProviderApiKeyConfigurationKey { get; set; }
+    public Dictionary<string, MarketAssetClass> AllowedAssets { get; set; } = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["AAPL"] = MarketAssetClass.Equity,
+        ["MSFT"] = MarketAssetClass.Equity,
+        ["BTC-USD"] = MarketAssetClass.Crypto,
+        ["ETH-USD"] = MarketAssetClass.Crypto
+    };
 
     public ValidateOptionsResult Validate(string? name, MarketDataOptions options)
     {
@@ -43,6 +50,11 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
         if (options.ApplicationRequestBudget <= 0)
         {
             errors.Add($"{nameof(ApplicationRequestBudget)} must be greater than zero.");
+        }
+
+        if (options.AllowedAssets is null || options.AllowedAssets.Count == 0)
+        {
+            errors.Add($"{nameof(AllowedAssets)} must contain at least one asset.");
         }
 
         if (options.PublicDisplayApproved && string.IsNullOrWhiteSpace(options.ProviderId))

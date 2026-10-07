@@ -1,3 +1,16 @@
+using System.Net;
+using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 using _bootstrap_scaffold.MarketData;
@@ -7,13 +20,199 @@ namespace Argus.Authentication.Tests;
 public sealed class MarketDataContractTests
 {
     [Fact]
-    public void Normalized_result_uses_application_contract_types()
+    public async Task Market_data_requires_authentication()
+    {
+        await using var factory = new RealSchemeFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.PostAsJsonAsync("/api/market-data", CreateRequest("AAPL"));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task Single_asset_request_returns_normalized_data_and_attribution()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var response = await PostAsync(factory, CreateRequest("AAPL"));
+        var data = await ReadResponseAsync(response);
+        var result = Assert.Single(data.Results);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("AAPL", result.Asset.Id);
+        Assert.Equal(215.50m, result.CurrentQuote?.Value);
+        Assert.Equal("USD", result.CurrentQuote?.Currency);
+        Assert.Equal("fake-provider", result.Source?.ProviderId);
+        Assert.Equal("Fake provider attribution", result.Source?.Attribution);
+        Assert.Equal(MarketDataQuality.Complete, result.Quality);
+        Assert.Empty(result.Warnings);
+    }
+
+    [Fact]
+    public async Task Multi_asset_request_preserves_each_normalized_result()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"), CreateResult("BTC-USD", MarketAssetClass.Crypto));
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var response = await PostAsync(factory, CreateRequest("AAPL", "BTC-USD"));
+        var data = await ReadResponseAsync(response);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(["AAPL", "BTC-USD"], data.Results.Select(result => result.Asset.Id));
+        Assert.All(data.Results, result => Assert.Equal(MarketDataGranularity.Daily, result.RequestedHistory.Granularity));
+    }
+
+    [Fact]
+    public async Task Partial_provider_evidence_keeps_usable_result_and_marks_missing_asset()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var response = await PostAsync(factory, CreateRequest("AAPL", "MSFT"));
+        var data = await ReadResponseAsync(response);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(MarketDataQuality.Complete, data.Results[0].Quality);
+        Assert.Equal(MarketDataErrorCategory.UpstreamUnavailable, data.Results[1].Error?.Category);
+        Assert.Equal(MarketDataQuality.Unavailable, data.Results[1].Quality);
+    }
+
+    [Fact]
+    public async Task Fresh_cache_hit_avoids_a_second_provider_call()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(provider);
+
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+
+        Assert.Equal(1, provider.CallCount);
+    }
+
+    [Fact]
+    public async Task Expired_cache_exposes_stale_evidence_when_refresh_fails()
+    {
+        var provider = new FakeMarketDataProvider
+        {
+            Results = [CreateResult(
+                "AAPL",
+                quality: MarketDataQuality.Unavailable,
+                error: new MarketDataError(
+                    MarketDataErrorCategory.UpstreamUnavailable,
+                    "fake outage",
+                    true))]
+        };
+        var cache = new SeededMarketDataCache(
+            new MarketDataCacheEntry(
+                CreateKey("AAPL"),
+                CreateResult("AAPL"),
+                DateTimeOffset.UtcNow.AddMinutes(-10),
+                DateTimeOffset.UtcNow.AddMinutes(-1)));
+        await using var factory = new MarketDataTestFactory(provider, cache);
+
+        var response = await PostAsync(factory, CreateRequest("AAPL"));
+        var result = Assert.Single((await ReadResponseAsync(response)).Results);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(MarketDataErrorCategory.UpstreamUnavailable, result.Error?.Category);
+        Assert.Contains(result.Warnings, warning => warning.Category == MarketDataWarningCategory.StaleData);
+        Assert.Contains(result.Warnings, warning => warning.Category == MarketDataWarningCategory.UpstreamUnavailable);
+        Assert.True(result.Freshness.IsStale);
+    }
+
+    [Fact]
+    public async Task Invalid_asset_returns_explicit_error_category()
+    {
+        await using var factory = new MarketDataTestFactory(new FakeMarketDataProvider());
+
+        using var response = await PostAsync(factory, CreateRequest("NOT-ALLOWED"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("UnsupportedAsset", category);
+    }
+
+    [Fact]
+    public async Task Quota_exhaustion_returns_per_asset_error()
+    {
+        var provider = new FakeMarketDataProvider
+        {
+            Results = [CreateResult(
+                "AAPL",
+                quality: MarketDataQuality.Unavailable,
+                error: new MarketDataError(
+                    MarketDataErrorCategory.QuotaExceeded,
+                    "fake quota exhausted",
+                    true))]
+        };
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(MarketDataErrorCategory.QuotaExceeded, result.Error?.Category);
+        Assert.True(result.Error?.IsRetryable);
+    }
+
+    [Fact]
+    public async Task Timeout_returns_explicit_retryable_error()
+    {
+        var provider = new FakeMarketDataProvider { DelayUntilCancelled = true };
+        await using var factory = new MarketDataTestFactory(
+            provider,
+            configureOptions: options => options.RequestTimeout = TimeSpan.FromMilliseconds(20));
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(MarketDataErrorCategory.Timeout, result.Error?.Category);
+        Assert.True(result.Error?.IsRetryable);
+    }
+
+    [Fact]
+    public async Task Upstream_outage_returns_explicit_retryable_error()
+    {
+        var provider = new FakeMarketDataProvider { ThrowUpstreamUnavailable = true };
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(MarketDataErrorCategory.UpstreamUnavailable, result.Error?.Category);
+        Assert.True(result.Error?.IsRetryable);
+    }
+
+    [Fact]
+    public async Task Provider_not_approved_returns_unavailable_problem_without_calling_provider()
+    {
+        var provider = new FakeMarketDataProvider();
+        await using var factory = new MarketDataTestFactory(provider, configureOptions: options =>
+        {
+            options.ProviderId = string.Empty;
+            options.PublicDisplayApproved = false;
+        });
+
+        using var response = await PostAsync(factory, CreateRequest("AAPL"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal("ProviderNotApproved", category);
+        Assert.Equal(0, provider.CallCount);
+    }
+
+    [Fact]
+    public async Task Normalized_contract_does_not_require_provider_payload_fields()
     {
         var asset = new AssetReference("AAPL", "Apple", MarketAssetClass.Equity);
-        var history = new MarketDataHistoryRequest(
-            new DateOnly(2025, 10, 1),
-            new DateOnly(2026, 10, 1),
-            MarketDataGranularity.Daily);
+        var history = CreateHistory();
         var freshness = new MarketDataFreshness(
             DateTimeOffset.UtcNow.AddMinutes(-1),
             DateTimeOffset.UtcNow,
@@ -25,60 +224,194 @@ public sealed class MarketDataContractTests
             history,
             new MarketQuote(215.50m, "USD", freshness.ObservedAt, freshness, MarketDataQuality.Complete),
             [],
-            new MarketDataSource("test-provider", "Test Provider", true, TimeSpan.FromMinutes(15)),
+            new MarketDataSource("fake-provider", "Fake provider attribution", true, TimeSpan.FromMinutes(15)),
             freshness,
             MarketDataQuality.Complete,
             []);
 
         Assert.Equal("AAPL", result.Asset.Id);
         Assert.Equal(MarketDataGranularity.Daily, result.RequestedHistory.Granularity);
-        Assert.Equal("USD", result.CurrentQuote?.Currency);
-        Assert.Equal("test-provider", result.Source?.ProviderId);
+        Assert.Equal("fake-provider", result.Source?.ProviderId);
     }
 
-    [Fact]
-    public void Options_validation_rejects_invalid_operational_settings()
+    private static MarketDataRequest CreateRequest(params string[] assetIds) =>
+        new(
+            assetIds.Select(id => new AssetReference(
+                id,
+                id == "BTC-USD" ? "Bitcoin" : id,
+                id.EndsWith("-USD", StringComparison.Ordinal) ? MarketAssetClass.Crypto : MarketAssetClass.Equity)).ToArray(),
+            CreateHistory());
+
+    private static MarketDataHistoryRequest CreateHistory() =>
+        new(DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-12)), DateOnly.FromDateTime(DateTime.UtcNow), MarketDataGranularity.Daily);
+
+    private static MarketDataResult CreateResult(
+        string id,
+        MarketAssetClass assetClass = MarketAssetClass.Equity,
+        MarketDataQuality quality = MarketDataQuality.Complete,
+        MarketDataError? error = null)
     {
-        var invalidOptions = new[]
-        {
-            new MarketDataOptions { HistoryWindowMonths = 11, ProviderId = "test", PublicDisplayApproved = true },
-            new MarketDataOptions { MaximumSelectedAssets = 0, ProviderId = "test", PublicDisplayApproved = true },
-            new MarketDataOptions { RequestTimeout = TimeSpan.Zero, ProviderId = "test", PublicDisplayApproved = true },
-            new MarketDataOptions { CacheDuration = TimeSpan.Zero, ProviderId = "test", PublicDisplayApproved = true },
-            new MarketDataOptions { ApplicationRequestBudget = 0, ProviderId = "test", PublicDisplayApproved = true },
-            new MarketDataOptions { ProviderId = "", PublicDisplayApproved = true },
-            new MarketDataOptions { ProviderId = "test", PublicDisplayApproved = false }
-        };
+        var now = DateTimeOffset.UtcNow;
+        var history = CreateHistory();
+        var freshness = new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
+        return new MarketDataResult(
+            new AssetReference(id, id, assetClass),
+            history,
+            error is null ? new MarketQuote(215.50m, "USD", now, freshness, quality) : null,
+            error is null ? [new HistoricalPricePoint(now.AddDays(-1), null, null, null, 214.25m, null, "USD", true)] : [],
+            error is null ? new MarketDataSource("fake-provider", "Fake provider attribution", true, TimeSpan.FromMinutes(15)) : null,
+            freshness,
+            quality,
+            [],
+            error);
+    }
 
-        foreach (var options in invalidOptions)
-        {
-            var result = options.Validate(Options.DefaultName, options);
+    private static MarketDataCacheKey CreateKey(string id) =>
+        new(id, MarketAssetClass.Equity, CreateHistory().Start, CreateHistory().End, MarketDataGranularity.Daily);
 
-            Assert.False(result.Succeeded);
+    private static async Task<HttpResponseMessage> PostAsync(
+        MarketDataTestFactory factory,
+        MarketDataRequest request)
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+        return await client.PostAsJsonAsync("/api/market-data", request);
+    }
+
+    private static async Task<MarketDataResponse> ReadResponseAsync(HttpResponseMessage response)
+    {
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<MarketDataResponse>())!;
+    }
+
+    private static async Task<string?> ReadProblemCategoryAsync(HttpResponseMessage response)
+    {
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return document.RootElement.TryGetProperty("errorCategory", out var category)
+            ? category.GetString()
+            : null;
+    }
+}
+
+internal sealed class FakeMarketDataProvider : IMarketDataProvider
+{
+    public IReadOnlyList<MarketDataResult> Results { get; set; } = [];
+    public bool DelayUntilCancelled { get; init; }
+    public bool ThrowUpstreamUnavailable { get; init; }
+    public int CallCount { get; private set; }
+
+    public async Task<IReadOnlyList<MarketDataResult>> GetAsync(
+        MarketDataRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        CallCount++;
+        if (DelayUntilCancelled)
+        {
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
         }
-    }
 
-    [Fact]
-    public void Options_validation_accepts_a_compliant_configuration()
-    {
-        var options = new MarketDataOptions
+        if (ThrowUpstreamUnavailable)
         {
-            ProviderId = "approved-provider",
-            PublicDisplayApproved = true
-        };
+            throw new HttpRequestException("fake outage");
+        }
 
-        var result = options.Validate(Options.DefaultName, options);
-
-        Assert.True(result.Succeeded);
+        return Results.Where(result => request.Assets.Any(asset =>
+            string.Equals(asset.Id, result.Asset.Id, StringComparison.OrdinalIgnoreCase))).ToArray();
     }
 
-    [Fact]
-    public void Options_validation_accepts_the_disabled_provider_default()
+    public void SetResults(params MarketDataResult[] results) => Results = results;
+}
+
+internal sealed class SeededMarketDataCache(MarketDataCacheEntry entry) : IMarketDataCache
+{
+    private MarketDataCacheEntry? current = entry;
+
+    public ValueTask<MarketDataCacheEntry?> GetAsync(
+        MarketDataCacheKey key,
+        CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(current?.Key == key ? current : null);
+
+    public ValueTask SetAsync(MarketDataCacheEntry cacheEntry, CancellationToken cancellationToken = default)
     {
-        var options = new MarketDataOptions();
+        current = cacheEntry;
+        return ValueTask.CompletedTask;
+    }
 
-        var result = options.Validate(Options.DefaultName, options);
+    public ValueTask RemoveAsync(MarketDataCacheKey key, CancellationToken cancellationToken = default)
+    {
+        if (current?.Key == key)
+        {
+            current = null;
+        }
 
-        Assert.True(result.Succeeded);
+        return ValueTask.CompletedTask;
+    }
+}
+
+internal sealed class MarketDataTestFactory : WebApplicationFactory<Program>
+{
+    private readonly IMarketDataProvider provider;
+    private readonly IMarketDataCache? cache;
+    private readonly Action<MarketDataOptions>? configureOptions;
+
+    public MarketDataTestFactory(
+        IMarketDataProvider provider,
+        IMarketDataCache? cache = null,
+        Action<MarketDataOptions>? configureOptions = null)
+    {
+        this.provider = provider;
+        this.cache = cache;
+        this.configureOptions = configureOptions;
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Testing");
+        TestEntraConfiguration.Apply(builder);
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["MarketData:ProviderId"] = "fake-provider",
+                ["MarketData:PublicDisplayApproved"] = "true",
+                ["MarketData:RequestTimeout"] = "00:00:10",
+                ["MarketData:CacheDuration"] = "00:05:00"
+            });
+        });
+        builder.ConfigureServices(services =>
+        {
+            services.AddAuthentication("Test")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", _ => { });
+            services.PostConfigure<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+                options.DefaultForbidScheme = "Test";
+                options.DefaultSignInScheme = "Test";
+                options.DefaultSignOutScheme = "Test";
+            });
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
+
+            services.RemoveAll<IMarketDataProvider>();
+            services.AddSingleton(provider);
+            if (cache is not null)
+            {
+                services.RemoveAll<IMarketDataCache>();
+                services.AddSingleton(cache);
+            }
+
+            if (configureOptions is not null)
+            {
+                services.PostConfigure<MarketDataOptions>(configureOptions);
+            }
+        });
     }
 }

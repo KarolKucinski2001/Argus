@@ -44,6 +44,32 @@ the official terms and the checklist above have been reviewed and recorded.
 The current research does not approve a provider; the free tiers reviewed so
 far do not establish the required public-display permission.
 
+## Release-readiness record
+
+A provider adapter must not be enabled in production until a release record
+links the exact provider plan and asset allowlist to evidence for every item
+below:
+
+- Official terms explicitly permit Argus to publicly display the returned
+  values, historical data, attribution, and delayed/latest-data state.
+- The fixed US-equity and crypto allowlist, required endpoint coverage, and
+  twelve months of history at the requested granularity have been exercised.
+- Quota and rate-limit ceilings, request timeout behavior, freshness guarantees,
+  retryability, and upstream error mappings have been verified from official
+  documentation and deterministic adapter tests.
+- Normalized responses contain the required attribution and source timestamps,
+  and missing, stale, partial, delayed, quota-limited, and unavailable evidence
+  remains visible to callers.
+- Provider credentials are supplied only through Azure App Service settings,
+  Key Vault, or another approved secret store; no credential is stored in this
+  repository.
+
+Until that record is complete and reviewed, `PublicDisplayApproved` must remain
+false. The application must report the explicit `ProviderNotApproved` or
+configuration-unavailable state rather than presenting a provider response as
+fresh market evidence. This phase adds deterministic fake-provider tests only;
+it does not constitute provider approval.
+
 ## Operational boundary
 
 `MarketDataOptions` keeps the 12-month window, selected-asset limit, timeout,
