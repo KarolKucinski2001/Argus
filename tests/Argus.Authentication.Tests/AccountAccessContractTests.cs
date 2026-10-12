@@ -30,9 +30,12 @@ public sealed class AccountAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Argus", html);
-        Assert.Contains("educational", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not investment advice", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("/account/signin", html);
+        Assert.Contains("Zrozum rynek", html);
+        Assert.Contains("analizę edukacyjną", html);
+        Assert.Contains("nie oferuje spersonalizowanych", html);
+        Assert.Contains("porad inwestycyjnych", html);
+        Assert.Contains("są ilustracyjne", html);
+        Assert.Contains("/account/signin", html, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
