@@ -1,12 +1,100 @@
 @page
 @model _bootstrap_scaffold.Pages.IndexModel
 @{
-    ViewData["Title"] = "Argus";
+    Layout = "_Layout";
+    ViewData["Title"] = "Zrozum rynek";
 }
 
-<main>
-    <h1>Argus</h1>
-    <p>Argus helps you understand selected market assets through clear, explained educational analysis.</p>
-    <p>This service is educational and is not investment advice. It does not guarantee future results.</p>
-    <p><a class="button" href="/account/signin">Sign in or create an account</a></p>
-</main>
+<div class="landing-page">
+    <section class="landing-hero" aria-labelledby="hero-title">
+        <div class="landing-hero__copy">
+            <p class="eyebrow">Edukacyjna analiza rynku</p>
+            <h1 id="hero-title">Zrozum rynek, zanim wybierzesz aktywa.</h1>
+            <p class="hero-lede">
+                Argus łączy kontekst rynkowy, wyjaśnione czynniki i dane historyczne,
+                aby początkujący mogli lepiej zrozumieć, co wpływa na wynik aktywa.
+            </p>
+            <div class="hero-actions">
+                <a class="button" href="#how-it-works">Poznaj sposób działania</a>
+                <a class="button button--secondary" asp-page="/Account/SignIn">Zaloguj się lub utwórz konto</a>
+            </div>
+        </div>
+
+        <div class="landing-hero__preview">
+            <article class="analysis-card" aria-labelledby="analysis-preview-title">
+                <div class="analysis-card__header">
+                    <div>
+                        <p class="analysis-card__label">Przykładowy podgląd</p>
+                        <h2 id="analysis-preview-title">Opportunity Score</h2>
+                    </div>
+                    <span class="analysis-card__note">Dane ilustracyjne</span>
+                </div>
+
+                <div class="analysis-row">
+                    <div class="analysis-row__asset">
+                        <span class="asset-symbol" aria-hidden="true">BTC</span>
+                        <span>Bitcoin<small>BTC/USD</small></span>
+                    </div>
+                    <span class="score">82</span>
+                </div>
+                <div class="analysis-row">
+                    <div class="analysis-row__asset">
+                        <span class="asset-symbol" aria-hidden="true">ETH</span>
+                        <span>Ethereum<small>ETH/USD</small></span>
+                    </div>
+                    <span class="score">74</span>
+                </div>
+                <div class="analysis-row">
+                    <div class="analysis-row__asset">
+                        <span class="asset-symbol" aria-hidden="true">MS</span>
+                        <span>Microsoft<small>MSFT</small></span>
+                    </div>
+                    <span class="score">68</span>
+                </div>
+
+                <div class="analysis-card__factors" aria-label="Illustrative contributing factors">
+                    <div class="factor-row"><span>Niedawny impet</span><strong>Pozytywny</strong></div>
+                    <div class="factor-row"><span>Zakres historyczny</span><strong>Mieszany</strong></div>
+                    <div class="factor-row"><span>Aktualność danych</span><strong>Bieżąca</strong></div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section" id="how-it-works" aria-labelledby="how-it-works-title">
+        <div class="section-heading">
+            <p class="eyebrow">Przejrzysty proces</p>
+            <h2 id="how-it-works-title">Od pytania do lepiej poinformowanego spojrzenia.</h2>
+            <p>Argus pokazuje dowody zamiast ukrywać sposób rozumowania za jednym sygnałem.</p>
+        </div>
+        <div class="workflow-grid">
+            <article class="workflow-card">
+                <span class="workflow-card__number">01</span>
+                <h3>Wybierz aktywa</h3>
+                <p>Wybierz aktywa, które chcesz zrozumieć i porównać.</p>
+            </article>
+            <article class="workflow-card">
+                <span class="workflow-card__number">02</span>
+                <h3>Sprawdź dane</h3>
+                <p>Zobacz bieżący i historyczny kontekst w jednym miejscu.</p>
+            </article>
+            <article class="workflow-card">
+                <span class="workflow-card__number">03</span>
+                <h3>Zrozum czynniki</h3>
+                <p>Poznaj sygnały i dowody, które wpływają na każdy wynik.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="section" aria-labelledby="boundary-title">
+        <div class="boundary-card">
+            <p class="eyebrow">Ważne ograniczenie</p>
+            <h2 id="boundary-title">Ucz się z danych. Podejmuj własne decyzje.</h2>
+            <p>
+                Argus udostępnia analizę edukacyjną i nie oferuje spersonalizowanych
+                porad inwestycyjnych ani gwarancji przyszłych wyników. Oceny i przykłady
+                na tej stronie są ilustracyjne.
+            </p>
+        </div>
+    </section>
+</div>
