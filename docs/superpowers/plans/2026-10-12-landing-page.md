@@ -419,7 +419,7 @@ Update the layout to:
 <body>
     <header class="site-header">
         <a class="brand" asp-page="/Index">Argus</a>
-        <nav class="site-nav" aria-label="Primary navigation">
+        <nav class="site-nav" aria-label="Nawigacja główna">
             <a class="text-link" href="#how-it-works">Jak to działa</a>
             <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
         </nav>
@@ -521,7 +521,7 @@ Replace `Pages/Index.cshtml` with:
                     <span class="score">68</span>
                 </div>
 
-                <div class="analysis-card__factors" aria-label="Illustrative contributing factors">
+                <div class="analysis-card__factors" aria-label="Przykładowe czynniki wpływające na wynik">
                     <div class="factor-row"><span>Niedawny impet</span><strong>Pozytywny</strong></div>
                     <div class="factor-row"><span>Zakres historyczny</span><strong>Mieszany</strong></div>
                     <div class="factor-row"><span>Aktualność danych</span><strong>Bieżąca</strong></div>
