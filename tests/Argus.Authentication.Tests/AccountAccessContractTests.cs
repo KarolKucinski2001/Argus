@@ -39,6 +39,22 @@ public sealed class AccountAccessContractTests
     }
 
     [Fact]
+    public async Task Site_stylesheet_is_served_as_css()
+    {
+        await using var factory = new AccountAccessFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/css/site.css");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/css", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
     public async Task Sign_in_explicitly_challenges_openid_connect_and_does_not_preserve_external_return_url()
     {
         await using var factory = new AccountAccessFactory();

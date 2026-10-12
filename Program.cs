@@ -104,6 +104,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapStaticAssets();
 app.MapRazorPages();
 
 app.MapGet("/api/me", (ClaimsPrincipal user) =>
