@@ -409,7 +409,7 @@ Update the layout to:
 
 ```cshtml
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -420,8 +420,8 @@ Update the layout to:
     <header class="site-header">
         <a class="brand" asp-page="/Index">Argus</a>
         <nav class="site-nav" aria-label="Primary navigation">
-            <a class="text-link" href="#how-it-works">How it works</a>
-            <a class="text-link" asp-page="/Account/SignIn">Sign in</a>
+            <a class="text-link" href="#how-it-works">Jak to działa</a>
+            <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
         </nav>
     </header>
     <main class="landing-main">
@@ -470,6 +470,7 @@ Replace `Pages/Index.cshtml` with:
 @page
 @model _bootstrap_scaffold.Pages.IndexModel
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Zrozum rynek";
 }
 
