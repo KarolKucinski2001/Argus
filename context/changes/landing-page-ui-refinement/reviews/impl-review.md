@@ -33,7 +33,7 @@
   - Tradeoff: Requires a documentation follow-up and a new closing commit.
   - Confidence: HIGH — the approved design spec and final tests clearly establish the intended three-card workflow.
   - Blind spot: The exact preferred wording for historical Phase 3 criteria has not been confirmed.
-- **Decision**: PENDING
+- **Decision**: FIXED — updated the Phase 3 plan addendum and success criteria to record the approved duplicate-result removal.
 
 ### F2 — Process-result visual verification is not persisted as screenshot evidence
 

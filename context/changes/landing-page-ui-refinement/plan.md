@@ -214,29 +214,36 @@ Restructure the existing process section so its steps lead into the existing
 illustrative ranking and factors, giving users a visible example of the value
 produced by the workflow without creating a second scoring model.
 
+**Approved addendum**: The later design decision in
+`docs/superpowers/specs/2026-10-14-remove-duplicate-process-result-design.md`
+superseded this connected-result direction. The final process section remains
+a focused three-card workflow, while the single illustrative ranking remains
+in the hero to avoid competing duplicate results. The cleanup plan and its
+contract tests are the implementation source for this final Phase 3 outcome.
+
 ### Changes Required:
 
 #### 1. Process markup
 
 **File**: `Pages/Index.cshtml`
 
-**Intent**: Connect the three process steps to a compact visual result based on
-the already-present illustrative assets, scores, and factors.
+**Intent**: Keep the three process steps focused and avoid duplicating the
+illustrative result already presented in the hero.
 
 **Contract**: The section remains static and semantic, keeps the existing
-`#how-it-works` anchor, identifies the result as illustrative, and does not
-claim current or personalized investment advice.
+`#how-it-works` anchor, leaves the single illustrative result in the hero, and
+does not claim current or personalized investment advice.
 
 #### 2. Process/result styling
 
 **File**: `wwwroot/css/site.css`
 
-**Intent**: Give the connected process/result composition a clear reading order
-on desktop and a single-column reading order on mobile.
+**Intent**: Preserve the focused three-card workflow without introducing
+process-result styling that competes with the hero result.
 
 **Contract**: New classes use the existing semantic tokens and BEM naming
-pattern; the result visualization does not duplicate a separate ranking or
-introduce unscoped colors.
+pattern; the process section does not introduce a second ranking visualization
+or unscoped colors.
 
 #### 3. Landing contract coverage
 
@@ -259,11 +266,10 @@ not brittle pixel-specific markup.
 
 #### Manual Verification:
 
-- The process section visibly explains how the steps lead to a ranking/result.
-- The result remains secondary to the primary hero message and does not read as
-  a live recommendation.
-- The process/result composition remains readable at `1440x900` and
+- The process section remains a readable three-card workflow at `1440x900` and
   `390x844`.
+- The single hero result remains secondary to the primary message and does not
+  read as a live recommendation.
 
 **Implementation Note**: Do not proceed to the final state gate until the
 visual proof has been checked against the screenshot pair.
