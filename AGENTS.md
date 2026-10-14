@@ -24,6 +24,7 @@ Razor Pages under `Pages/`; the investment-analysis product described in
 - HTTPS redirection is global. Development URLs are defined in `@Properties/launchSettings.json`.
 - The project remains `.bootstrap-scaffold.csproj` with root namespace `_bootstrap_scaffold`; do not infer production namespaces or feature boundaries from it.
 - Future domain work should follow the PRD flow: authenticated users select assets, market data is analyzed, scores are ranked with explaining factors, and AI summaries remain grounded in displayed data with an educational-not-advice boundary.
+- For landing-page UI changes, keep visual tokens in `@wwwroot/css/site.css`, static brand assets in `@wwwroot/`, and views free of literal colors or arbitrary layout values; use the existing landing-page contract and evidence under `@context/changes/landing-page-ui-refinement/`.
 
 ## Build, test, and run
 

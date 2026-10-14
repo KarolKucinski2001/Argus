@@ -425,11 +425,11 @@ handled as a separate asset decision rather than recoloring the view.
 
 #### Automated
 
-- [ ] 4.1 Final build and targeted tests pass
-- [ ] 4.2 Final view scan reports no new hardcoded colors or arbitrary spacing values
+- [x] 4.1 Final build and targeted tests pass
+- [x] 4.2 Final view scan reports no new hardcoded colors or arbitrary spacing values
 
 #### Manual
 
-- [ ] 4.3 Screenshot gate passes at 1440x900 and 390x844 without clipping
-- [ ] 4.4 Keyboard focus and applicable hover states are visible
-- [ ] 4.5 Static-page N/A states and educational boundary are recorded and verified
+- [x] 4.3 Screenshot gate passes at 1440x900 and 390x844 without clipping
+- [x] 4.4 Keyboard focus and applicable hover states are visible
+- [x] 4.5 Static-page N/A states and educational boundary are recorded and verified
