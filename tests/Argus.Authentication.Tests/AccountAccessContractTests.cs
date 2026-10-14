@@ -36,6 +36,8 @@ public sealed class AccountAccessContractTests
         Assert.Contains("porad inwestycyjnych", html);
         Assert.Contains("są ilustracyjne", html);
         Assert.Contains("how-it-works", html);
+        Assert.Equal(3, html.Split("class=\"workflow-card\"", StringSplitOptions.None).Length - 1);
+        Assert.Equal(1, html.Split("class=\"analysis-card\"", StringSplitOptions.None).Length - 1);
         Assert.Contains("Wybierz aktywa", html);
         Assert.Contains("Sprawdź dane", html);
         Assert.Contains("Zrozum czynniki", html);
