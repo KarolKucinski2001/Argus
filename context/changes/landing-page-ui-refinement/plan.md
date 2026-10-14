@@ -403,23 +403,23 @@ handled as a separate asset decision rather than recoloring the view.
 
 #### Automated
 
-- [x] 2.1 View and stylesheet scan contains no new hardcoded view colors or arbitrary spacing values
-- [x] 2.2 Application build passes without errors
+- [x] 2.1 View and stylesheet scan contains no new hardcoded view colors or arbitrary spacing values — d4f55a6
+- [x] 2.2 Application build passes without errors — d4f55a6
 
 #### Manual
 
-- [x] 2.3 Desktop hierarchy and mobile preview/CTA behavior pass at the agreed viewports
+- [x] 2.3 Desktop hierarchy and mobile preview/CTA behavior pass at the agreed viewports — d4f55a6
 
 ### Phase 3: Landing-page value proof
 
 #### Automated
 
-- [ ] 3.1 Targeted authentication and landing contract tests pass
-- [ ] 3.2 Landing response retains the educational boundary and illustrative-data label
+- [x] 3.1 Targeted authentication and landing contract tests pass
+- [x] 3.2 Landing response retains the educational boundary and illustrative-data label
 
 #### Manual
 
-- [ ] 3.3 Process steps visibly connect to a secondary illustrative result on desktop and mobile
+- [x] 3.3 Process steps visibly connect to a secondary illustrative result on desktop and mobile — 9c68d31
 
 ### Phase 4: State matrix, documentation, and visual gate
 
