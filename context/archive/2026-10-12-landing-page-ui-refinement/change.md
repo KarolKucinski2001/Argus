@@ -1,10 +1,10 @@
 ---
 change_id: landing-page-ui-refinement
 title: Refine landing page UI
-status: impl_reviewed
+status: archived
 created: 2026-10-12
 updated: 2026-10-14
-archived_at: null
+archived_at: 2026-10-14T13:35:25Z
 ---
 
 ## Notes
