@@ -35,6 +35,12 @@ public sealed class AccountAccessContractTests
         Assert.Contains("nie oferuje spersonalizowanych", html);
         Assert.Contains("porad inwestycyjnych", html);
         Assert.Contains("są ilustracyjne", html);
+        Assert.Contains("how-it-works", html);
+        Assert.Contains("Wybierz aktywa", html);
+        Assert.Contains("Sprawdź dane", html);
+        Assert.Contains("Zrozum czynniki", html);
+        Assert.Contains("Dane ilustracyjne", html);
+        Assert.DoesNotContain("process-result", html);
         Assert.Contains("/account/signin", html, StringComparison.OrdinalIgnoreCase);
     }
 
