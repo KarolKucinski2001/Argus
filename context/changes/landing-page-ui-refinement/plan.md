@@ -392,23 +392,23 @@ handled as a separate asset decision rather than recoloring the view.
 
 #### Automated
 
-- [x] 1.1 SVG asset exists at the selected static path and is included by the build
-- [x] 1.2 Existing authentication contract tests pass
+- [x] 1.1 SVG asset exists at the selected static path and is included by the build — 3cad300
+- [x] 1.2 Existing authentication contract tests pass — 3cad300
 
 #### Manual
 
-- [x] 1.3 White symbol and text brand render at desktop and mobile, with visible brand-link focus
+- [x] 1.3 White symbol and text brand render at desktop and mobile, with visible brand-link focus — 3cad300
 
 ### Phase 2: Token-backed responsive values and hierarchy
 
 #### Automated
 
-- [ ] 2.1 View and stylesheet scan contains no new hardcoded view colors or arbitrary spacing values
-- [ ] 2.2 Application build passes without errors
+- [x] 2.1 View and stylesheet scan contains no new hardcoded view colors or arbitrary spacing values
+- [x] 2.2 Application build passes without errors
 
 #### Manual
 
-- [ ] 2.3 Desktop hierarchy and mobile preview/CTA behavior pass at the agreed viewports
+- [x] 2.3 Desktop hierarchy and mobile preview/CTA behavior pass at the agreed viewports
 
 ### Phase 3: Landing-page value proof
 

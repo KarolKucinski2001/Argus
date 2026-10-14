@@ -3,7 +3,7 @@ change_id: landing-page-ui-refinement
 title: Refine landing page UI
 status: implementing
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-14
 archived_at: null
 ---
 

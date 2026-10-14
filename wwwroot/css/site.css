@@ -18,6 +18,13 @@
     --space-5: 2rem;
     --space-6: 3rem;
     --space-7: 5rem;
+    --hero-min-height: 28rem;
+    --hero-padding: var(--space-6);
+    --hero-gap: var(--space-5);
+    --hero-heading-size: clamp(2.5rem, 6vw, 4.75rem);
+    --preview-column-min: 20rem;
+    --preview-row-gap: var(--space-2);
+    --mobile-control-width: 100%;
     --radius-sm: 0.5rem;
     --radius-md: 0.875rem;
     --radius-lg: 1.25rem;
@@ -36,7 +43,6 @@ html {
 }
 
 body {
-    min-width: 20rem;
     margin: 0;
     background: var(--color-bg);
     color: var(--color-text);
@@ -102,9 +108,9 @@ button:focus-visible {
 .landing-hero {
     display: grid;
     align-items: center;
-    gap: var(--space-6);
-    min-height: 34rem;
-    padding-block: var(--space-7);
+    gap: var(--hero-gap);
+    min-height: var(--hero-min-height);
+    padding-block: var(--hero-padding);
 }
 
 .landing-hero__copy,
@@ -124,7 +130,7 @@ button:focus-visible {
 .landing-hero h1 {
     max-width: 12ch;
     margin: 0;
-    font-size: clamp(2.75rem, 7vw, 5.5rem);
+    font-size: var(--hero-heading-size);
     line-height: 0.98;
     letter-spacing: -0.06em;
 }
@@ -193,7 +199,7 @@ button:focus-visible {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--preview-row-gap);
 }
 
 .analysis-card__header {
@@ -220,6 +226,7 @@ button:focus-visible {
 
 .analysis-row__asset {
     display: flex;
+    min-width: 0;
     gap: var(--space-3);
     align-items: center;
 }
@@ -239,6 +246,13 @@ button:focus-visible {
 .analysis-row__asset small {
     display: block;
     color: var(--color-muted);
+}
+
+.analysis-row__asset > span:last-child,
+.factor-row > span,
+.factor-row > strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .score {
@@ -320,13 +334,54 @@ button:focus-visible {
     color: var(--color-muted);
 }
 
-@media (min-width: 48rem) {
-    .landing-hero {
-        grid-template-columns: minmax(0, 1fr) minmax(22rem, 0.85fr);
-    }
-
+@media (min-width: 56rem) {
     .workflow-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 64rem) {
+    .landing-hero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(var(--preview-column-min), 0.85fr);
+    }
+}
+
+@media (max-width: 40rem) {
+    .landing-hero {
+        min-height: 0;
+        padding-block: var(--space-5);
+    }
+
+    .hero-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hero-actions .button {
+        width: var(--mobile-control-width);
+    }
+
+    .analysis-card__header,
+    .analysis-row,
+    .factor-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .analysis-card__header {
+        gap: var(--space-2);
+    }
+
+    .analysis-row__asset {
+        width: var(--mobile-control-width);
+    }
+
+    .score {
+        align-self: flex-end;
+    }
+
+    .factor-row {
+        gap: var(--space-1);
     }
 }
 
