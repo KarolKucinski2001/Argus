@@ -43,7 +43,7 @@
 - **Location**: `context/changes/landing-page-ui-refinement/state-matrix.md`
 - **Detail**: The state matrix records desktop and mobile verification as prose and records the static-page N/A states, but no screenshot evidence files are present under the change directory. The plan calls for recording the final screenshot evidence where available.
 - **Fix**: Add the available desktop and mobile screenshot evidence to the change directory, or explicitly amend the plan/state matrix to identify the user-confirmed manual verification as the available evidence when screenshots cannot be persisted.
-- **Decision**: PENDING
+- **Decision**: FIXED — documented that manual viewport verification is the available evidence and no screenshot artifact is persisted because the repository has no screenshot runner or capture workflow.
 
 ### F3 — Shared navigation fragment is a no-op on account pages
 

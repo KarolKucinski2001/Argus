@@ -7,8 +7,8 @@
 | Default | Pass | Public landing page renders the hero, hero ranking, workflow cards, and educational boundary. |
 | Hover | Pass | Existing token-backed link and button hover rules remain applicable. |
 | Focus-visible | Pass | Existing global focus-visible outline applies to the brand and CTA links. |
-| Desktop | Pass | User verified the landing page at `1440x900` without clipping or unintended horizontal overflow. |
-| Mobile | Pass | User verified the landing page at `390x844` without clipping or unintended horizontal overflow. |
+| Desktop | Pass | User manually verified the landing page at `1440x900` without clipping or unintended horizontal overflow; no screenshot artifact is persisted because the repository has no screenshot runner or stored capture workflow. |
+| Mobile | Pass | User manually verified the landing page at `390x844` without clipping or unintended horizontal overflow; no screenshot artifact is persisted because the repository has no screenshot runner or stored capture workflow. |
 
 ## Not applicable states
 
