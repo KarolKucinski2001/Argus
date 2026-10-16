@@ -72,13 +72,24 @@ below:
 Until that record is complete and reviewed, `PublicDisplayApproved` must remain
 false. The application must report the explicit `ProviderNotApproved` or
 configuration-unavailable state rather than presenting a provider response as
-fresh market evidence. Development and Testing environments register a deterministic fake provider
+fresh market evidence.
+
+Development and Testing environments register a deterministic fake provider
 that returns clearly labelled illustrative data for local protected-flow
 testing. The fake provider has no credentials or network calls and is never
 registered outside those environments. Its results do not constitute provider
 approval or permission for public display. Production and other environments
-continue to use the unavailable-provider boundary until an explicitly
-approved provider is registered.
+continue to use the unavailable-provider boundary until an explicitly approved
+provider is registered; production must not present fake results.
+
+## S-03 handoff
+
+The current slice ends after a bounded analysis-start status. S-03 must consume
+the normalized `MarketDataResponse` evidence already produced by this
+provider-neutral contract, including source metadata, freshness, quality,
+warnings, and per-asset errors. S-03 must not add a provider-specific request
+or response contract to implement ranking, factors, charts, or grounded AI
+summaries.
 
 ## Operational boundary
 

@@ -372,28 +372,28 @@ unchanged except for documentation of the Development/Test fake boundary.
 
 #### Automated
 
-- [x] 2.1 An unauthenticated GET `/analysis` follows the repository's protected-page challenge contract.
-- [x] 2.2 An authenticated GET `/analysis` renders every configured asset and the configured maximum selection count.
-- [x] 2.3 Valid POST selection invokes the shared service with canonical assets, a 12-month daily history, and the authenticated request context.
-- [x] 2.4 Empty, duplicate, unsupported, and over-limit selections do not invoke the provider and render bounded inline validation.
-- [x] 2.5 Provider-unavailable and successful fake-provider states render without leaking raw provider details.
+- [x] 2.1 An unauthenticated GET `/analysis` follows the repository's protected-page challenge contract. — 4e5e675
+- [x] 2.2 An authenticated GET `/analysis` renders every configured asset and the configured maximum selection count. — 4e5e675
+- [x] 2.3 Valid POST selection invokes the shared service with canonical assets, a 12-month daily history, and the authenticated request context. — 4e5e675
+- [x] 2.4 Empty, duplicate, unsupported, and over-limit selections do not invoke the provider and render bounded inline validation. — 4e5e675
+- [x] 2.5 Provider-unavailable and successful fake-provider states render without leaking raw provider details. — 4e5e675
 
 #### Manual
 
-- [x] 2.6 A signed-in user can reach `/analysis` from `/account`, select multiple assets, submit, and see the illustrative started state.
-- [x] 2.7 Keyboard users can reach every checkbox and the submit control, and focus remains visible at desktop and mobile widths.
-- [x] 2.8 Validation and provider errors remain understandable, preserve selected assets, and do not create horizontal overflow.
+- [x] 2.6 A signed-in user can reach `/analysis` from `/account`, select multiple assets, submit, and see the illustrative started state. — 4e5e675
+- [x] 2.7 Keyboard users can reach every checkbox and the submit control, and focus remains visible at desktop and mobile widths. — 4e5e675
+- [x] 2.8 Validation and provider errors remain understandable, preserve selected assets, and do not create horizontal overflow. — 4e5e675
 
 ### Phase 3: Contract coverage, documentation, and release boundary
 
 #### Automated
 
-- [ ] 3.1 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
-- [ ] 3.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with no warnings introduced by the slice.
-- [ ] 3.3 A source/configuration scan confirms no provider credentials, production fake registration, or new literal colors in the analysis view.
+- [x] 3.1 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
+- [x] 3.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with no warnings introduced by the slice.
+- [x] 3.3 A source/configuration scan confirms no provider credentials, production fake registration, or new literal colors in the analysis view.
 
 #### Manual
 
-- [ ] 3.4 The complete local flow is understandable: account → analysis → select assets → start → illustrative status or bounded error.
-- [ ] 3.5 Production configuration still communicates unavailable/unapproved data rather than presenting fake results.
-- [ ] 3.6 The page remains usable at `1440x900` and `390x844`, including visible focus, selected-state feedback, and educational-not-advice language.
+- [x] 3.4 The complete local flow is understandable: account → analysis → select assets → start → illustrative status or bounded error.
+- [x] 3.5 Production configuration still communicates unavailable/unapproved data rather than presenting fake results.
+- [x] 3.6 The page remains usable at `1440x900` and `390x844`, including visible focus, selected-state feedback, and educational-not-advice language.

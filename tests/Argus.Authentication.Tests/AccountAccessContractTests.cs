@@ -120,6 +120,23 @@ public sealed class AccountAccessContractTests
     }
 
     [Fact]
+    public async Task Authenticated_account_links_to_analysis_entry()
+    {
+        await using var factory = new AuthenticatedAccountFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/account");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("href=\"/analysis\"", html);
+    }
+
+    [Fact]
     public async Task Unauthenticated_account_uses_explicit_provider_challenge_instead_of_api_problem_details()
     {
         await using var factory = new AccountAccessFactory();

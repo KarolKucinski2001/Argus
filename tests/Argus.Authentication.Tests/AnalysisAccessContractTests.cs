@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Configuration;
 using Xunit;
+using _bootstrap_scaffold.MarketData;
 
 namespace Argus.Authentication.Tests;
 
@@ -102,6 +104,93 @@ public sealed class AnalysisAccessContractTests
         Assert.DoesNotContain("illustrative-development", html);
     }
 
+    [Fact]
+    public async Task Empty_analysis_submission_renders_bounded_inline_validation()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("__RequestVerificationToken", token)
+            ]));
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Wybierz co najmniej jedno aktywo", html);
+        Assert.DoesNotContain("Analiza rozpoczęta", html);
+    }
+
+    [Fact]
+    public async Task Over_limit_analysis_submission_renders_bounded_inline_validation()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "MSFT"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "BTC-USD"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "ETH-USD"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "MSFT")
+            ]));
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("maksymalnie 5", html);
+        Assert.DoesNotContain("Analiza rozpoczęta", html);
+    }
+
+    [Fact]
+    public async Task Unavailable_provider_renders_bounded_error_without_raw_provider_details()
+    {
+        await using var factory = new AnalysisProviderFactory(
+            new UnavailableMarketDataProvider(),
+            options =>
+            {
+                options.ProviderId = "approved-test-provider";
+                options.PublicDisplayApproved = true;
+            });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL")
+            ]));
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Nie udało się rozpocząć analizy", html);
+        Assert.Contains("Analiza jest", html);
+        Assert.DoesNotContain("approved-test-provider", html);
+        Assert.DoesNotContain("An approved provider is not registered", html);
+    }
+
     private static async Task<string> GetAntiforgeryTokenAsync(HttpClient client)
     {
         using var response = await client.GetAsync("/analysis");
@@ -126,6 +215,47 @@ internal sealed class UnauthenticatedAnalysisFactory : WebApplicationFactory<Pro
         {
             TestAuthenticationService.Reset();
             services.Replace(ServiceDescriptor.Singleton<IAuthenticationService, TestAuthenticationService>());
+        });
+    }
+}
+
+internal sealed class AnalysisProviderFactory(
+    IMarketDataProvider provider,
+    Action<MarketDataOptions> configureOptions) : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Testing");
+        TestEntraConfiguration.Apply(builder);
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["MarketData:ProviderId"] = "approved-test-provider",
+                ["MarketData:PublicDisplayApproved"] = "true"
+            });
+        });
+        builder.ConfigureServices(services =>
+        {
+            services.AddAuthentication("Test")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", _ => { });
+            services.PostConfigure<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+                options.DefaultForbidScheme = "Test";
+                options.DefaultSignInScheme = "Test";
+                options.DefaultSignOutScheme = "Test";
+            });
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder("Test")
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
+            services.RemoveAll<IMarketDataProvider>();
+            services.AddSingleton(provider);
+            services.PostConfigure<MarketDataOptions>(configureOptions);
         });
     }
 }
