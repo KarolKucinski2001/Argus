@@ -79,6 +79,153 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Valid_analysis_submission_renders_ranked_scores_and_metrics()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 120m, 120m, 120m),
+            CreateScoredResult("MSFT", MarketAssetClass.Equity, 120m, 80m, 80m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Ranking analizy", html);
+        var rankingHtml = html[html.IndexOf("Ranking analizy", StringComparison.Ordinal)..];
+        Assert.True(rankingHtml.IndexOf("MSFT", StringComparison.Ordinal) < rankingHtml.IndexOf("AAPL", StringComparison.Ordinal));
+        Assert.Contains("Miejsce 1", html);
+        Assert.Contains("100/100", html);
+        Assert.Contains("50/100", html);
+        Assert.Contains("Cena aktualna", html);
+        Assert.Contains("24 godziny", html);
+        Assert.Contains("7 dni", html);
+        Assert.Contains("30 dni", html);
+    }
+
+    [Fact]
+    public async Task Analysis_results_render_factors_summary_and_chart_data()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Czynniki", html);
+        Assert.Contains("24-hour momentum", html);
+        Assert.Contains("7-day momentum", html);
+        Assert.Contains("30-day trend", html);
+        Assert.Contains("contribution", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Score ", html);
+        Assert.Contains("Dane wykresu", html);
+        Assert.Contains("data-chart-asset=\"AAPL\"", html);
+        Assert.Contains("data-chart-close=\"80", html);
+    }
+
+    [Fact]
+    public async Task Partial_analysis_renders_successful_asset_and_bounded_failed_asset()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("AAPL", html);
+        Assert.Contains("MSFT", html);
+        Assert.Contains("Częściowe wyniki", html);
+        Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
+        Assert.Contains("Spróbuj ponownie później", html);
+        Assert.DoesNotContain("The market data provider returned no result", html);
+    }
+
+    [Fact]
+    public async Task Insufficient_evidence_renders_bounded_state_without_zero_score()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateThinResult("AAPL", MarketAssetClass.Equity));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("AAPL", html);
+        Assert.Contains("Niewystarczające dane", html);
+        Assert.Contains("Insufficient evidence", html);
+        Assert.DoesNotContain("0/100", html);
+        Assert.DoesNotContain("Score 0", html);
+    }
+
+    [Fact]
+    public async Task Analysis_results_do_not_render_provider_identifiers_or_raw_errors()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m) with
+            {
+                Source = new MarketDataSource(
+                    "secret-provider-id",
+                    "RAW secret attribution",
+                    false,
+                    null)
+            },
+            CreateErrorResult(
+                "MSFT",
+                MarketAssetClass.Equity,
+                new MarketDataError(
+                    MarketDataErrorCategory.UpstreamUnavailable,
+                    "RAW provider outage ticket provider-789",
+                    true)));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Ranking analizy", html);
+        Assert.DoesNotContain("secret-provider-id", html);
+        Assert.DoesNotContain("RAW secret attribution", html);
+        Assert.DoesNotContain("RAW provider outage", html);
+        Assert.DoesNotContain("provider-789", html);
+    }
+
+    [Fact]
     public async Task Valid_analysis_submission_sends_the_canonical_daily_history_request()
     {
         var provider = new FakeMarketDataProvider();
@@ -272,6 +419,17 @@ public sealed class AnalysisAccessContractTests
         return match.Groups[1].Value;
     }
 
+    private static Task<HttpResponseMessage> PostAnalysisAsync(
+        HttpClient client,
+        string token,
+        params string[] assetIds) =>
+        client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+                new[] { new KeyValuePair<string, string>("__RequestVerificationToken", token) }
+                    .Concat(assetIds.Select(assetId =>
+                        new KeyValuePair<string, string>("SelectedAssetIds", assetId)))));
+
     private static MarketDataResult CreateResultForAnalysis(string id)
     {
         var now = DateTimeOffset.UtcNow;
@@ -290,6 +448,80 @@ public sealed class AnalysisAccessContractTests
             MarketDataQuality.Complete,
             []);
     }
+
+    private static MarketDataResult CreateScoredResult(
+        string id,
+        MarketAssetClass assetClass,
+        decimal currentQuote,
+        decimal close24Hours,
+        decimal close7Days,
+        decimal close30Days)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var history = new MarketDataHistoryRequest(
+            DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            MarketDataGranularity.Daily);
+        var freshness = new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
+        return new MarketDataResult(
+            new AssetReference(id, id, assetClass),
+            history,
+            new MarketQuote(currentQuote, "USD", now, freshness, MarketDataQuality.Complete),
+            [
+                Point(now.AddDays(-30), close30Days),
+                Point(now.AddDays(-7), close7Days),
+                Point(now.AddHours(-24), close24Hours)
+            ],
+            new MarketDataSource("fake-provider", "Fake provider attribution", true, TimeSpan.FromMinutes(15)),
+            freshness,
+            MarketDataQuality.Complete,
+            []);
+    }
+
+    private static MarketDataResult CreateThinResult(string id, MarketAssetClass assetClass)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var history = new MarketDataHistoryRequest(
+            DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            MarketDataGranularity.Daily);
+        var freshness = new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
+        return new MarketDataResult(
+            new AssetReference(id, id, assetClass),
+            history,
+            new MarketQuote(120m, "USD", now, freshness, MarketDataQuality.Incomplete),
+            [],
+            new MarketDataSource("fake-provider", "Fake provider attribution", true, TimeSpan.FromMinutes(15)),
+            freshness,
+            MarketDataQuality.Incomplete,
+            [new MarketDataWarning(MarketDataWarningCategory.IncompleteHistory, "Only limited history is available.", false)]);
+    }
+
+    private static MarketDataResult CreateErrorResult(
+        string id,
+        MarketAssetClass assetClass,
+        MarketDataError error)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var history = new MarketDataHistoryRequest(
+            DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            MarketDataGranularity.Daily);
+        var freshness = new MarketDataFreshness(now.AddMinutes(-30), now, null, true);
+        return new MarketDataResult(
+            new AssetReference(id, id, assetClass),
+            history,
+            null,
+            [],
+            new MarketDataSource("secret-provider-id", "RAW secret attribution", false, null),
+            freshness,
+            MarketDataQuality.Unavailable,
+            [],
+            error);
+    }
+
+    private static HistoricalPricePoint Point(DateTimeOffset timestamp, decimal close) =>
+        new(timestamp, null, null, null, close, null, "USD", true);
 }
 
 internal sealed class UnauthenticatedAnalysisFactory : WebApplicationFactory<Program>

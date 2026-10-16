@@ -1,4 +1,5 @@
 @page "/analysis"
+@using System.Globalization
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
     ViewData["Title"] = "Start analizy";
@@ -72,6 +73,111 @@
             </div>
         }
 
+        @if (Model.HasResults)
+        {
+            <section class="analysis-results" aria-labelledby="analysis-results-title">
+                <h2 id="analysis-results-title">Ranking analizy</h2>
+                @if (Model.HasPartialResults)
+                {
+                    <p role="status">Częściowe wyniki — część aktywów nie ma pełnych danych.</p>
+                }
+
+                <ol class="analysis-results__list">
+                    @for (var index = 0; index < Model.AnalysisResults!.Results.Count; index++)
+                    {
+                        var result = Model.AnalysisResults.Results[index];
+                        var hasQuote = Model.CurrentQuotes.TryGetValue(result.Asset.Id, out var quote);
+
+                        <li class="analysis-result-card">
+                            <article aria-labelledby="analysis-result-@result.Asset.Id">
+                                <header>
+                                    <p>@(result.Score.HasValue ? $"Miejsce {index + 1}" : "Wynik nierankingowy")</p>
+                                    <h3 id="analysis-result-@result.Asset.Id">@result.Asset.Id</h3>
+                                    @if (result.Score.HasValue)
+                                    {
+                                        <p>Score @FormatDecimal(result.Score.Value)/100</p>
+                                    }
+                                    else if (result.Error is null)
+                                    {
+                                        <p>Niewystarczające dane do wyliczenia score.</p>
+                                    }
+                                </header>
+
+                                @if (result.Error is not null)
+                                {
+                                    <p role="status">@Model.MapAssetErrorMessage(result.Error.Category)</p>
+                                }
+                                else
+                                {
+                                    <dl>
+                                        <dt>Cena aktualna</dt>
+                                        <dd>@(hasQuote ? $"{FormatDecimal(quote!.Value)} {quote.Currency}" : "niedostępna")</dd>
+                                        <dt>24 godziny</dt>
+                                        <dd>@FormatMetric(result.Performance.Change24Hours)</dd>
+                                        <dt>7 dni</dt>
+                                        <dd>@FormatMetric(result.Performance.Change7Days)</dd>
+                                        <dt>30 dni</dt>
+                                        <dd>@FormatMetric(result.Performance.Change30Days)</dd>
+                                        <dt>Jakość danych</dt>
+                                        <dd>@result.Quality</dd>
+                                        <dt>Świeżość danych</dt>
+                                        <dd>@(result.Freshness.IsStale ? "stale" : "current")</dd>
+                                    </dl>
+
+                                    <section aria-label="Czynniki dla @result.Asset.Id">
+                                        <h4>Czynniki</h4>
+                                        <ul>
+                                            @foreach (var factor in result.Factors)
+                                            {
+                                                <li>
+                                                    <strong>@factor.Label</strong>:
+                                                    @if (factor.IsAvailable)
+                                                    {
+                                                        <span>@FormatNullablePercent(factor.Percentage)</span>
+                                                        <span>contribution @FormatNullableDecimal(factor.Contribution)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>niedostępny</span>
+                                                    }
+                                                    <span>@factor.Explanation</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </section>
+
+                                    @if (result.ChartPoints.Count > 0)
+                                    {
+                                        <section aria-label="Dane wykresu dla @result.Asset.Id">
+                                            <h4>Dane wykresu</h4>
+                                            <ul>
+                                                @foreach (var point in result.ChartPoints)
+                                                {
+                                                    <li data-chart-asset="@result.Asset.Id"
+                                                        data-chart-timestamp="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)"
+                                                        data-chart-close="@FormatDecimal(point.Close)">
+                                                        <time datetime="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)">
+                                                            @point.Timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                                                        </time>
+                                                        <span>@FormatDecimal(point.Close)</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </section>
+                                    }
+
+                                    @if (result.Summary is not null)
+                                    {
+                                        <p>@result.Summary</p>
+                                    }
+                                }
+                            </article>
+                        </li>
+                    }
+                </ol>
+            </section>
+        }
+
         <button class="button" type="submit">Rozpocznij analizę</button>
     </form>
 
@@ -80,3 +186,22 @@
         inwestycyjnej.
     </p>
 </section>
+
+@functions {
+    private static string FormatMetric(_bootstrap_scaffold.Analysis.PerformanceMetric metric) =>
+        metric.IsAvailable && metric.Percentage.HasValue
+            ? FormatSignedPercent(metric.Percentage.Value)
+            : "niedostępne";
+
+    private static string FormatNullablePercent(decimal? value) =>
+        value.HasValue ? FormatSignedPercent(value.Value) : "niedostępne";
+
+    private static string FormatSignedPercent(decimal value) =>
+        string.Create(CultureInfo.InvariantCulture, $"{value:+0.##;-0.##;0}%");
+
+    private static string FormatNullableDecimal(decimal? value) =>
+        value.HasValue ? FormatDecimal(value.Value) : "niedostępne";
+
+    private static string FormatDecimal(decimal value) =>
+        value.ToString("0.##", CultureInfo.InvariantCulture);
+}

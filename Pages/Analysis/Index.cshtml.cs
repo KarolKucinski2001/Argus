@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
 
 namespace _bootstrap_scaffold.Pages.Analysis;
@@ -11,7 +12,8 @@ namespace _bootstrap_scaffold.Pages.Analysis;
 [AllowAnonymous]
 public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredOptions,
-    IMarketDataService marketDataService) : PageModel
+    IMarketDataService marketDataService,
+    IAnalysisService analysisService) : PageModel
 {
     private readonly MarketDataOptions options = configuredOptions.Value;
 
@@ -21,8 +23,14 @@ public sealed class IndexModel(
     public IReadOnlyList<SelectableAsset> Assets { get; private set; } = [];
     public int MaximumSelectedAssets => options.MaximumSelectedAssets;
     public bool HasStarted { get; private set; }
+    public bool HasResults => AnalysisResults is not null;
+    public bool HasPartialResults => AnalysisResults?.Results.Any(result => result.Error is not null) == true &&
+                                     AnalysisResults.Results.Any(result => result.Error is null) == true;
     public string? StartedMessage { get; private set; }
     public string? ProviderMessage { get; private set; }
+    public AnalysisResponse? AnalysisResults { get; private set; }
+    public IReadOnlyDictionary<string, MarketQuote> CurrentQuotes { get; private set; } =
+        new Dictionary<string, MarketQuote>(StringComparer.OrdinalIgnoreCase);
 
     public IActionResult OnGet()
     {
@@ -75,19 +83,16 @@ public sealed class IndexModel(
             return Page();
         }
 
-        var responseError = result.Response!.Results
-            .Select(item => item.Error)
-            .FirstOrDefault(error => error is not null);
-        if (responseError is not null)
-        {
-            ProviderMessage = MapProviderMessage(responseError.Category);
-            return Page();
-        }
-
+        CurrentQuotes = result.Response!.Results
+            .Where(item => item.CurrentQuote is not null)
+            .ToDictionary(item => item.Asset.Id, item => item.CurrentQuote!, StringComparer.OrdinalIgnoreCase);
+        AnalysisResults = analysisService.Analyze(result.Response, DateTimeOffset.UtcNow);
         HasStarted = true;
-        StartedMessage = result.Response.Results.Any(item =>
-            item.Source?.Attribution?.Contains("illustrative", StringComparison.OrdinalIgnoreCase) == true)
-            ? "Analiza została rozpoczęta na podstawie ilustracyjnych danych."
+        StartedMessage = AnalysisResults.Results.Any(item => item.Error is not null)
+            ? "Częściowe wyniki są gotowe. Aktywa z brakującymi danymi pokazują bezpieczny stan."
+            : result.Response.Results.Any(item =>
+                item.Source?.Attribution?.Contains("illustrative", StringComparison.OrdinalIgnoreCase) == true)
+                ? "Analiza została rozpoczęta na podstawie ilustracyjnych danych."
             : "Analiza została rozpoczęta.";
         return Page();
     }
@@ -127,6 +132,19 @@ public sealed class IndexModel(
 
     private bool EnsureAuthenticated() =>
         User.Identity?.IsAuthenticated ?? false;
+
+    public string MapAssetErrorMessage(MarketDataErrorCategory? category) =>
+        category switch
+        {
+            MarketDataErrorCategory.Timeout =>
+                "Nie udało się przeanalizować tego aktywa. Pobieranie danych trwało zbyt długo. Spróbuj ponownie później.",
+            MarketDataErrorCategory.QuotaExceeded =>
+                "Nie udało się przeanalizować tego aktywa. Limit zapytań został osiągnięty. Spróbuj ponownie później.",
+            MarketDataErrorCategory.UnsupportedAsset =>
+                "Nie udało się przeanalizować tego aktywa. Aktywo nie jest teraz obsługiwane.",
+            _ =>
+                "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
+        };
 
     private static string MapProviderMessage(MarketDataErrorCategory? category) =>
         category switch
