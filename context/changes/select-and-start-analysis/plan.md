@@ -359,30 +359,30 @@ unchanged except for documentation of the Development/Test fake boundary.
 
 #### Automated
 
-- [x] 1.1 The application builds with `dotnet build .bootstrap-scaffold.csproj --no-restore`.
-- [x] 1.2 Existing market-data contract tests pass with the API route using the shared service.
-- [x] 1.3 New tests prove Development/Test resolve the fake provider and a non-development host does not resolve it.
+- [x] 1.1 The application builds with `dotnet build .bootstrap-scaffold.csproj --no-restore`. — 24ce858
+- [x] 1.2 Existing market-data contract tests pass with the API route using the shared service. — 24ce858
+- [x] 1.3 New tests prove Development/Test resolve the fake provider and a non-development host does not resolve it. — 24ce858
 
 #### Manual
 
-- [x] 1.4 The existing `/api/market-data` behavior remains unchanged for valid, invalid, unauthorised, unavailable, and partially successful requests.
-- [x] 1.5 Local Development results visibly identify themselves as illustrative and never appear as approved production data.
+- [x] 1.4 The existing `/api/market-data` behavior remains unchanged for valid, invalid, unauthorised, unavailable, and partially successful requests. — 24ce858
+- [x] 1.5 Local Development results visibly identify themselves as illustrative and never appear as approved production data. — 24ce858
 
 ### Phase 2: Protected asset selection and analysis start page
 
 #### Automated
 
-- [ ] 2.1 An unauthenticated GET `/analysis` follows the repository's protected-page challenge contract.
-- [ ] 2.2 An authenticated GET `/analysis` renders every configured asset and the configured maximum selection count.
-- [ ] 2.3 Valid POST selection invokes the shared service with canonical assets, a 12-month daily history, and the authenticated request context.
-- [ ] 2.4 Empty, duplicate, unsupported, and over-limit selections do not invoke the provider and render bounded inline validation.
-- [ ] 2.5 Provider-unavailable and successful fake-provider states render without leaking raw provider details.
+- [x] 2.1 An unauthenticated GET `/analysis` follows the repository's protected-page challenge contract.
+- [x] 2.2 An authenticated GET `/analysis` renders every configured asset and the configured maximum selection count.
+- [x] 2.3 Valid POST selection invokes the shared service with canonical assets, a 12-month daily history, and the authenticated request context.
+- [x] 2.4 Empty, duplicate, unsupported, and over-limit selections do not invoke the provider and render bounded inline validation.
+- [x] 2.5 Provider-unavailable and successful fake-provider states render without leaking raw provider details.
 
 #### Manual
 
-- [ ] 2.6 A signed-in user can reach `/analysis` from `/account`, select multiple assets, submit, and see the illustrative started state.
-- [ ] 2.7 Keyboard users can reach every checkbox and the submit control, and focus remains visible at desktop and mobile widths.
-- [ ] 2.8 Validation and provider errors remain understandable, preserve selected assets, and do not create horizontal overflow.
+- [x] 2.6 A signed-in user can reach `/analysis` from `/account`, select multiple assets, submit, and see the illustrative started state.
+- [x] 2.7 Keyboard users can reach every checkbox and the submit control, and focus remains visible at desktop and mobile widths.
+- [x] 2.8 Validation and provider errors remain understandable, preserve selected assets, and do not create horizontal overflow.
 
 ### Phase 3: Contract coverage, documentation, and release boundary
 

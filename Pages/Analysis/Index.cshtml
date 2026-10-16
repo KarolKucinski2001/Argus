@@ -1,0 +1,82 @@
+@page "/analysis"
+@model _bootstrap_scaffold.Pages.Analysis.IndexModel
+@{
+    ViewData["Title"] = "Start analizy";
+}
+
+<section class="analysis-page" aria-labelledby="analysis-title">
+    <div class="analysis-page__header">
+        <p class="eyebrow">Nowa analiza</p>
+        <h1 id="analysis-title">Wybierz aktywa do sprawdzenia</h1>
+        <p class="analysis-page__lede">
+            Wybierz od jednego do @Model.MaximumSelectedAssets aktywów. Argus pobierze
+            dzienną historię z ostatnich 12 miesięcy i przygotuje punkt wyjścia
+            do dalszej analizy.
+        </p>
+    </div>
+
+    <form method="post" class="analysis-form">
+        <div class="analysis-form__header">
+            <h2>Dostępne aktywa</h2>
+            <p>Możesz wybrać maksymalnie @Model.MaximumSelectedAssets aktywów.</p>
+        </div>
+
+        <div class="asset-list">
+            @foreach (var asset in Model.Assets)
+            {
+                var isSelected = Model.SelectedAssetIds.Any(id =>
+                    string.Equals(id, asset.Id, StringComparison.OrdinalIgnoreCase));
+                <label class="asset-option">
+                    <input class="asset-option__input"
+                           type="checkbox"
+                           name="SelectedAssetIds"
+                           value="@asset.Id"
+                           checked="@(isSelected ? "checked" : null)" />
+                    <span class="asset-option__copy">
+                        <strong>@asset.Id</strong>
+                        <small>@asset.AssetClass</small>
+                    </span>
+                </label>
+            }
+        </div>
+
+        @if (ViewData.ModelState[nameof(Model.SelectedAssetIds)]?.Errors.Count > 0)
+        {
+            <div class="validation-message" role="alert">
+                @foreach (var error in ViewData.ModelState[nameof(Model.SelectedAssetIds)]!.Errors)
+                {
+                    <span>@error.ErrorMessage</span>
+                }
+            </div>
+        }
+
+        @if (Model.ProviderMessage is not null)
+        {
+            <div class="status-card status-card--error" role="alert">
+                <h2>Nie udało się rozpocząć analizy</h2>
+                <p>@Model.ProviderMessage</p>
+            </div>
+        }
+
+        @if (Model.HasStarted)
+        {
+            <div class="status-card status-card--success" role="status">
+                <h2>Analiza rozpoczęta</h2>
+                <p>@Model.StartedMessage</p>
+                <ul>
+                    @foreach (var assetId in Model.SelectedAssetIds.Distinct(StringComparer.OrdinalIgnoreCase))
+                    {
+                        <li>@assetId</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <button class="button" type="submit">Rozpocznij analizę</button>
+    </form>
+
+    <p class="analysis-page__boundary">
+        Dane w środowisku deweloperskim są ilustracyjne i nie stanowią porady
+        inwestycyjnej.
+    </p>
+</section>
