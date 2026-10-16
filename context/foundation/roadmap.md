@@ -166,6 +166,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 
 ## Done
 
+- **S-02: user can select one or more supported assets and start a market analysis.** — Archived 2026-10-16 → `context/archive/2026-10-14-select-and-start-analysis/`. Lesson: —.
 - **F-01: (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.** — Archived 2026-10-02 → `context/archive/2026-10-01-minimal-auth-foundation/`. Lesson: —.
 - **S-01: user can create an account, log in, and see a short explanation that Argus provides educational analysis rather than investment advice.** — Archived 2026-10-06 → `context/archive/2026-10-05-account-access-flow/`. Lesson: —.
 - **F-02: (foundation) the analysis path has a verified source and evidence contract for current and historical data without committing to a provider-specific implementation.** — Archived 2026-10-07 → `context/archive/2026-10-06-market-data-access-contract/`. Lesson: —.

@@ -1,10 +1,10 @@
 ---
 change_id: select-and-start-analysis
 title: Select and start analysis
-status: impl_reviewed
+status: archived
 created: 2026-10-14
 updated: 2026-10-16
-archived_at: null
+archived_at: 2026-10-16T11:04:00Z
 ---
 
 ## Notes
