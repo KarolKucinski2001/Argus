@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,10 @@ builder.Services.AddOptions<MarketDataOptions>()
 builder.Services.AddSingleton<IMarketDataCache, InMemoryMarketDataCache>();
 builder.Services.AddSingleton<IMarketDataRequestBudget, InMemoryMarketDataRequestBudget>();
 builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
+builder.Services.AddSingleton<IPerformanceCalculator, PerformanceCalculator>();
+builder.Services.AddSingleton<IOpportunityScorer, OpportunityScorer>();
+builder.Services.AddSingleton<IAnalysisExplanationBuilder, AnalysisExplanationBuilder>();
+builder.Services.AddSingleton<IAnalysisService, AnalysisService>();
 builder.Services.AddSingleton<IMarketDataProvider>(_ =>
     builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing")
         ? new DevelopmentMarketDataProvider()

@@ -9,6 +9,207 @@ public sealed class AnalysisContractTests
     private static readonly DateTimeOffset AsOf = new(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
 
     [Fact]
+    public void Build_mentions_available_metrics_and_avoids_unshown_facts()
+    {
+        var builder = new AnalysisExplanationBuilder();
+        var marketData = CreateResult(
+            120m,
+            Point(AsOf.AddHours(-24), 150m),
+            Point(AsOf.AddDays(-7), 120m),
+            Point(AsOf.AddDays(-30), 100m));
+        var performance = CreatePerformance(-20m, 0m, 20m);
+        var assessment = new OpportunityScorer().Assess(performance);
+
+        var summary = builder.Build(marketData, performance, assessment);
+
+        Assert.Contains("57.5", summary);
+        Assert.Contains("24-hour momentum", summary);
+        Assert.Contains("-20", summary);
+        Assert.Contains("7-day momentum", summary);
+        Assert.Contains("0", summary);
+        Assert.Contains("30-day trend", summary);
+        Assert.Contains("20", summary);
+        Assert.Contains("Complete", summary);
+        Assert.DoesNotContain("test", summary, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("provider", summary, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Apple", summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Build_acknowledges_insufficient_evidence()
+    {
+        var builder = new AnalysisExplanationBuilder();
+        var marketData = CreateResult(
+            120m,
+            Point(AsOf.AddHours(-24), 100m));
+        var performance = new AssetPerformance(
+            new PerformanceMetric("24h", null, false),
+            new PerformanceMetric("7d", 20m, true),
+            new PerformanceMetric("30d", null, false),
+            []);
+        var assessment = new OpportunityScorer().Assess(performance);
+
+        var summary = builder.Build(marketData, performance, assessment);
+
+        Assert.Contains("insufficient", summary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("fewer than two", summary, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("7-day momentum", summary);
+        Assert.Contains("20", summary);
+        Assert.DoesNotContain("test", summary, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Analyze_preserves_provider_errors_without_raw_provider_messages()
+    {
+        var error = new MarketDataError(
+            MarketDataErrorCategory.UpstreamUnavailable,
+            "RAW vendor outage id provider-123",
+            true,
+            503);
+        var warning = new MarketDataWarning(
+            MarketDataWarningCategory.UpstreamUnavailable,
+            "Provider is temporarily unavailable.",
+            true);
+        var source = new MarketDataSource("secret-provider", "Raw Attribution", false, null);
+        var marketDataResponse = new MarketDataResponse(
+        [
+            CreateErrorResult(
+                new AssetReference("ERR", "Errored asset", MarketAssetClass.Equity),
+                error,
+                [warning],
+                source)
+        ]);
+        var service = CreateAnalysisService();
+
+        var response = service.Analyze(marketDataResponse, AsOf);
+
+        var result = Assert.Single(response.Results);
+        Assert.Equal("ERR", result.Asset.Id);
+        Assert.Null(result.Score);
+        Assert.Null(result.Summary);
+        Assert.Same(error, result.Error);
+        Assert.Same(warning, Assert.Single(result.Warnings));
+        Assert.Equal(MarketDataQuality.Unavailable, result.Quality);
+        Assert.True(result.Freshness.IsStale);
+    }
+
+    [Fact]
+    public void Analyze_ranks_scored_assets_descending()
+    {
+        var marketDataResponse = new MarketDataResponse(
+        [
+            CreateResult(
+                120m,
+                new AssetReference("LOW", "Low score", MarketAssetClass.Equity),
+                Point(AsOf.AddHours(-24), 120m),
+                Point(AsOf.AddDays(-7), 120m),
+                Point(AsOf.AddDays(-30), 120m)),
+            CreateResult(
+                120m,
+                new AssetReference("HIGH", "High score", MarketAssetClass.Equity),
+                Point(AsOf.AddHours(-24), 80m),
+                Point(AsOf.AddDays(-7), 80m),
+                Point(AsOf.AddDays(-30), 80m))
+        ]);
+        var service = CreateAnalysisService();
+
+        var response = service.Analyze(marketDataResponse, AsOf);
+
+        Assert.Collection(
+            response.Results,
+            result =>
+            {
+                Assert.Equal("HIGH", result.Asset.Id);
+                Assert.Equal(100m, result.Score);
+            },
+            result =>
+            {
+                Assert.Equal("LOW", result.Asset.Id);
+                Assert.Equal(50m, result.Score);
+            });
+    }
+
+    [Fact]
+    public void Analyze_preserves_submitted_order_for_score_ties()
+    {
+        var marketDataResponse = new MarketDataResponse(
+        [
+            CreateResult(
+                120m,
+                new AssetReference("FIRST", "First score", MarketAssetClass.Equity),
+                Point(AsOf.AddHours(-24), 100m),
+                Point(AsOf.AddDays(-7), 100m),
+                Point(AsOf.AddDays(-30), 100m)),
+            CreateResult(
+                240m,
+                new AssetReference("SECOND", "Second score", MarketAssetClass.Equity),
+                Point(AsOf.AddHours(-24), 200m),
+                Point(AsOf.AddDays(-7), 200m),
+                Point(AsOf.AddDays(-30), 200m))
+        ]);
+        var service = CreateAnalysisService();
+
+        var response = service.Analyze(marketDataResponse, AsOf);
+
+        Assert.Collection(
+            response.Results,
+            result => Assert.Equal("FIRST", result.Asset.Id),
+            result => Assert.Equal("SECOND", result.Asset.Id));
+        Assert.Equal(response.Results[0].Score, response.Results[1].Score);
+    }
+
+    [Fact]
+    public void Analyze_keeps_successful_results_when_another_asset_has_an_error()
+    {
+        var successful = CreateResult(
+            120m,
+            new AssetReference("OK", "Successful asset", MarketAssetClass.Equity),
+            Point(AsOf.AddHours(-24), 100m),
+            Point(AsOf.AddDays(-7), 96m),
+            Point(AsOf.AddDays(-30), 80m));
+        var insufficient = CreateResult(
+            120m,
+            new AssetReference("THIN", "Thin history", MarketAssetClass.Equity),
+            Point(AsOf.AddHours(-24), 100m));
+        var errored = CreateErrorResult(
+            new AssetReference("ERR", "Errored asset", MarketAssetClass.Crypto),
+            new MarketDataError(MarketDataErrorCategory.Timeout, "RAW timeout provider-789", true),
+            [],
+            null);
+        var service = CreateAnalysisService();
+
+        var response = service.Analyze(new MarketDataResponse([errored, insufficient, successful]), AsOf);
+
+        Assert.Collection(
+            response.Results,
+            result =>
+            {
+                Assert.Equal("OK", result.Asset.Id);
+                Assert.NotNull(result.Score);
+                Assert.Null(result.Error);
+                Assert.NotNull(result.Summary);
+                Assert.NotEmpty(result.Factors);
+                Assert.NotEmpty(result.ChartPoints);
+            },
+            result =>
+            {
+                Assert.Equal("ERR", result.Asset.Id);
+                Assert.Null(result.Score);
+                Assert.NotNull(result.Error);
+                Assert.Empty(result.Factors);
+                Assert.Empty(result.ChartPoints);
+            },
+            result =>
+            {
+                Assert.Equal("THIN", result.Asset.Id);
+                Assert.Null(result.Score);
+                Assert.Null(result.Error);
+                Assert.Contains("insufficient", result.Summary!, StringComparison.OrdinalIgnoreCase);
+                Assert.NotEmpty(result.Factors);
+            });
+    }
+
+    [Fact]
     public void Assess_normalizes_each_factor_to_zero_to_one_hundred()
     {
         var scorer = new OpportunityScorer();
@@ -213,6 +414,17 @@ public sealed class AnalysisContractTests
 
     private static MarketDataResult CreateResult(decimal currentQuote, params HistoricalPricePoint[] points)
     {
+        return CreateResult(
+            currentQuote,
+            new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+            points);
+    }
+
+    private static MarketDataResult CreateResult(
+        decimal currentQuote,
+        AssetReference asset,
+        params HistoricalPricePoint[] points)
+    {
         var history = new MarketDataHistoryRequest(
             DateOnly.FromDateTime(AsOf.AddDays(-30).Date),
             DateOnly.FromDateTime(AsOf.Date),
@@ -220,7 +432,7 @@ public sealed class AnalysisContractTests
         var freshness = new MarketDataFreshness(AsOf, AsOf, AsOf.AddMinutes(5), false);
 
         return new MarketDataResult(
-            new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+            asset,
             history,
             new MarketQuote(currentQuote, "USD", AsOf, freshness, MarketDataQuality.Complete),
             points,
@@ -229,6 +441,36 @@ public sealed class AnalysisContractTests
             MarketDataQuality.Complete,
             []);
     }
+
+    private static MarketDataResult CreateErrorResult(
+        AssetReference asset,
+        MarketDataError error,
+        IReadOnlyList<MarketDataWarning> warnings,
+        MarketDataSource? source)
+    {
+        var history = new MarketDataHistoryRequest(
+            DateOnly.FromDateTime(AsOf.AddDays(-30).Date),
+            DateOnly.FromDateTime(AsOf.Date),
+            MarketDataGranularity.Daily);
+        var freshness = new MarketDataFreshness(AsOf.AddHours(-2), AsOf, AsOf.AddMinutes(-1), true);
+
+        return new MarketDataResult(
+            asset,
+            history,
+            null,
+            [],
+            source,
+            freshness,
+            MarketDataQuality.Unavailable,
+            warnings,
+            error);
+    }
+
+    private static AnalysisService CreateAnalysisService() =>
+        new(
+            new PerformanceCalculator(),
+            new OpportunityScorer(),
+            new AnalysisExplanationBuilder());
 
     private static HistoricalPricePoint Point(DateTimeOffset timestamp, decimal close) =>
         new(timestamp, null, null, null, close, null, "USD", true);

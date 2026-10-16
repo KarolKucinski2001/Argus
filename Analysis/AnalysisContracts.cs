@@ -1,3 +1,5 @@
+using _bootstrap_scaffold.MarketData;
+
 namespace _bootstrap_scaffold.Analysis;
 
 public sealed record PerformanceMetric(
@@ -28,3 +30,18 @@ public sealed record ScoreAssessment(
     decimal? Score,
     IReadOnlyList<AnalysisFactor> Factors,
     bool HasSufficientEvidence);
+
+public sealed record AssetAnalysis(
+    AssetReference Asset,
+    decimal? Score,
+    AssetPerformance Performance,
+    IReadOnlyList<AnalysisFactor> Factors,
+    IReadOnlyList<AnalysisChartPoint> ChartPoints,
+    string? Summary,
+    MarketDataQuality Quality,
+    MarketDataFreshness Freshness,
+    IReadOnlyList<MarketDataWarning> Warnings,
+    MarketDataError? Error);
+
+public sealed record AnalysisResponse(
+    IReadOnlyList<AssetAnalysis> Results);
