@@ -84,12 +84,25 @@ provider is registered; production must not present fake results.
 
 ## S-03 handoff
 
-The current slice ends after a bounded analysis-start status. S-03 must consume
-the normalized `MarketDataResponse` evidence already produced by this
-provider-neutral contract, including source metadata, freshness, quality,
-warnings, and per-asset errors. S-03 must not add a provider-specific request
-or response contract to implement ranking, factors, charts, or grounded AI
-summaries.
+S-03 product metrics, scoring, chart projection, and deterministic
+explanations must derive only from the normalized `MarketDataResponse` evidence
+already produced by this provider-neutral contract. That evidence boundary must
+preserve source metadata, freshness, quality, stable warnings, and per-asset
+errors all the way into ranking and result rendering, so missing or partial
+evidence remains distinguishable from a zero score.
+
+S-03 must not add a provider-specific request or response contract to implement
+ranking, factors, charts, or grounded AI summaries. Review the handoff by
+confirming that:
+
+- 24-hour, 7-day, and 30-day metrics are calculated from normalized current
+  quotes and historical points;
+- opportunity scores and factors preserve insufficient-evidence states instead
+  of coercing missing evidence to zero;
+- chart data is projected from normalized historical points without introducing
+  provider fields; and
+- result views carry bounded warning/error states forward without rendering raw
+  provider identifiers or messages.
 
 ## Operational boundary
 
