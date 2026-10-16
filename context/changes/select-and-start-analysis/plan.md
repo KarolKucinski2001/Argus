@@ -388,12 +388,12 @@ unchanged except for documentation of the Development/Test fake boundary.
 
 #### Automated
 
-- [x] 3.1 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
-- [x] 3.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with no warnings introduced by the slice.
-- [x] 3.3 A source/configuration scan confirms no provider credentials, production fake registration, or new literal colors in the analysis view.
+- [x] 3.1 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes. — 879667e
+- [x] 3.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with no warnings introduced by the slice. — 879667e
+- [x] 3.3 A source/configuration scan confirms no provider credentials, production fake registration, or new literal colors in the analysis view. — 879667e
 
 #### Manual
 
-- [x] 3.4 The complete local flow is understandable: account → analysis → select assets → start → illustrative status or bounded error.
-- [x] 3.5 Production configuration still communicates unavailable/unapproved data rather than presenting fake results.
-- [x] 3.6 The page remains usable at `1440x900` and `390x844`, including visible focus, selected-state feedback, and educational-not-advice language.
+- [x] 3.4 The complete local flow is understandable: account → analysis → select assets → start → illustrative status or bounded error. — 879667e
+- [x] 3.5 Production configuration still communicates unavailable/unapproved data rather than presenting fake results. — 879667e
+- [x] 3.6 The page remains usable at `1440x900` and `390x844`, including visible focus, selected-state feedback, and educational-not-advice language. — 879667e
