@@ -138,6 +138,65 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Analysis_results_render_the_responsive_styling_class_contract()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m, isStale: true),
+            CreateThinResult("BTC-USD", MarketAssetClass.Crypto),
+            CreateErrorResult(
+                "MSFT",
+                MarketAssetClass.Equity,
+                new MarketDataError(
+                    MarketDataErrorCategory.UpstreamUnavailable,
+                    "RAW provider outage ticket provider-789",
+                    true)));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "BTC-USD", "MSFT");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("class=\"analysis-results__list\"", html);
+        Assert.Contains("class=\"analysis-result-card analysis-result-card--success analysis-result-card--stale\"", html);
+        Assert.Contains("class=\"analysis-result-card analysis-result-card--insufficient-evidence\"", html);
+        Assert.Contains("class=\"analysis-result-card analysis-result-card--error\"", html);
+        Assert.Contains("class=\"analysis-result-card__header\"", html);
+        Assert.Contains("class=\"analysis-result-card__rank\"", html);
+        Assert.Contains("class=\"analysis-result-card__score\"", html);
+        Assert.Contains("class=\"analysis-result-card__metrics\"", html);
+        Assert.Contains("class=\"analysis-result-card__metric\"", html);
+        Assert.Contains("class=\"analysis-result-card__factors\"", html);
+        Assert.Contains("class=\"analysis-result-card__factor\"", html);
+        Assert.Contains("class=\"analysis-result-card__factor-contribution\"", html);
+        Assert.Contains("class=\"analysis-result-card__chart\"", html);
+        Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
+        Assert.Contains("class=\"analysis-result-card__summary\"", html);
+    }
+
+    [Fact]
+    public void Analysis_result_sources_keep_view_markup_color_free_and_css_token_backed()
+    {
+        var analysisView = File.ReadAllText(RepositoryPath("Pages", "Analysis", "Index.cshtml"));
+        var stylesheet = File.ReadAllText(RepositoryPath("wwwroot", "css", "site.css"));
+
+        Assert.DoesNotMatch(@"#[0-9a-fA-F]{3,8}|rgb\(", analysisView);
+        Assert.Contains(".analysis-result-card:focus-within", stylesheet);
+        Assert.Contains(".analysis-result-card--success", stylesheet);
+        Assert.Contains(".analysis-result-card__metrics", stylesheet);
+        Assert.Contains(".analysis-result-card__chart", stylesheet);
+        Assert.Contains(".analysis-result-card--insufficient-evidence", stylesheet);
+        Assert.Contains(".analysis-result-card--error", stylesheet);
+        Assert.Contains("@media (max-width: 40rem)", stylesheet);
+    }
+
+    [Fact]
     public async Task Partial_analysis_renders_successful_asset_and_bounded_failed_asset()
     {
         var provider = new FakeMarketDataProvider();
@@ -455,14 +514,17 @@ public sealed class AnalysisAccessContractTests
         decimal currentQuote,
         decimal close24Hours,
         decimal close7Days,
-        decimal close30Days)
+        decimal close30Days,
+        bool isStale = false)
     {
         var now = DateTimeOffset.UtcNow;
         var history = new MarketDataHistoryRequest(
             DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
             DateOnly.FromDateTime(DateTime.UtcNow),
             MarketDataGranularity.Daily);
-        var freshness = new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
+        var freshness = isStale
+            ? new MarketDataFreshness(now.AddHours(-8), now, null, true)
+            : new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
         return new MarketDataResult(
             new AssetReference(id, id, assetClass),
             history,
@@ -522,6 +584,12 @@ public sealed class AnalysisAccessContractTests
 
     private static HistoricalPricePoint Point(DateTimeOffset timestamp, decimal close) =>
         new(timestamp, null, null, null, close, null, "USD", true);
+
+    private static string RepositoryPath(params string[] segments)
+    {
+        var basePath = AppContext.BaseDirectory;
+        return Path.GetFullPath(Path.Combine([basePath, "..", "..", "..", "..", "..", .. segments]));
+    }
 }
 
 internal sealed class UnauthenticatedAnalysisFactory : WebApplicationFactory<Program>

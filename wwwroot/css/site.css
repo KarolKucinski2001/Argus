@@ -30,6 +30,8 @@
     --radius-lg: 1.25rem;
     --brand-mark-size: 1.5rem;
     --content-width: 72rem;
+    --result-chart-max-height: 18rem;
+    --result-metric-min: 12rem;
     color-scheme: dark;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -455,6 +457,209 @@ button:focus-visible {
     margin: 0;
 }
 
+.analysis-results {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.analysis-results h2,
+.analysis-results p {
+    margin: 0;
+}
+
+.analysis-results__list {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.analysis-result-card {
+    min-width: 0;
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    box-shadow: 0 1.5rem 4rem var(--color-shadow);
+}
+
+.analysis-result-card:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 1.5rem 4rem var(--color-shadow);
+}
+
+.analysis-result-card__body {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+    padding: var(--space-4);
+    border-radius: inherit;
+}
+
+.analysis-result-card__body:focus-visible {
+    outline: 0.1875rem solid var(--color-accent);
+    outline-offset: 0.25rem;
+}
+
+.analysis-result-card__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-3);
+    align-items: start;
+    padding-bottom: var(--space-3);
+    border-bottom: 0.0625rem solid var(--color-divider);
+}
+
+.analysis-result-card__header h3 {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.analysis-result-card__rank,
+.analysis-result-card__status {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.analysis-result-card__rank {
+    grid-column: 1 / -1;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.analysis-result-card__score {
+    margin: 0;
+    padding: var(--space-1) var(--space-2);
+    border: 0.0625rem solid var(--color-accent);
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-accent);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.analysis-result-card__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(var(--result-metric-min), 1fr));
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.analysis-result-card__metric {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-raised);
+}
+
+.analysis-result-card__metric dt {
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+}
+
+.analysis-result-card__metric dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-weight: 800;
+}
+
+.analysis-result-card__factors,
+.analysis-result-card__chart {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.analysis-result-card__factors h4,
+.analysis-result-card__chart h4 {
+    margin: 0;
+}
+
+.analysis-result-card__factor-list,
+.analysis-result-card__chart-points {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.analysis-result-card__factor {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    color: var(--color-muted);
+}
+
+.analysis-result-card__factor strong,
+.analysis-result-card__factor-contribution {
+    color: var(--color-text);
+}
+
+.analysis-result-card__chart {
+    overflow: hidden;
+}
+
+.analysis-result-card__chart-points {
+    max-block-size: var(--result-chart-max-height);
+    overflow: auto;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+}
+
+.analysis-result-card__chart-point {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-width: 0;
+    padding-block: var(--space-1);
+    border-bottom: 0.0625rem solid var(--color-divider);
+}
+
+.analysis-result-card__chart-point:last-child {
+    border-bottom: 0;
+}
+
+.analysis-result-card__chart-point span,
+.analysis-result-card__chart-point time,
+.analysis-result-card__summary {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.analysis-result-card__summary {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.analysis-result-card--success {
+    border-color: var(--color-accent);
+}
+
+.analysis-result-card--insufficient-evidence,
+.analysis-result-card--stale,
+.analysis-result-card--error {
+    background: var(--color-warning-surface);
+}
+
+.analysis-result-card--error .analysis-result-card__status,
+.analysis-result-card--insufficient-evidence .analysis-result-card__status,
+.analysis-result-card--stale .analysis-result-card__rank {
+    color: var(--color-accent);
+}
+
 @media (min-width: 56rem) {
     .workflow-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -502,6 +707,37 @@ button:focus-visible {
     }
 
     .factor-row {
+        gap: var(--space-1);
+    }
+
+    .analysis-results {
+        gap: var(--space-3);
+    }
+
+    .analysis-result-card__body {
+        padding: var(--space-3);
+    }
+
+    .analysis-result-card__header,
+    .analysis-result-card__chart-point {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-result-card__header {
+        gap: var(--space-2);
+    }
+
+    .analysis-result-card__score {
+        justify-self: start;
+        white-space: normal;
+    }
+
+    .analysis-result-card__metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-result-card__chart-point {
+        display: grid;
         gap: var(--space-1);
     }
 }

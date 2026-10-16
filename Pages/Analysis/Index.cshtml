@@ -87,54 +87,73 @@
                     {
                         var result = Model.AnalysisResults.Results[index];
                         var hasQuote = Model.CurrentQuotes.TryGetValue(result.Asset.Id, out var quote);
+                        var cardStateClass = result.Error is not null
+                            ? "analysis-result-card--error"
+                            : result.Score.HasValue
+                                ? result.Freshness.IsStale
+                                    ? "analysis-result-card--success analysis-result-card--stale"
+                                    : "analysis-result-card--success"
+                                : "analysis-result-card--insufficient-evidence";
 
-                        <li class="analysis-result-card">
-                            <article aria-labelledby="analysis-result-@result.Asset.Id">
-                                <header>
-                                    <p>@(result.Score.HasValue ? $"Miejsce {index + 1}" : "Wynik nierankingowy")</p>
+                        <li class="analysis-result-card @cardStateClass">
+                            <article class="analysis-result-card__body" aria-labelledby="analysis-result-@result.Asset.Id" tabindex="0">
+                                <header class="analysis-result-card__header">
+                                    <p class="analysis-result-card__rank">@(result.Score.HasValue ? $"Miejsce {index + 1}" : "Wynik nierankingowy")</p>
                                     <h3 id="analysis-result-@result.Asset.Id">@result.Asset.Id</h3>
                                     @if (result.Score.HasValue)
                                     {
-                                        <p>Score @FormatDecimal(result.Score.Value)/100</p>
+                                        <p class="analysis-result-card__score">Score @FormatDecimal(result.Score.Value)/100</p>
                                     }
                                     else if (result.Error is null)
                                     {
-                                        <p>Niewystarczające dane do wyliczenia score.</p>
+                                        <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
                                     }
                                 </header>
 
                                 @if (result.Error is not null)
                                 {
-                                    <p role="status">@Model.MapAssetErrorMessage(result.Error.Category)</p>
+                                    <p class="analysis-result-card__status" role="status">@Model.MapAssetErrorMessage(result.Error.Category)</p>
                                 }
                                 else
                                 {
-                                    <dl>
-                                        <dt>Cena aktualna</dt>
-                                        <dd>@(hasQuote ? $"{FormatDecimal(quote!.Value)} {quote.Currency}" : "niedostępna")</dd>
-                                        <dt>24 godziny</dt>
-                                        <dd>@FormatMetric(result.Performance.Change24Hours)</dd>
-                                        <dt>7 dni</dt>
-                                        <dd>@FormatMetric(result.Performance.Change7Days)</dd>
-                                        <dt>30 dni</dt>
-                                        <dd>@FormatMetric(result.Performance.Change30Days)</dd>
-                                        <dt>Jakość danych</dt>
-                                        <dd>@result.Quality</dd>
-                                        <dt>Świeżość danych</dt>
-                                        <dd>@(result.Freshness.IsStale ? "stale" : "current")</dd>
+                                    <dl class="analysis-result-card__metrics">
+                                        <div class="analysis-result-card__metric">
+                                            <dt>Cena aktualna</dt>
+                                            <dd>@(hasQuote ? $"{FormatDecimal(quote!.Value)} {quote.Currency}" : "niedostępna")</dd>
+                                        </div>
+                                        <div class="analysis-result-card__metric">
+                                            <dt>24 godziny</dt>
+                                            <dd>@FormatMetric(result.Performance.Change24Hours)</dd>
+                                        </div>
+                                        <div class="analysis-result-card__metric">
+                                            <dt>7 dni</dt>
+                                            <dd>@FormatMetric(result.Performance.Change7Days)</dd>
+                                        </div>
+                                        <div class="analysis-result-card__metric">
+                                            <dt>30 dni</dt>
+                                            <dd>@FormatMetric(result.Performance.Change30Days)</dd>
+                                        </div>
+                                        <div class="analysis-result-card__metric">
+                                            <dt>Jakość danych</dt>
+                                            <dd>@result.Quality</dd>
+                                        </div>
+                                        <div class="analysis-result-card__metric">
+                                            <dt>Świeżość danych</dt>
+                                            <dd>@(result.Freshness.IsStale ? "stale" : "current")</dd>
+                                        </div>
                                     </dl>
 
-                                    <section aria-label="Czynniki dla @result.Asset.Id">
+                                    <section class="analysis-result-card__factors" aria-label="Czynniki dla @result.Asset.Id">
                                         <h4>Czynniki</h4>
-                                        <ul>
+                                        <ul class="analysis-result-card__factor-list">
                                             @foreach (var factor in result.Factors)
                                             {
-                                                <li>
+                                                <li class="analysis-result-card__factor">
                                                     <strong>@factor.Label</strong>:
                                                     @if (factor.IsAvailable)
                                                     {
                                                         <span>@FormatNullablePercent(factor.Percentage)</span>
-                                                        <span>contribution @FormatNullableDecimal(factor.Contribution)</span>
+                                                        <span class="analysis-result-card__factor-contribution">contribution @FormatNullableDecimal(factor.Contribution)</span>
                                                     }
                                                     else
                                                     {
@@ -148,12 +167,13 @@
 
                                     @if (result.ChartPoints.Count > 0)
                                     {
-                                        <section aria-label="Dane wykresu dla @result.Asset.Id">
+                                        <section class="analysis-result-card__chart" aria-label="Dane wykresu dla @result.Asset.Id">
                                             <h4>Dane wykresu</h4>
-                                            <ul>
+                                            <ul class="analysis-result-card__chart-points">
                                                 @foreach (var point in result.ChartPoints)
                                                 {
-                                                    <li data-chart-asset="@result.Asset.Id"
+                                                    <li class="analysis-result-card__chart-point"
+                                                        data-chart-asset="@result.Asset.Id"
                                                         data-chart-timestamp="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)"
                                                         data-chart-close="@FormatDecimal(point.Close)">
                                                         <time datetime="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)">
@@ -168,7 +188,7 @@
 
                                     @if (result.Summary is not null)
                                     {
-                                        <p>@result.Summary</p>
+                                        <p class="analysis-result-card__summary">@result.Summary</p>
                                     }
                                 }
                             </article>
