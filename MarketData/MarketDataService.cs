@@ -186,7 +186,7 @@ public sealed class MarketDataService(
                 request.History,
                 new MarketDataError(
                     exception.Category,
-                    exception.Message,
+                    MapProviderExceptionMessage(exception.Category),
                     exception.IsRetryable,
                     exception.UpstreamStatusCode))).ToArray();
         }
@@ -211,6 +211,25 @@ public sealed class MarketDataService(
                     true))).ToArray();
         }
     }
+
+    private static string MapProviderExceptionMessage(MarketDataErrorCategory category) =>
+        category switch
+        {
+            MarketDataErrorCategory.AuthenticationFailed =>
+                "The market data provider could not authenticate the request.",
+            MarketDataErrorCategory.QuotaExceeded =>
+                "The market data provider request limit was reached.",
+            MarketDataErrorCategory.UnsupportedAsset =>
+                "The market data provider does not support this asset.",
+            MarketDataErrorCategory.InvalidProviderResponse =>
+                "The market data provider returned invalid data.",
+            MarketDataErrorCategory.UpstreamUnavailable =>
+                "The market data provider is unavailable.",
+            MarketDataErrorCategory.Timeout =>
+                "The market data provider timed out.",
+            _ =>
+                "The market data provider could not complete the request."
+        };
 
     private static MarketDataServiceError? ValidateRequest(
         MarketDataRequest? request,

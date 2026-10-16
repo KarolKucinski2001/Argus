@@ -79,6 +79,38 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Valid_analysis_submission_sends_the_canonical_daily_history_request()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResultForAnalysis("AAPL"));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL")
+            ]));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(provider.LastRequest);
+        Assert.Equal(["AAPL"], provider.LastRequest!.Assets.Select(asset => asset.Id));
+        Assert.Equal(
+            new MarketDataHistoryRequest(
+                DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
+                DateOnly.FromDateTime(DateTime.UtcNow),
+                MarketDataGranularity.Daily),
+            provider.LastRequest.History);
+    }
+
+    [Fact]
     public async Task Invalid_analysis_submission_renders_bounded_inline_validation()
     {
         await using var factory = new AuthenticationTestFactory();
@@ -191,6 +223,42 @@ public sealed class AnalysisAccessContractTests
         Assert.DoesNotContain("An approved provider is not registered", html);
     }
 
+    [Fact]
+    public async Task Provider_error_preserves_the_selected_assets_in_the_form()
+    {
+        await using var factory = new AnalysisProviderFactory(
+            new UnavailableMarketDataProvider(),
+            options =>
+            {
+                options.ProviderId = "approved-test-provider";
+                options.PublicDisplayApproved = true;
+            });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await client.PostAsync(
+            "/analysis",
+            new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL"),
+                new KeyValuePair<string, string>("SelectedAssetIds", "BTC-USD")
+            ]));
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Matches(
+            "<input[^>]*(?:value=\"AAPL\"[^>]*checked=\"checked\"|checked=\"checked\"[^>]*value=\"AAPL\")",
+            html);
+        Assert.Matches(
+            "<input[^>]*(?:value=\"BTC-USD\"[^>]*checked=\"checked\"|checked=\"checked\"[^>]*value=\"BTC-USD\")",
+            html);
+    }
+
     private static async Task<string> GetAntiforgeryTokenAsync(HttpClient client)
     {
         using var response = await client.GetAsync("/analysis");
@@ -202,6 +270,25 @@ public sealed class AnalysisAccessContractTests
 
         Assert.True(match.Success, "The analysis page did not render an antiforgery token.");
         return match.Groups[1].Value;
+    }
+
+    private static MarketDataResult CreateResultForAnalysis(string id)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var history = new MarketDataHistoryRequest(
+            DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            MarketDataGranularity.Daily);
+        var freshness = new MarketDataFreshness(now.AddMinutes(-1), now, now.AddMinutes(5), false);
+        return new MarketDataResult(
+            new AssetReference(id, id, MarketAssetClass.Equity),
+            history,
+            new MarketQuote(215.50m, "USD", now, freshness, MarketDataQuality.Complete),
+            [],
+            new MarketDataSource("fake-provider", "Fake provider attribution", true, TimeSpan.FromMinutes(15)),
+            freshness,
+            MarketDataQuality.Complete,
+            []);
     }
 }
 

@@ -305,6 +305,42 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
+    public async Task Unsupported_asset_returns_an_explicit_problem_category()
+    {
+        await using var factory = new MarketDataTestFactory(new FakeMarketDataProvider());
+
+        using var response = await PostAsync(
+            factory,
+            CreateRequest("NOT-ALLOWED"));
+        var category = await ReadProblemCategoryAsync(response);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("UnsupportedAsset", category);
+    }
+
+    [Fact]
+    public async Task Provider_exception_maps_message_to_a_user_safe_error()
+    {
+        const string rawProviderMessage = "https://provider.example/response?token=secret";
+        var provider = new FakeMarketDataProvider
+        {
+            ExceptionToThrow = new MarketDataProviderException(
+                MarketDataErrorCategory.AuthenticationFailed,
+                rawProviderMessage,
+                false,
+                401)
+        };
+        await using var factory = new MarketDataTestFactory(provider);
+
+        var result = Assert.Single((await ReadResponseAsync(await PostAsync(factory, CreateRequest("AAPL")))).Results);
+
+        Assert.Equal(
+            "The market data provider could not authenticate the request.",
+            result.Error?.Message);
+        Assert.DoesNotContain(rawProviderMessage, result.Error?.Message);
+    }
+
+    [Fact]
     public async Task Application_request_budget_returns_too_many_requests_after_limit()
     {
         var provider = new FakeMarketDataProvider();
@@ -445,6 +481,7 @@ public sealed class MarketDataContractTests
 internal sealed class FakeMarketDataProvider : IMarketDataProvider
 {
     public IReadOnlyList<MarketDataResult> Results { get; set; } = [];
+    public MarketDataRequest? LastRequest { get; private set; }
     public bool DelayUntilCancelled { get; init; }
     public bool ThrowUpstreamUnavailable { get; init; }
     public MarketDataProviderException? ExceptionToThrow { get; init; }
@@ -455,6 +492,7 @@ internal sealed class FakeMarketDataProvider : IMarketDataProvider
         CancellationToken cancellationToken = default)
     {
         CallCount++;
+        LastRequest = request;
         if (DelayUntilCancelled)
         {
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
