@@ -40,6 +40,7 @@ public sealed record AssetAnalysis(
     string? Summary,
     MarketDataQuality Quality,
     MarketDataFreshness Freshness,
+    bool IsDelayed,
     IReadOnlyList<MarketDataWarning> Warnings,
     MarketDataError? Error);
 

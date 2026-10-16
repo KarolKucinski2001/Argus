@@ -124,17 +124,59 @@ public sealed class AnalysisAccessContractTests
         var token = await GetAntiforgeryTokenAsync(client);
         using var response = await PostAnalysisAsync(client, token, "AAPL");
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
-
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Czynniki", html);
         Assert.Contains("24-hour momentum", html);
         Assert.Contains("7-day momentum", html);
         Assert.Contains("30-day trend", html);
         Assert.Contains("contribution", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("weight 25%", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("weight 35%", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("weight 40%", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Score ", html);
         Assert.Contains("Dane wykresu", html);
         Assert.Contains("data-chart-asset=\"AAPL\"", html);
         Assert.Contains("data-chart-close=\"80", html);
+    }
+
+
+    [Fact]
+    public async Task Analysis_results_surface_delayed_incomplete_and_warning_states_without_raw_messages()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m) with
+            {
+                Quality = MarketDataQuality.Incomplete,
+                Warnings =
+                [
+                    new MarketDataWarning(
+                        MarketDataWarningCategory.DelayedData,
+                        "RAW provider says delayed by 15 minutes.",
+                        true),
+                    new MarketDataWarning(
+                        MarketDataWarningCategory.IncompleteHistory,
+                        "RAW incomplete provider payload.",
+                        false)
+                ]
+            });
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Dane opóźnione", html);
+        Assert.Contains("Dane niepełne", html);
+        Assert.Contains("Historia niepełna", html);
+        Assert.DoesNotContain("RAW provider", html);
+        Assert.DoesNotContain("RAW incomplete", html);
     }
 
     [Fact]

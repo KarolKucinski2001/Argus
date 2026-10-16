@@ -1,5 +1,6 @@
 @page "/analysis"
 @using System.Globalization
+@using _bootstrap_scaffold.MarketData
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
     ViewData["Title"] = "Start analizy";
@@ -143,6 +144,32 @@
                                         </div>
                                     </dl>
 
+                                    @if (result.IsDelayed || result.Warnings.Any(warning =>
+                                        warning.Category == MarketDataWarningCategory.DelayedData))
+                                    {
+                                        <p class="analysis-result-card__state" role="status">Dane opóźnione</p>
+                                    }
+
+                                    @if (result.Quality != MarketDataQuality.Complete)
+                                    {
+                                        <p class="analysis-result-card__state" role="status">
+                                            @FormatQuality(result.Quality)
+                                        </p>
+                                    }
+
+                                    @if (result.Warnings.Count > 0)
+                                    {
+                                        <section class="analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
+                                            <h4>Ostrzeżenia</h4>
+                                            <ul>
+                                                @foreach (var warning in result.Warnings.Select(warning => FormatWarning(warning.Category)).Distinct())
+                                                {
+                                                    <li>@warning</li>
+                                                }
+                                            </ul>
+                                        </section>
+                                    }
+
                                     <section class="analysis-result-card__factors" aria-label="Czynniki dla @result.Asset.Id">
                                         <h4>Czynniki</h4>
                                         <ul class="analysis-result-card__factor-list">
@@ -153,11 +180,13 @@
                                                     @if (factor.IsAvailable)
                                                     {
                                                         <span>@FormatNullablePercent(factor.Percentage)</span>
+                                                        <span class="analysis-result-card__factor-weight">weight @FormatWeight(factor.Weight)</span>
                                                         <span class="analysis-result-card__factor-contribution">contribution @FormatNullableDecimal(factor.Contribution)</span>
                                                     }
                                                     else
                                                     {
                                                         <span>niedostępny</span>
+                                                        <span class="analysis-result-card__factor-weight">weight @FormatWeight(factor.Weight)</span>
                                                     }
                                                     <span>@factor.Explanation</span>
                                                 </li>
@@ -221,6 +250,31 @@
 
     private static string FormatNullableDecimal(decimal? value) =>
         value.HasValue ? FormatDecimal(value.Value) : "niedostępne";
+
+    private static string FormatWeight(decimal value) =>
+        $"{(Math.Clamp(value, 0m, 1m) * 100m).ToString("0.##", CultureInfo.InvariantCulture)}%";
+
+    private static string FormatQuality(MarketDataQuality quality) =>
+        quality switch
+        {
+            MarketDataQuality.Incomplete => "Dane niepełne",
+            MarketDataQuality.Stale => "Dane nieaktualne",
+            MarketDataQuality.Unavailable => "Dane niedostępne",
+            _ => "Dane kompletne"
+        };
+
+    private static string FormatWarning(MarketDataWarningCategory category) =>
+        category switch
+        {
+            MarketDataWarningCategory.MissingCurrentQuote => "Brak bieżącej ceny",
+            MarketDataWarningCategory.MissingHistory => "Brak historii",
+            MarketDataWarningCategory.IncompleteHistory => "Historia niepełna",
+            MarketDataWarningCategory.StaleData => "Dane nieaktualne",
+            MarketDataWarningCategory.DelayedData => "Dane opóźnione",
+            MarketDataWarningCategory.ProviderQuota => "Ograniczona dostępność danych",
+            MarketDataWarningCategory.UpstreamUnavailable => "Źródło danych chwilowo niedostępne",
+            _ => "Ograniczona jakość danych"
+        };
 
     private static string FormatDecimal(decimal value) =>
         value.ToString("0.##", CultureInfo.InvariantCulture);

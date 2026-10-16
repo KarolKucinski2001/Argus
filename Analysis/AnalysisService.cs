@@ -35,6 +35,7 @@ public sealed class AnalysisService(
                 null,
                 result.Quality,
                 result.Freshness,
+                result.Source?.IsDelayed == true,
                 result.Warnings,
                 result.Error);
         }
@@ -51,6 +52,7 @@ public sealed class AnalysisService(
             summary,
             result.Quality,
             result.Freshness,
+            result.Source?.IsDelayed == true,
             result.Warnings,
             null);
     }
