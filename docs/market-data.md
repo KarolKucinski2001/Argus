@@ -72,8 +72,13 @@ below:
 Until that record is complete and reviewed, `PublicDisplayApproved` must remain
 false. The application must report the explicit `ProviderNotApproved` or
 configuration-unavailable state rather than presenting a provider response as
-fresh market evidence. This phase adds deterministic fake-provider tests only;
-it does not constitute provider approval.
+fresh market evidence. Development and Testing environments register a deterministic fake provider
+that returns clearly labelled illustrative data for local protected-flow
+testing. The fake provider has no credentials or network calls and is never
+registered outside those environments. Its results do not constitute provider
+approval or permission for public display. Production and other environments
+continue to use the unavailable-provider boundary until an explicitly
+approved provider is registered.
 
 ## Operational boundary
 

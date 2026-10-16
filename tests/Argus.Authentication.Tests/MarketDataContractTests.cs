@@ -555,11 +555,9 @@ internal sealed class MarketDataTestFactory : WebApplicationFactory<Program>
                     .Build();
             });
 
-            if (!useDefaultProvider)
-            {
-                services.RemoveAll<IMarketDataProvider>();
-                services.AddSingleton(provider);
-            }
+            services.RemoveAll<IMarketDataProvider>();
+            services.AddSingleton<IMarketDataProvider>(
+                useDefaultProvider ? new UnavailableMarketDataProvider() : provider);
             if (cache is not null)
             {
                 services.RemoveAll<IMarketDataCache>();
