@@ -14,3 +14,17 @@ public sealed record AssetPerformance(
 public sealed record AnalysisChartPoint(
     DateTimeOffset Timestamp,
     decimal Close);
+
+public sealed record AnalysisFactor(
+    string Key,
+    string Label,
+    decimal? Percentage,
+    decimal Weight,
+    decimal? Contribution,
+    bool IsAvailable,
+    string Explanation);
+
+public sealed record ScoreAssessment(
+    decimal? Score,
+    IReadOnlyList<AnalysisFactor> Factors,
+    bool HasSufficientEvidence);
