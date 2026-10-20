@@ -4,27 +4,36 @@
 @using _bootstrap_scaffold.MarketData
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Start analizy";
 }
 
-<section class="analysis-page" aria-labelledby="analysis-title">
-    <div class="analysis-page__header">
-        <p class="eyebrow">Nowa analiza</p>
-        <h1 id="analysis-title">Wybierz aktywa do sprawdzenia</h1>
-        <p class="analysis-page__lede">
-            Wybierz od jednego do @Model.MaximumSelectedAssets aktywów. Argus pobierze
-            dzienną historię z ostatnich 12 miesięcy i przygotuje punkt wyjścia
-            do dalszej analizy.
-        </p>
-    </div>
+<section class="analysis-workspace" aria-labelledby="analysis-title">
+    <aside class="analysis-workspace__sidebar">
+        <div class="analysis-page__header">
+            <p class="eyebrow">Nowa analiza</p>
+            <h1 id="analysis-title">Wybierz aktywa do sprawdzenia</h1>
+            <p class="analysis-page__lede">
+                Wybierz od jednego do @Model.MaximumSelectedAssets aktywów. Argus pobierze
+                dzienną historię z ostatnich 12 miesięcy i przygotuje punkt wyjścia
+                do dalszej analizy.
+            </p>
+        </div>
 
-    <form method="post" class="analysis-form">
+        <form method="post" class="analysis-form" data-analysis-form>
         <div class="analysis-form__header">
             <h2>Dostępne aktywa</h2>
             <p>Możesz wybrać maksymalnie @Model.MaximumSelectedAssets aktywów.</p>
         </div>
 
         <div class="asset-list">
+            @if (Model.Assets.Count == 0)
+            {
+                <div class="status-card status-card--error" role="status">
+                    <h3>Brak skonfigurowanych aktywów</h3>
+                    <p>Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.</p>
+                </div>
+            }
             @foreach (var asset in Model.Assets)
             {
                 var isSelected = Model.SelectedAssetIds.Any(id =>
@@ -75,10 +84,34 @@
             </div>
         }
 
-        @if (Model.HasResults)
-        {
-            <section class="analysis-results" aria-labelledby="analysis-results-title">
-                <h2 id="analysis-results-title">Ranking analizy</h2>
+        <p class="analysis-form__pending" data-pending-status role="status" hidden>
+            Analiza jest przygotowywana. Nie zamykaj tej strony.
+        </p>
+        <button class="button"
+                type="submit"
+                data-submit-button
+                disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
+            Rozpocznij analizę
+        </button>
+        </form>
+
+        <p class="analysis-page__boundary">
+            Dane w środowisku deweloperskim są ilustracyjne i nie stanowią porady
+            inwestycyjnej.
+        </p>
+    </aside>
+
+    <div class="analysis-workspace__content">
+        <header class="analysis-workspace__header">
+            <p class="eyebrow">Market intelligence</p>
+            <h2>Dashboard analizy</h2>
+            <p>Rankingi, kontekst rynkowy i czynniki wyjaśniające dla wybranych aktywów.</p>
+        </header>
+
+        <section class="analysis-results" aria-labelledby="analysis-results-title">
+            <h2 id="analysis-results-title">Ranking analizy</h2>
+            @if (Model.HasResults)
+            {
                 <p class="analysis-results__boundary">
                     Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
                     Argus pokazuje dane i ich wyjaśnienia, ale nie składa spersonalizowanych obietnic dotyczących przyszłości.
@@ -87,8 +120,11 @@
                 {
                     <p role="status">Częściowe wyniki — część aktywów nie ma pełnych danych.</p>
                 }
+            }
 
-                <ol class="analysis-results__list">
+            <ol class="analysis-results__list">
+                @if (Model.HasResults)
+                {
                     @for (var index = 0; index < Model.AnalysisResults!.Results.Count; index++)
                     {
                         var result = Model.AnalysisResults.Results[index];
@@ -379,21 +415,15 @@
                             </article>
                         </li>
                     }
+                }
                 </ol>
-            </section>
-        }
-
-        <button class="button" type="submit">Rozpocznij analizę</button>
-    </form>
-
-    <p class="analysis-page__boundary">
-        Dane w środowisku deweloperskim są ilustracyjne i nie stanowią porady
-        inwestycyjnej.
-    </p>
+        </section>
+    </div>
 </section>
 
 @section Scripts {
     <script src="~/js/analysis-chart.js" asp-append-version="true"></script>
+    <script src="~/js/analysis-form.js" asp-append-version="true"></script>
 }
 
 @functions {

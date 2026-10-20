@@ -15,6 +15,45 @@ namespace Argus.Authentication.Tests;
 public sealed class AnalysisAccessContractTests
 {
     [Fact]
+    public async Task Testing_ui_state_fixture_renders_the_required_states()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Default", html);
+        Assert.Contains("Hover", html);
+        Assert.Contains("Focus-visible", html);
+        Assert.Contains("Disabled", html);
+        Assert.Contains("Error", html);
+        Assert.Contains("Empty", html);
+        Assert.Contains("Loading", html);
+        Assert.Contains("ui-state-fixture__grid", html);
+    }
+
+    [Fact]
+    public async Task Ui_state_fixture_is_not_available_outside_testing()
+    {
+        await using var factory = new DevelopmentUiStateFixtureFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task Unauthenticated_analysis_page_uses_the_explicit_provider_challenge()
     {
         await using var factory = new UnauthenticatedAnalysisFactory();
@@ -28,6 +67,15 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains("test.invalid", response.Headers.Location?.ToString());
+    }
+
+    internal sealed class DevelopmentUiStateFixtureFactory : WebApplicationFactory<Program>
+    {
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.UseEnvironment("Development");
+            TestEntraConfiguration.Apply(builder);
+        }
     }
 
     [Fact]
@@ -49,6 +97,36 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("BTC-USD", html);
         Assert.Contains("ETH-USD", html);
         Assert.Contains("maksymalnie 5", html);
+        Assert.Contains(">Analiza</a>", html);
+        Assert.Contains(">Konto</a>", html);
+        Assert.Contains("/account/signout", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Zaloguj się", html);
+        Assert.Contains("class=\"analysis-workspace\"", html);
+        Assert.Contains("class=\"analysis-workspace__sidebar\"", html);
+        Assert.Contains("class=\"analysis-workspace__content\"", html);
+        Assert.Contains("class=\"analysis-results__list\"", html);
+    }
+
+    [Fact]
+    public async Task Empty_asset_configuration_renders_an_explanatory_disabled_action()
+    {
+        await using var factory = new AnalysisProviderFactory(
+            new FakeMarketDataProvider(),
+            options => options.AllowedAssets.Clear());
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Brak skonfigurowanych aktywów", html);
+        Assert.Contains("data-submit-button", html);
+        Assert.Contains("disabled=\"disabled\"", html);
+        Assert.Contains("data-pending-status", html);
     }
 
     [Fact]
