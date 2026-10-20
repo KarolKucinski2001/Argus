@@ -439,12 +439,12 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [x] 2.1 Sufficient evidence invokes the generator with only displayed evidence.
-- [x] 2.2 Insufficient evidence skips the generator.
-- [x] 2.3 Generator failure preserves score, ranking, factors, metrics, and chart points.
-- [x] 2.4 Errored market-data results never invoke the generator.
-- [x] 2.5 Empty, oversized, or malformed generator output is handled safely.
-- [x] 2.6 Existing analysis and market-data contract tests remain green.
+- [x] 2.1 Sufficient evidence invokes the generator with only displayed evidence. — 8ac6c9b
+- [x] 2.2 Insufficient evidence skips the generator. — 8ac6c9b
+- [x] 2.3 Generator failure preserves score, ranking, factors, metrics, and chart points. — 8ac6c9b
+- [x] 2.4 Errored market-data results never invoke the generator. — 8ac6c9b
+- [x] 2.5 Empty, oversized, or malformed generator output is handled safely. — 8ac6c9b
+- [x] 2.6 Existing analysis and market-data contract tests remain green. — 8ac6c9b
 
 #### Manual
 
@@ -456,11 +456,11 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [ ] 3.1 Generated summaries render per asset.
-- [ ] 3.2 Insufficient-evidence and AI-unavailable states render distinctly.
-- [ ] 3.3 The educational-not-investment-advice boundary is present.
-- [ ] 3.4 Raw prompts, provider details, credentials, and exception messages are absent.
-- [ ] 3.5 Existing chart, ranking, quality, partial-result, and validation tests remain green.
+- [x] 3.1 Generated summaries render per asset.
+- [x] 3.2 Insufficient-evidence and AI-unavailable states render distinctly.
+- [x] 3.3 The educational-not-investment-advice boundary is present.
+- [x] 3.4 Raw prompts, provider details, credentials, and exception messages are absent.
+- [x] 3.5 Existing chart, ranking, quality, partial-result, and validation tests remain green.
 
 #### Manual
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Configuration;
 using Xunit;
+using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
 
 namespace Argus.Authentication.Tests;
@@ -220,6 +221,34 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-result-card__chart\"", html);
         Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
         Assert.Contains("class=\"analysis-result-card__summary\"", html);
+        Assert.Contains("nie stanowią porady inwestycyjnej", html);
+    }
+
+    [Fact]
+    public async Task Generated_summary_renders_per_asset_without_provider_details()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m),
+            CreateScoredResult("MSFT", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(
+            provider,
+            _ => { },
+            new FixedSummaryGenerator("Explains the displayed evidence."));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(2, Regex.Matches(html, "Explains the displayed evidence\\.").Count);
+        Assert.DoesNotContain("provider-id", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("raw response", html, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -650,7 +679,8 @@ internal sealed class UnauthenticatedAnalysisFactory : WebApplicationFactory<Pro
 
 internal sealed class AnalysisProviderFactory(
     IMarketDataProvider provider,
-    Action<MarketDataOptions> configureOptions) : WebApplicationFactory<Program>
+    Action<MarketDataOptions> configureOptions,
+    IAnalysisSummaryGenerator? summaryGenerator = null) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -684,7 +714,23 @@ internal sealed class AnalysisProviderFactory(
             });
             services.RemoveAll<IMarketDataProvider>();
             services.AddSingleton(provider);
+            if (summaryGenerator is not null)
+            {
+                services.RemoveAll<IAnalysisSummaryGenerator>();
+                services.AddSingleton(summaryGenerator);
+            }
             services.PostConfigure<MarketDataOptions>(configureOptions);
         });
+    }
+}
+
+internal sealed class FixedSummaryGenerator(string text) : IAnalysisSummaryGenerator
+{
+    public Task<AnalysisSummaryResult> GenerateAsync(
+        AnalysisSummaryRequest request,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(AnalysisSummaryResult.Generated(text));
     }
 }

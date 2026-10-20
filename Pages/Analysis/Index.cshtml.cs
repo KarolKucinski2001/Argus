@@ -149,6 +149,17 @@ public sealed class IndexModel(
                 "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
         };
 
+    public string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
+        status switch
+        {
+            AnalysisSummaryStatus.InsufficientEvidence =>
+                "Niewystarczające dane do przygotowania podsumowania.",
+            AnalysisSummaryStatus.Unavailable =>
+                "Podsumowanie analizy jest chwilowo niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+            _ =>
+                "Podsumowanie analizy."
+        };
+
     private static string MapProviderMessage(MarketDataErrorCategory? category) =>
         category switch
         {
