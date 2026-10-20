@@ -8,14 +8,59 @@
         return "Data: " + date + " · Cena zamknięcia: " + close;
     }
 
+    var RANGE_DAYS = {
+        "1M": 31,
+        "3M": 92,
+        "6M": 183,
+        "1Y": 365,
+        "Max": null
+    };
+
+    function readPoint(point, index) {
+        return {
+            element: point,
+            index: index,
+            timestamp: new Date(point.getAttribute("data-chart-timestamp") || ""),
+            close: Number(point.getAttribute("data-chart-close") || "0")
+        };
+    }
+
+    function selectPoints(points, range) {
+        if (range === "Max" || points.length === 0) {
+            return points;
+        }
+
+        var latest = points[points.length - 1].timestamp.getTime();
+        var cutoff = latest - (RANGE_DAYS[range] * 24 * 60 * 60 * 1000);
+        var selected = points.filter(function (point) {
+            var time = point.timestamp.getTime();
+            return isNaN(time) ? false : time >= cutoff;
+        });
+
+        return selected.length > 0 ? selected : points;
+    }
+
     function createController(container) {
         var svg = container.querySelector("[data-chart-svg]");
         var tooltip = container.querySelector("[data-chart-tooltip]");
         var points = Array.prototype.slice.call(container.querySelectorAll("[data-chart-point]"));
+        var line = container.querySelector("[data-chart-line]");
+        var rangeButtons = Array.prototype.slice.call(container.querySelectorAll("[data-chart-range-option]"));
 
         if (!svg || !tooltip || points.length === 0) {
             return;
         }
+
+        var pointRecords = points.map(readPoint);
+        var chartLeft = Number(svg.getAttribute("data-chart-left") || "0");
+        var chartRight = Number(svg.getAttribute("data-chart-right") || "0");
+        var chartTop = Number(svg.getAttribute("data-chart-top") || "0");
+        var chartBottom = Number(svg.getAttribute("data-chart-bottom") || "0");
+        var chartWidth = Number(svg.getAttribute("data-chart-width") || "0");
+        var chartHeight = Number(svg.getAttribute("data-chart-height") || "0");
+        var plotWidth = chartWidth - chartLeft - chartRight;
+        var plotHeight = chartHeight - chartTop - chartBottom;
+        var activeRange = "1Y";
 
         var activePoint = null;
         var pinned = false;
@@ -69,6 +114,46 @@
             }
         }
 
+        function redraw(selectedPoints) {
+            var selectedSet = new Set(selectedPoints.map(function (point) {
+                return point.element;
+            }));
+
+            if (activePoint && !selectedSet.has(activePoint)) {
+                pinned = false;
+                clearActive();
+            }
+
+            var minimum = Math.min.apply(null, selectedPoints.map(function (point) { return point.close; }));
+            var maximum = Math.max.apply(null, selectedPoints.map(function (point) { return point.close; }));
+            var range = maximum - minimum;
+            var path = [];
+
+            pointRecords.forEach(function (point) {
+                var isSelected = selectedSet.has(point.element);
+                point.element.hidden = !isSelected;
+                if (!isSelected) {
+                    return;
+                }
+
+                var selectedIndex = selectedPoints.indexOf(point);
+                var x = selectedPoints.length === 1
+                    ? chartLeft + plotWidth / 2
+                    : chartLeft + (selectedIndex * plotWidth / (selectedPoints.length - 1));
+                var normalized = range === 0 ? 0.5 : (point.close - minimum) / range;
+                var y = chartTop + ((1 - normalized) * plotHeight);
+
+                point.element.setAttribute("cx", x.toFixed(2));
+                point.element.setAttribute("cy", y.toFixed(2));
+                path.push((selectedIndex === 0 ? "M" : "L") + x.toFixed(2) + "," + y.toFixed(2));
+            });
+
+            if (line) {
+                line.hidden = selectedPoints.length < 2;
+                line.setAttribute("d", path.join(" "));
+            }
+        }
+
         points.forEach(function (point) {
             point.addEventListener("pointerenter", function () {
                 showPoint(point, false);
@@ -111,6 +196,20 @@
                 positionTooltip(activePoint);
             }
         });
+
+        rangeButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                activeRange = button.getAttribute("data-chart-range-option") || "1Y";
+                rangeButtons.forEach(function (option) {
+                    option.setAttribute("aria-pressed",
+                        option === button ? "true" : "false");
+                });
+                clearActive();
+                redraw(selectPoints(pointRecords, activeRange));
+            });
+        });
+
+        redraw(selectPoints(pointRecords, activeRange));
     }
 
     function initialize() {

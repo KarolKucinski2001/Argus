@@ -317,6 +317,15 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains(".analysis-result-card__chart-range", stylesheet);
         Assert.Contains(".analysis-result-card__chart-range-button", stylesheet);
         Assert.Contains(".analysis-result-card__chart-range-button[aria-pressed=\"true\"]", stylesheet);
+
+        var chartScript = File.ReadAllText(RepositoryPath("wwwroot", "js", "analysis-chart.js"));
+
+        Assert.Contains("data-chart-range-option", chartScript);
+        Assert.Contains("data-chart-timestamp", chartScript);
+        Assert.Contains("aria-pressed", chartScript);
+        Assert.Contains("data-chart-line", chartScript);
+        Assert.Contains("1Y", chartScript);
+        Assert.Contains("Max", chartScript);
     }
 
     [Fact]
