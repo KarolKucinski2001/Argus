@@ -234,12 +234,32 @@
                                             <p id="@chartDescriptionId" class="analysis-result-card__chart-description">
                                                 Historyczne obserwacje ceny zamknięcia dla @result.Asset.Id.
                                             </p>
+                                            <div class="analysis-result-card__chart-range"
+                                                 role="group"
+                                                 aria-label="Zakres historii cenowej"
+                                                 data-chart-range>
+                                                @foreach (var range in new[] { "1M", "3M", "6M", "1Y", "Max" })
+                                                {
+                                                    <button class="analysis-result-card__chart-range-button"
+                                                            type="button"
+                                                            data-chart-range-option="@range"
+                                                            aria-pressed="@(range == "1Y" ? "true" : "false")">
+                                                        @range
+                                                    </button>
+                                                }
+                                            </div>
                                             <svg class="analysis-result-card__chart-svg"
                                                  viewBox="0 0 640 240"
                                                  preserveAspectRatio="xMidYMid meet"
                                                  role="img"
                                                  aria-labelledby="@chartTitleId @chartDescriptionId"
-                                                 data-chart-svg>
+                                                 data-chart-svg
+                                                 data-chart-width="640"
+                                                 data-chart-height="240"
+                                                 data-chart-left="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                 data-chart-right="@chartRight.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                 data-chart-top="@chartTop.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                 data-chart-bottom="@chartBottom.ToString("0.##", CultureInfo.InvariantCulture)">
                                                 <g class="analysis-result-card__chart-axis" aria-hidden="true">
                                                     <line x1="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
                                                           y1="@chartTop.ToString("0.##", CultureInfo.InvariantCulture)"
