@@ -570,7 +570,7 @@ button:focus-visible {
 
 .analysis-results__list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(min(var(--workspace-card-min), 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--workspace-card-min), 100%), 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
