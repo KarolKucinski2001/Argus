@@ -317,6 +317,9 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains(".analysis-result-card__chart-range", stylesheet);
         Assert.Contains(".analysis-result-card__chart-range-button", stylesheet);
         Assert.Contains(".analysis-result-card__chart-range-button[aria-pressed=\"true\"]", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-range-button:hover", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-point:not([hidden])", stylesheet);
+        Assert.Contains("overflow-x: hidden", stylesheet);
 
         var chartScript = File.ReadAllText(RepositoryPath("wwwroot", "js", "analysis-chart.js"));
 
