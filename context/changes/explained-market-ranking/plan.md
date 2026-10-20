@@ -432,8 +432,8 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Manual
 
-- [ ] 1.4 Review that prompt inputs are limited to evidence visible in the result.
-- [ ] 1.5 Review that provider/model details cannot enter the public result contract.
+- [x] 1.4 Review that prompt inputs are limited to evidence visible in the result. — 6b8a4bb
+- [x] 1.5 Review that provider/model details cannot enter the public result contract. — 6b8a4bb
 
 ### Phase 2: Integrate grounded summaries into analysis
 
@@ -448,9 +448,9 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Manual
 
-- [ ] 2.7 Mixed sufficient/insufficient assets remain visible with distinct states.
-- [ ] 2.8 AI unavailability leaves the ranked evidence usable.
-- [ ] 2.9 Cancellation does not render an incomplete summary as successful.
+- [x] 2.7 Mixed sufficient/insufficient assets remain visible with distinct states. — 8ac6c9b
+- [x] 2.8 AI unavailability leaves the ranked evidence usable. — 8ac6c9b
+- [x] 2.9 Cancellation does not render an incomplete summary as successful. — 8ac6c9b
 
 ### Phase 3: Render the complete result surface
 
@@ -464,21 +464,21 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Manual
 
-- [ ] 3.6 Account-to-results flow works over HTTPS.
-- [ ] 3.7 Keyboard navigation, focus order, responsive cards, and disclaimer visibility are acceptable.
-- [ ] 3.8 Generated copy explains shown evidence without personalized-advice language.
+- [x] 3.6 Account-to-results flow works over HTTPS. — 36a23ab
+- [x] 3.7 Keyboard navigation, focus order, responsive cards, and disclaimer visibility are acceptable. — 36a23ab
+- [x] 3.8 Generated copy explains shown evidence without personalized-advice language. — 36a23ab
 
 ### Phase 4: Verify and document the S-03 contract
 
 #### Automated
 
-- [x] 4.1 The focused analysis and page contract matrix is deterministic and network-free.
-- [x] 4.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with zero warnings and errors.
-- [x] 4.3 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
-- [x] 4.4 S-03 documentation matches the provider-neutral grounded-summary behavior.
+- [x] 4.1 The focused analysis and page contract matrix is deterministic and network-free. — 617ca3d
+- [x] 4.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with zero warnings and errors. — 617ca3d
+- [x] 4.3 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes. — 617ca3d
+- [x] 4.4 S-03 documentation matches the provider-neutral grounded-summary behavior. — 617ca3d
 
 #### Manual
 
-- [ ] 4.5 All S-03 acceptance criteria are reviewed against the final result.
-- [ ] 4.6 Approved non-production AI and unavailable-provider paths are both verified.
-- [ ] 4.7 The UI does not imply guaranteed results or personalized advice.
+- [x] 4.5 All S-03 acceptance criteria are reviewed against the final result. — 617ca3d
+- [x] 4.6 Approved non-production AI and unavailable-provider paths are both verified. — 617ca3d
+- [x] 4.7 The UI does not imply guaranteed results or personalized advice. — 617ca3d
