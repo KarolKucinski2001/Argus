@@ -1,0 +1,233 @@
+@page "/analysis/ui-state-fixture"
+@model _bootstrap_scaffold.Pages.Analysis.UiStateFixtureModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Analysis UI states";
+}
+
+<section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
+    <div class="analysis-page__header">
+        <p class="eyebrow">Testing only</p>
+        <h1 id="ui-state-fixture-title">Analysis UI state fixture</h1>
+        <p class="analysis-page__lede">
+            Review the shared analysis surfaces and interaction states before
+            changing the production flow.
+        </p>
+    </div>
+
+    <div class="ui-state-fixture__grid">
+        <section class="ui-state-fixture__state" aria-labelledby="state-default">
+            <h2 id="state-default">Default</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="analysis-form__header">
+                            <h3>Wybierz aktywa</h3>
+                            <p>Stan początkowy selektora.</p>
+                        </div>
+                        <label class="asset-option">
+                            <input class="asset-option__input" type="checkbox" />
+                            <span class="asset-option__copy">
+                                <strong>AAPL</strong>
+                                <small>Equity</small>
+                            </span>
+                        </label>
+                        <button class="button" type="button">Rozpocznij analizę</button>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card">
+                        <div class="analysis-result-card__body">
+                            <header class="analysis-result-card__header">
+                                <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                                <h3>AAPL</h3>
+                                <p class="analysis-result-card__score">82/100</p>
+                            </header>
+                            <dl class="analysis-result-card__metrics">
+                                <div class="analysis-result-card__metric">
+                                    <dt>Score</dt>
+                                    <dd>82/100</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-hover">
+            <h2 id="state-hover">Hover</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="analysis-form__header">
+                            <h3>Wybierz aktywa</h3>
+                            <p>Najedź na wiersz selektora.</p>
+                        </div>
+                        <label class="asset-option">
+                            <input class="asset-option__input" type="checkbox" />
+                            <span class="asset-option__copy">
+                                <strong>MSFT</strong>
+                                <small>Equity</small>
+                            </span>
+                        </label>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card">
+                        <div class="analysis-result-card__body">
+                            <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                            <h3>MSFT</h3>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-focus">
+            <h2 id="state-focus">Focus-visible</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="analysis-form__header">
+                            <h3>Wybierz aktywa</h3>
+                            <p>Przejdź klawiszem Tab do kontrolki.</p>
+                        </div>
+                        <label class="asset-option">
+                            <input class="asset-option__input" type="checkbox" autofocus />
+                            <span class="asset-option__copy">
+                                <strong>BTC-USD</strong>
+                                <small>Crypto</small>
+                            </span>
+                        </label>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card">
+                        <div class="analysis-result-card__body">
+                            <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                            <h3>BTC-USD</h3>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
+            <h2 id="state-disabled">Disabled</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="analysis-form__header">
+                            <h3>Analiza niedostępna</h3>
+                            <p>Kontrolka pozostaje czytelna bez akcji.</p>
+                        </div>
+                        <button class="button" type="button" disabled>Ładowanie analizy</button>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card">
+                        <div class="analysis-result-card__body">
+                            <p class="analysis-result-card__status" role="status">Wynik niedostępny.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-error">
+            <h2 id="state-error">Error</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="validation-message" role="alert">
+                            <strong>Wybierz co najmniej jedno aktywo.</strong>
+                            <span>To jest stan walidacji selektora.</span>
+                        </div>
+                        <label class="asset-option">
+                            <input class="asset-option__input" type="checkbox" />
+                            <span class="asset-option__copy">
+                                <strong>ETH-USD</strong>
+                                <small>Crypto</small>
+                            </span>
+                        </label>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card analysis-result-card--error">
+                        <div class="analysis-result-card__body">
+                            <p class="analysis-result-card__status" role="status">Nie udało się przygotować wyniku.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-empty">
+            <h2 id="state-empty">Empty</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="status-card status-card--error" role="status">
+                            <h3>Brak skonfigurowanych aktywów</h3>
+                            <p>Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.</p>
+                        </div>
+                        <button class="button" type="button" disabled>Rozpocznij analizę</button>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card">
+                        <div class="analysis-result-card__body">
+                            <p class="analysis-result-card__status" role="status">Brak wyników do wyświetlenia.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-loading">
+            <h2 id="state-loading">Loading</h2>
+            <div class="analysis-workspace">
+                <aside class="analysis-workspace__sidebar">
+                    <div class="analysis-form">
+                        <div class="analysis-form__header">
+                            <h3>Wybierz aktywa</h3>
+                            <p>Przygotowywanie analizy.</p>
+                        </div>
+                        <button class="button" type="button" disabled>Przygotowywanie analizy...</button>
+                    </div>
+                </aside>
+                <div class="analysis-workspace__content">
+                    <h3>Dashboard analizy</h3>
+                    <article class="analysis-result-card analysis-result-card--success">
+                        <div class="analysis-result-card__body">
+                            <header class="analysis-result-card__header">
+                                <p class="analysis-result-card__rank">Analiza w toku</p>
+                                <h3 id="state-loading-result">AAPL</h3>
+                                <p class="analysis-result-card__status" role="status">
+                                    Pobieranie danych i przygotowywanie wyniku.
+                                </p>
+                            </header>
+                            <dl class="analysis-result-card__metrics" aria-label="Ładowanie metryk">
+                                <div class="analysis-result-card__metric" aria-hidden="true">
+                                    <dt>Score</dt>
+                                    <dd>...</dd>
+                                </div>
+                                <div class="analysis-result-card__metric" aria-hidden="true">
+                                    <dt>Historia</dt>
+                                    <dd>...</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>

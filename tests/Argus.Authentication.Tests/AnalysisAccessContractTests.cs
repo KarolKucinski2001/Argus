@@ -36,6 +36,11 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Empty", html);
         Assert.Contains("Loading", html);
         Assert.Contains("ui-state-fixture__grid", html);
+        Assert.Contains("analysis-workspace", html);
+        Assert.Contains("analysis-workspace__sidebar", html);
+        Assert.Contains("analysis-workspace__content", html);
+        Assert.Contains("analysis-result-card__metrics", html);
+        Assert.Contains("role=\"status\"", html);
     }
 
     [Fact]

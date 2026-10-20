@@ -511,6 +511,24 @@ button:focus-visible {
     margin: 0;
 }
 
+.ui-state-fixture .analysis-workspace {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.ui-state-fixture .analysis-workspace__sidebar {
+    position: static;
+}
+
+.ui-state-fixture .analysis-form {
+    max-width: none;
+}
+
+.ui-state-fixture .analysis-result-card__body {
+    padding: var(--space-3);
+}
+
 .analysis-page__boundary {
     margin: 0;
 }
