@@ -252,6 +252,59 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Unavailable_summary_keeps_analysis_evidence_and_uses_bounded_copy()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Podsumowanie analizy jest chwilowo niedostępne", html);
+        Assert.Contains("100/100", html);
+        Assert.Contains("Czynniki", html);
+        Assert.DoesNotContain("provider", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("exception", html, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Analysis_results_keep_the_educational_boundary_and_avoid_advice_language()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(
+            provider,
+            _ => { },
+            new FixedSummaryGenerator("Displayed evidence only."));
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.", html);
+        Assert.Contains("Dane w środowisku deweloperskim są ilustracyjne", html);
+        Assert.Contains("nie stanowią porady inwestycyjnej.", html);
+        Assert.DoesNotContain("best investment", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("buy", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("guaranteed", html, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("top opportunity", html, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Analysis_result_sources_keep_view_markup_color_free_and_css_token_backed()
     {
         var analysisView = File.ReadAllText(RepositoryPath("Pages", "Analysis", "Index.cshtml"));

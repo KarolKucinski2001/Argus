@@ -300,6 +300,101 @@ public sealed class AnalysisContractTests
     }
 
     [Fact]
+    public async Task AnalyzeAsync_marks_summary_unavailable_when_generator_times_out()
+    {
+            var generator = new BehaviorSummaryGenerator(
+                (_, _) => throw new OperationCanceledException("provider timeout"));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
+            Assert.Null(result.Summary);
+            Assert.NotNull(result.Score);
+            Assert.NotEmpty(result.Factors);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_propagates_request_cancellation_without_rendering_partial_summary()
+    {
+            using var cancellation = new CancellationTokenSource();
+            var generator = new BehaviorSummaryGenerator(
+                (_, token) =>
+                {
+                    cancellation.Cancel();
+                    token.ThrowIfCancellationRequested();
+                    return Task.FromResult(AnalysisSummaryResult.Generated("Should not be used."));
+                });
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            await Assert.ThrowsAsync<OperationCanceledException>(() =>
+                service.AnalyzeAsync(marketData, AsOf, cancellation.Token));
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_invokes_generator_once_per_sufficient_asset_and_keeps_mixed_results()
+    {
+            var calls = new List<string>();
+            var generator = new BehaviorSummaryGenerator(
+                (request, _) =>
+                {
+                    calls.Add(request.Asset.Id);
+                    return request.Asset.Id == "AAPL"
+                        ? Task.FromResult(AnalysisSummaryResult.Generated("AAPL grounded summary."))
+                        : throw new InvalidOperationException("second asset unavailable");
+                });
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m)),
+                CreateResult(
+                    120m,
+                    new AssetReference("MSFT", "Microsoft", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            Assert.Equal(["AAPL", "MSFT"], calls);
+            Assert.Collection(
+                response.Results,
+                result => Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status),
+                result => Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status));
+            Assert.All(response.Results, result =>
+            {
+                Assert.NotNull(result.Score);
+                Assert.NotEmpty(result.Factors);
+                Assert.NotEmpty(result.ChartPoints);
+            });
+    }
+
+    [Fact]
     public async Task AnalyzeAsync_does_not_invoke_generator_for_market_data_errors()
     {
             var generator = new RecordingSummaryGenerator(
@@ -350,6 +445,29 @@ public sealed class AnalysisContractTests
                 Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
                 Assert.Null(result.Summary);
             }
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_rejects_control_characters_from_generator_output()
+    {
+            var generator = new RecordingSummaryGenerator(
+                _ => AnalysisSummaryResult.Generated("safe\u0000unsafe"));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
+            Assert.Null(result.Summary);
     }
 
     [Fact]
@@ -658,6 +776,16 @@ public sealed class AnalysisContractTests
             LastRequest = request;
             return Task.FromResult(handler(request));
         }
+    }
+
+    private sealed class BehaviorSummaryGenerator(
+        Func<AnalysisSummaryRequest, CancellationToken, Task<AnalysisSummaryResult>> handler)
+        : IAnalysisSummaryGenerator
+    {
+        public Task<AnalysisSummaryResult> GenerateAsync(
+            AnalysisSummaryRequest request,
+            CancellationToken cancellationToken) =>
+            handler(request, cancellationToken);
     }
 
     private sealed class StaticPerformanceCalculator(AssetPerformance performance) : IPerformanceCalculator

@@ -456,11 +456,11 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [x] 3.1 Generated summaries render per asset.
-- [x] 3.2 Insufficient-evidence and AI-unavailable states render distinctly.
-- [x] 3.3 The educational-not-investment-advice boundary is present.
-- [x] 3.4 Raw prompts, provider details, credentials, and exception messages are absent.
-- [x] 3.5 Existing chart, ranking, quality, partial-result, and validation tests remain green.
+- [x] 3.1 Generated summaries render per asset. — 36a23ab
+- [x] 3.2 Insufficient-evidence and AI-unavailable states render distinctly. — 36a23ab
+- [x] 3.3 The educational-not-investment-advice boundary is present. — 36a23ab
+- [x] 3.4 Raw prompts, provider details, credentials, and exception messages are absent. — 36a23ab
+- [x] 3.5 Existing chart, ranking, quality, partial-result, and validation tests remain green. — 36a23ab
 
 #### Manual
 
@@ -472,10 +472,10 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [ ] 4.1 The focused analysis and page contract matrix is deterministic and network-free.
-- [ ] 4.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with zero warnings and errors.
-- [ ] 4.3 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
-- [ ] 4.4 S-03 documentation matches the provider-neutral grounded-summary behavior.
+- [x] 4.1 The focused analysis and page contract matrix is deterministic and network-free.
+- [x] 4.2 `dotnet build .bootstrap-scaffold.csproj --no-restore` passes with zero warnings and errors.
+- [x] 4.3 `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` passes.
+- [x] 4.4 S-03 documentation matches the provider-neutral grounded-summary behavior.
 
 #### Manual
 

@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Extend the protected `/analysis` flow so selected assets receive a transparent ranked analysis with deterministic score, factors, performance metrics, chart data, and grounded local explanation.
+**Goal:** Extend the protected `/analysis` flow so selected assets receive a transparent ranked analysis with deterministic score, factors, performance metrics, chart data, and one provider-neutral AI summary per asset grounded only in displayed normalized evidence.
 
-**Architecture:** Add a focused `_bootstrap_scaffold.Analysis` application layer that consumes the existing provider-neutral `MarketDataResponse`. Keep `/analysis` as a server-rendered Razor Page, calculate a bounded `0–100` score from 24-hour, 7-day, and 30-day performance, preserve per-asset partial results, and render ranked cards without adding a JavaScript dashboard or real AI integration.
+**Architecture:** Add a focused `_bootstrap_scaffold.Analysis` application layer that consumes the existing provider-neutral `MarketDataResponse`. Keep `/analysis` as a server-rendered Razor Page, calculate a bounded `0–100` score from 24-hour, 7-day, and 30-day performance, preserve per-asset partial results, and request one provider-neutral grounded summary per asset without adding a JavaScript dashboard or provider activation decision.
 
 **Tech Stack:** ASP.NET Core/.NET 10, C# records and dependency injection, Razor Pages, xUnit, `WebApplicationFactory`, existing CSS token system.
 
@@ -18,9 +18,17 @@
 - Never convert missing evidence into zero performance or a zero score.
 - Never render raw provider exception text, upstream payloads, provider credentials, or provider-specific identifiers.
 - Keep the production provider-approval gate and Development/Test fake-provider boundary unchanged.
-- Use deterministic local explanations only; do not add an LLM, network call, API key, or new frontend dependency.
+- Use a provider-neutral grounded-summary port. Do not add provider SDK types to the analysis domain, expose credentials, or make provider activation decisions in this slice.
+- Invoke the summary generator once per asset only when at least two factors are available. Unavailable, timeout, cancellation, and malformed output states must preserve the rest of the analysis.
+- Allow only normalized evidence already displayed by the page to enter a summary request.
 - Keep all score, factor, chart, and summary copy educational and avoid “buy”, “best investment”, “guaranteed”, and “top opportunity” language.
 - Preserve the existing authentication, antiforgery, account-to-analysis navigation, and `/api/market-data` contracts.
+
+## Explicit non-goals
+
+- AI Copilot, chat, follow-up questions, or conversational interaction.
+- Provider activation, provider selection, and production credential decisions.
+- Persistence, watchlists, alerts, trading, or personalized investment advice.
 
 ---
 
@@ -34,7 +42,7 @@ Create these focused analysis-layer files:
 - `Analysis/IOpportunityScorer.cs` — scoring interface.
 - `Analysis/OpportunityScorer.cs` — fixed weights, clamping, missing-factor handling, and factor contribution calculation.
 - `Analysis/IAnalysisExplanationBuilder.cs` — explanation interface.
-- `Analysis/AnalysisExplanationBuilder.cs` — bounded deterministic summaries grounded in analysis values.
+- `Analysis/AnalysisExplanationBuilder.cs` — bounded fallback summaries grounded in analysis values.
 - `Analysis/IAnalysisService.cs` — application-layer entry point.
 - `Analysis/AnalysisService.cs` — maps market-data results, preserves partial errors, ranks usable results, and creates the final response.
 
@@ -222,7 +230,7 @@ git commit -m "feat(explained-market-ranking): add transparent opportunity scori
 
 ---
 
-### Task 3: Build deterministic explanations and the application analysis service
+### Task 3: Build grounded summaries and the application analysis service
 
 **Files:**
 - Create: `Analysis/IAnalysisExplanationBuilder.cs`
@@ -279,8 +287,9 @@ public sealed record AnalysisResponse(
   - `Analyze_preserves_submitted_order_for_score_ties`
   - `Analyze_keeps_successful_results_when_another_asset_has_an_error`
 
-Assert that summaries contain only values supplied by the test data, never
-provider IDs or raw error messages, and use bounded insufficient-evidence copy.
+Assert that summary requests and rendered summaries contain only normalized
+values supplied by the test data, never provider IDs or raw error messages, and
+use bounded insufficient-evidence copy.
 
 - [ ] **Step 2: Run the focused tests and verify they fail.**
 
@@ -292,17 +301,21 @@ dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj -
 
 Expected: FAIL because the explanation builder and analysis service are absent.
 
-- [ ] **Step 3: Implement the deterministic explanation builder.** Build short
+- [ ] **Step 3: Implement the bounded local fallback builder.** Build short
   Polish or English-consistent text from the factor labels, percentage values,
   score availability, quality, and freshness. Do not interpolate
   `MarketDataSource.ProviderId`, `MarketDataError.Message`, or any unbounded
   provider field. If fewer than two factors are available, explicitly state
-  that the evidence is insufficient for a meaningful score.
+  that the evidence is insufficient for a meaningful score. The provider-neutral
+  summary generator may replace this text only with a result grounded in the
+  normalized evidence supplied by `AnalysisSummaryRequest`.
 
 - [ ] **Step 4: Implement `AnalysisService`.** For each market-data result:
   - preserve `Error`, quality, freshness, warnings, and chart-safe data;
   - calculate performance and score for successful results;
-  - build the summary from the normalized values;
+  - invoke the summary generator once per asset with sufficient evidence;
+  - map unavailable, timeout, cancellation, and malformed output to a bounded
+    summary state while preserving the rest of the analysis;
   - order results by descending non-null score using stable input order for ties;
   - keep insufficient-evidence and errored assets in the response after scored
     assets so no selected asset silently disappears.
@@ -455,8 +468,10 @@ git commit -m "feat(explained-market-ranking): style ranked analysis cards"
 
 - [ ] **Step 1: Add documentation assertions or review checklist entries for the
   S-03 handoff.** Document that product metrics, scoring, chart projection, and
-  deterministic explanations derive from normalized evidence and must preserve
-  freshness, quality, warnings, and per-asset errors.
+  grounded summaries derive from normalized evidence and must preserve
+  freshness, quality, warnings, and per-asset errors. State that only displayed
+  normalized evidence may enter a summary and that Copilot/chat and provider
+  activation decisions are explicit non-goals.
 
 - [ ] **Step 2: Run the complete test suite.**
 
