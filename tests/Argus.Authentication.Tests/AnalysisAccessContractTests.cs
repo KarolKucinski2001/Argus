@@ -172,6 +172,16 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("<time datetime=", html);
         Assert.Contains("Historyczne obserwacje ceny zamknięcia", html);
         Assert.DoesNotContain("prognoz", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("data-chart-range", html);
+        Assert.Contains("aria-label=\"Zakres historii cenowej\"", html);
+        Assert.Equal(5, Regex.Matches(html, "data-chart-range-option").Count);
+        Assert.Contains("data-chart-range-option=\"1M\"", html);
+        Assert.Contains("data-chart-range-option=\"3M\"", html);
+        Assert.Contains("data-chart-range-option=\"6M\"", html);
+        Assert.Contains("data-chart-range-option=\"1Y\"", html);
+        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Matches("data-chart-range-option=\"1Y\"[^>]*aria-pressed=\"true\"", html);
+        Assert.Matches("data-chart-range-option=\"1M\"[^>]*aria-pressed=\"false\"", html);
     }
 
     [Fact]
@@ -303,6 +313,32 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Contains("analysis-chart.js", analysisView);
         Assert.Contains("data-chart-tooltip", analysisView);
+        Assert.Contains("data-chart-range-option", analysisView);
+        Assert.Contains(".analysis-result-card__chart-range", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-range-button", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-range-button[aria-pressed=\"true\"]", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-range-button:hover", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-point:not([hidden])", stylesheet);
+        Assert.Contains("overflow-x: hidden", stylesheet);
+
+        // Quiet/active point opacity must be scoped to the SVG circle so the no-JS textual
+        // fallback <li> rows (sharing the same class) stay fully readable.
+        Assert.Contains("circle.analysis-result-card__chart-point:not([hidden])", stylesheet);
+        Assert.Contains("circle.analysis-result-card__chart-point:hover", stylesheet);
+        Assert.DoesNotMatch(@"(?<!circle)\.analysis-result-card__chart-point:not\(\[hidden\]\)", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-points .analysis-result-card__chart-point {", stylesheet);
+        Assert.Matches(
+            @"\.analysis-result-card__chart-points \.analysis-result-card__chart-point \{[^}]*opacity:\s*1;",
+            stylesheet);
+
+        var chartScript = File.ReadAllText(RepositoryPath("wwwroot", "js", "analysis-chart.js"));
+
+        Assert.Contains("data-chart-range-option", chartScript);
+        Assert.Contains("data-chart-timestamp", chartScript);
+        Assert.Contains("aria-pressed", chartScript);
+        Assert.Contains("data-chart-line", chartScript);
+        Assert.Contains("1Y", chartScript);
+        Assert.Contains("Max", chartScript);
     }
 
     [Fact]

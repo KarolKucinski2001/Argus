@@ -609,6 +609,42 @@ button:focus-visible {
 .analysis-result-card__chart {
     position: relative;
     overflow: hidden;
+    overflow-x: hidden;
+}
+
+.analysis-result-card__chart-range {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.analysis-result-card__chart-range-button {
+    min-width: 3rem;
+    min-height: 2.25rem;
+    padding: var(--space-1) var(--space-2);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 800;
+}
+
+.analysis-result-card__chart-range-button:hover,
+.analysis-result-card__chart-range-button:focus-visible,
+.analysis-result-card__chart-range-button[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+}
+
+.analysis-result-card__chart-range-button:focus-visible {
+    outline: 0.125rem solid var(--color-accent);
+    outline-offset: 0.125rem;
 }
 
 .analysis-result-card__chart-svg {
@@ -616,8 +652,9 @@ button:focus-visible {
     width: 100%;
     max-width: 100%;
     height: auto;
-    min-height: 12rem;
-    overflow: visible;
+    aspect-ratio: 640 / 240;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .analysis-result-card__chart-axis line {
@@ -639,26 +676,29 @@ button:focus-visible {
     stroke-width: 3;
 }
 
-.analysis-result-card__chart-point {
+circle.analysis-result-card__chart-point:not([hidden]) {
     fill: var(--color-surface-raised);
     stroke: var(--color-accent);
-    stroke-width: 2;
+    r: 2.5;
+    opacity: 0.45;
+    stroke-width: 1.5;
     cursor: pointer;
     outline: none;
-    transition: r 160ms ease, fill 160ms ease, stroke-width 160ms ease;
+    transition: r 160ms ease, opacity 160ms ease, fill 160ms ease;
 }
 
-.analysis-result-card__chart-point:hover,
-.analysis-result-card__chart-point.is-active {
+circle.analysis-result-card__chart-point:hover,
+circle.analysis-result-card__chart-point.is-active,
+circle.analysis-result-card__chart-point:focus-visible {
     fill: var(--color-accent);
     stroke: var(--color-on-accent);
-    stroke-width: 3;
+    r: 5;
+    opacity: 1;
 }
 
-.analysis-result-card__chart-point:focus-visible {
+circle.analysis-result-card__chart-point:focus-visible {
     fill: var(--color-accent);
     stroke: var(--color-text);
-    stroke-width: 3;
     filter: drop-shadow(0 0 0.25rem var(--color-accent));
 }
 
@@ -687,21 +727,22 @@ button:focus-visible {
     background: var(--color-bg);
 }
 
-.analysis-result-card__chart-point {
+.analysis-result-card__chart-points .analysis-result-card__chart-point {
     display: flex;
     justify-content: space-between;
     gap: var(--space-3);
     min-width: 0;
     padding-block: var(--space-1);
     border-bottom: 0.0625rem solid var(--color-divider);
+    opacity: 1;
 }
 
-.analysis-result-card__chart-point:last-child {
+.analysis-result-card__chart-points .analysis-result-card__chart-point:last-child {
     border-bottom: 0;
 }
 
-.analysis-result-card__chart-point span,
-.analysis-result-card__chart-point time,
+.analysis-result-card__chart-points .analysis-result-card__chart-point span,
+.analysis-result-card__chart-points .analysis-result-card__chart-point time,
 .analysis-result-card__summary {
     min-width: 0;
     overflow-wrap: anywhere;
@@ -787,7 +828,7 @@ button:focus-visible {
     }
 
     .analysis-result-card__header,
-    .analysis-result-card__chart-point {
+    .analysis-result-card__chart-points .analysis-result-card__chart-point {
         grid-template-columns: 1fr;
     }
 
@@ -804,13 +845,25 @@ button:focus-visible {
         grid-template-columns: 1fr;
     }
 
-    .analysis-result-card__chart-point {
+    .analysis-result-card__chart-points .analysis-result-card__chart-point {
         display: grid;
         gap: var(--space-1);
     }
 
     .analysis-result-card__chart-svg {
         min-height: 10rem;
+    }
+
+    .analysis-result-card__chart-range {
+        width: 100%;
+    }
+
+    .analysis-result-card__chart-range-button {
+        flex: 1 1 3rem;
+    }
+
+    .analysis-result-card__chart-tooltip {
+        max-width: calc(100% - var(--space-4));
     }
 }
 
