@@ -194,12 +194,112 @@
                                         </ul>
                                     </section>
 
-                                    @if (result.ChartPoints.Count > 0)
-                                    {
-                                        <section class="analysis-result-card__chart" aria-label="Dane wykresu dla @result.Asset.Id">
-                                            <h4>Dane wykresu</h4>
+                                        var chartPoints = result.ChartPoints.OrderBy(point => point.Timestamp).ToArray();
+                                        var chartId = $"analysis-chart-{result.Asset.Id}";
+                                        var chartTitleId = $"{chartId}-title";
+                                        var chartDescriptionId = $"{chartId}-description";
+                                        var chartTooltipId = $"{chartId}-tooltip";
+                                        const decimal chartWidth = 640m;
+                                        const decimal chartHeight = 240m;
+                                        const decimal chartLeft = 48m;
+                                        const decimal chartRight = 16m;
+                                        const decimal chartTop = 16m;
+                                        const decimal chartBottom = 32m;
+                                        var plotWidth = chartWidth - chartLeft - chartRight;
+                                        var plotHeight = chartHeight - chartTop - chartBottom;
+                                        var minimumClose = chartPoints.Length > 0 ? chartPoints.Min(point => point.Close) : 0m;
+                                        var maximumClose = chartPoints.Length > 0 ? chartPoints.Max(point => point.Close) : 0m;
+                                        var closeRange = maximumClose - minimumClose;
+                                        var pathData = string.Join(
+                                            " ",
+                                            chartPoints.Select((point, index) =>
+                                            {
+                                                var x = chartPoints.Length == 1
+                                                    ? chartLeft + plotWidth / 2m
+                                                    : chartLeft + index * plotWidth / (chartPoints.Length - 1);
+                                                var normalizedClose = closeRange == 0m
+                                                    ? 0.5m
+                                                    : (point.Close - minimumClose) / closeRange;
+                                                var y = chartTop + (1m - normalizedClose) * plotHeight;
+                                                return $"{(index == 0 ? "M" : "L")}{x.ToString("0.##", CultureInfo.InvariantCulture)},{y.ToString("0.##", CultureInfo.InvariantCulture)}";
+                                            }));
+
+                                    <section id="@chartId"
+                                             class="analysis-result-card__chart"
+                                             data-chart-container
+                                             aria-labelledby="@chartTitleId">
+                                        <h4 id="@chartTitleId">Historia cenowa</h4>
+                                        @if (chartPoints.Length > 0)
+                                        {
+                                            <p id="@chartDescriptionId" class="analysis-result-card__chart-description">
+                                                Historyczne obserwacje ceny zamknięcia dla @result.Asset.Id.
+                                            </p>
+                                            <svg class="analysis-result-card__chart-svg"
+                                                 viewBox="0 0 640 240"
+                                                 preserveAspectRatio="xMidYMid meet"
+                                                 role="img"
+                                                 aria-labelledby="@chartTitleId @chartDescriptionId"
+                                                 data-chart-svg>
+                                                <g class="analysis-result-card__chart-axis" aria-hidden="true">
+                                                    <line x1="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          y1="@chartTop.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          x2="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          y2="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))" />
+                                                    <line x1="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          y1="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))"
+                                                          x2="@((chartWidth - chartRight).ToString("0.##", CultureInfo.InvariantCulture))"
+                                                          y2="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))" />
+                                                    <text class="analysis-result-card__chart-axis-label"
+                                                          x="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          y="12">Cena zamknięcia</text>
+                                                    <text class="analysis-result-card__chart-axis-label"
+                                                          x="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                          y="232">Data obserwacji</text>
+                                                </g>
+                                                @if (chartPoints.Length > 1)
+                                                {
+                                                    <path class="analysis-result-card__chart-line"
+                                                          d="@pathData"
+                                                          data-chart-line
+                                                          aria-hidden="true" />
+                                                }
+                                                @foreach (var point in chartPoints.Select((point, index) => new { point, index }))
+                                                {
+                                                    var x = chartPoints.Length == 1
+                                                        ? chartLeft + plotWidth / 2m
+                                                        : chartLeft + point.index * plotWidth / (chartPoints.Length - 1);
+                                                    var normalizedClose = closeRange == 0m
+                                                        ? 0.5m
+                                                        : (point.point.Close - minimumClose) / closeRange;
+                                                    var y = chartTop + (1m - normalizedClose) * plotHeight;
+                                                    var timestamp = point.point.Timestamp.ToString("O", CultureInfo.InvariantCulture);
+                                                    var close = FormatDecimal(point.point.Close);
+                                                    var label = $"{result.Asset.Id} — obserwacja historyczna {point.point.Timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}, cena zamknięcia {close}";
+                                                    <circle class="analysis-result-card__chart-point"
+                                                            cx="@x.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                            cy="@y.ToString("0.##", CultureInfo.InvariantCulture)"
+                                                            r="5"
+                                                            tabindex="0"
+                                                            role="img"
+                                                            aria-label="@label"
+                                                            data-chart-point
+                                                            data-chart-asset="@result.Asset.Id"
+                                                            data-chart-timestamp="@timestamp"
+                                                            data-chart-close="@close" />
+                                                }
+                                            </svg>
+                                            <div class="analysis-result-card__chart-tooltip"
+                                                 id="@chartTooltipId"
+                                                 data-chart-tooltip
+                                                 role="status"
+                                                 aria-live="polite"
+                                                 hidden></div>
+                                            @if (chartPoints.Length < 2)
+                                            {
+                                                <p class="analysis-result-card__chart-state" role="status">Dostępna jest jedna historyczna obserwacja.</p>
+                                            }
                                             <ul class="analysis-result-card__chart-points">
-                                                @foreach (var point in result.ChartPoints)
+                                                @foreach (var point in chartPoints)
                                                 {
                                                     <li class="analysis-result-card__chart-point"
                                                         data-chart-asset="@result.Asset.Id"
@@ -212,8 +312,12 @@
                                                     </li>
                                                 }
                                             </ul>
-                                        </section>
-                                    }
+                                        }
+                                        else
+                                        {
+                                            <p class="analysis-result-card__chart-state" role="status">Brak historycznych obserwacji do wyświetlenia.</p>
+                                        }
+                                    </section>
 
                                     @if (result.Summary is not null)
                                     {
@@ -235,6 +339,10 @@
         inwestycyjnej.
     </p>
 </section>
+
+@section Scripts {
+    <script src="~/js/analysis-chart.js" asp-append-version="true"></script>
+}
 
 @functions {
     private static string FormatMetric(_bootstrap_scaffold.Analysis.PerformanceMetric metric) =>

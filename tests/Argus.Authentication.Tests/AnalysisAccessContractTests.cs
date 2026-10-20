@@ -134,9 +134,69 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("weight 35%", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("weight 40%", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Score ", html);
-        Assert.Contains("Dane wykresu", html);
+        Assert.Contains("Historia cenowa", html);
         Assert.Contains("data-chart-asset=\"AAPL\"", html);
         Assert.Contains("data-chart-close=\"80", html);
+    }
+
+    [Fact]
+    public async Task Analysis_results_render_accessible_svg_geometry_and_text_fallback()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("id=\"analysis-chart-AAPL\"", html);
+        Assert.Contains("data-chart-container", html);
+        Assert.Contains("data-chart-svg", html);
+        Assert.Contains("class=\"analysis-result-card__chart-axis\"", html);
+        Assert.Contains("class=\"analysis-result-card__chart-line\"", html);
+        Assert.Contains("aria-label=\"AAPL — obserwacja historyczna", html);
+        Assert.Contains("tabindex=\"0\"", html);
+        Assert.Equal(3, Regex.Matches(html, "data-chart-point").Count);
+        Assert.Equal(3, Regex.Matches(html, "data-chart-point[^>]*data-chart-timestamp=\"[^\"]+\"").Count);
+        Assert.Equal(3, Regex.Matches(html, "data-chart-point[^>]*data-chart-close=\"[^\"]+\"").Count);
+        Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
+        Assert.Contains("data-chart-tooltip", html);
+        Assert.Contains("role=\"status\"", html);
+        Assert.Contains("<time datetime=", html);
+        Assert.Contains("Historyczne obserwacje ceny zamknięcia", html);
+        Assert.DoesNotContain("prognoz", html, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Analysis_results_render_safe_no_history_chart_state_without_geometry()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateThinResult("AAPL", MarketAssetClass.Equity));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Historia cenowa", html);
+        Assert.Contains("Brak historycznych obserwacji do wyświetlenia.", html);
+        Assert.DoesNotContain("data-chart-svg", html);
+        Assert.DoesNotContain("data-chart-point", html);
+        Assert.DoesNotContain("data-chart-timestamp", html);
+        Assert.DoesNotContain("data-chart-close", html);
     }
 
 
@@ -233,9 +293,16 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains(".analysis-result-card--success", stylesheet);
         Assert.Contains(".analysis-result-card__metrics", stylesheet);
         Assert.Contains(".analysis-result-card__chart", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-svg", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-point:focus-visible", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-tooltip", stylesheet);
+        Assert.Contains("var(--color-accent)", stylesheet);
         Assert.Contains(".analysis-result-card--insufficient-evidence", stylesheet);
         Assert.Contains(".analysis-result-card--error", stylesheet);
         Assert.Contains("@media (max-width: 40rem)", stylesheet);
+
+        Assert.Contains("analysis-chart.js", analysisView);
+        Assert.Contains("data-chart-tooltip", analysisView);
     }
 
     [Fact]
