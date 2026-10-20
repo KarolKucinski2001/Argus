@@ -28,6 +28,9 @@ builder.Services.AddSingleton<IPerformanceCalculator, PerformanceCalculator>();
 builder.Services.AddSingleton<IOpportunityScorer, OpportunityScorer>();
 builder.Services.AddSingleton<IAnalysisExplanationBuilder, AnalysisExplanationBuilder>();
 builder.Services.AddSingleton<IAnalysisService, AnalysisService>();
+builder.Services.AddOptions<AnalysisSummaryOptions>()
+    .Bind(builder.Configuration.GetSection(AnalysisSummaryOptions.SectionName));
+builder.Services.AddSingleton<IAnalysisSummaryGenerator, UnavailableAnalysisSummaryGenerator>();
 builder.Services.AddSingleton<IMarketDataProvider>(_ =>
     builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing")
         ? new DevelopmentMarketDataProvider()

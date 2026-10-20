@@ -1,5 +1,6 @@
 @page "/analysis"
 @using System.Globalization
+@using _bootstrap_scaffold.Analysis
 @using _bootstrap_scaffold.MarketData
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
@@ -78,6 +79,10 @@
         {
             <section class="analysis-results" aria-labelledby="analysis-results-title">
                 <h2 id="analysis-results-title">Ranking analizy</h2>
+                <p class="analysis-results__boundary">
+                    Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+                    Argus pokazuje dane i ich wyjaśnienia, ale nie składa spersonalizowanych obietnic dotyczących przyszłości.
+                </p>
                 @if (Model.HasPartialResults)
                 {
                     <p role="status">Częściowe wyniki — część aktywów nie ma pełnych danych.</p>
@@ -339,10 +344,37 @@
                                         }
                                     </section>
 
-                                    @if (result.Summary is not null)
-                                    {
-                                        <p class="analysis-result-card__summary">@result.Summary</p>
-                                    }
+                                    <section class="analysis-result-card__summary"
+                                             aria-label="Podsumowanie analizy dla @result.Asset.Id">
+                                        @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
+                                        {
+                                            <h4>Podsumowanie</h4>
+                                            <p>@generatedSummary.Text</p>
+                                        }
+                                        else if (result.SummaryResult is { Status: var summaryStatus })
+                                        {
+                                            <p class="analysis-result-card__summary--status" role="status">
+                                                <strong>Podsumowanie:</strong>
+                                                @Model.MapSummaryStatusMessage(summaryStatus)
+                                                @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
+                                                {
+                                                    <span class="visually-hidden">Insufficient evidence</span>
+                                                }
+                                            </p>
+                                        }
+                                        else if (result.Summary is not null)
+                                        {
+                                            <h4>Podsumowanie</h4>
+                                            <p>@result.Summary</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="analysis-result-card__summary--status" role="status">
+                                                <strong>Podsumowanie:</strong>
+                                                @Model.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
+                                            </p>
+                                        }
+                                    </section>
                                 }
                             </article>
                         </li>

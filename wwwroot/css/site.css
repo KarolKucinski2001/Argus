@@ -463,8 +463,16 @@ button:focus-visible {
 }
 
 .analysis-results h2,
-.analysis-results p {
+.analysis-results > p {
     margin: 0;
+}
+
+.analysis-results__boundary {
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-warning-surface);
+    color: var(--color-muted);
 }
 
 .analysis-results__list {
@@ -749,8 +757,39 @@ circle.analysis-result-card__chart-point:focus-visible {
 }
 
 .analysis-result-card__summary {
+    display: grid;
+    gap: var(--space-2);
     margin: 0;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
     color: var(--color-muted);
+}
+
+.analysis-result-card__summary h4,
+.analysis-result-card__summary p {
+    margin: 0;
+}
+
+.analysis-result-card__summary h4 {
+    color: var(--color-text);
+}
+
+.analysis-result-card__summary--status {
+    display: block;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .analysis-result-card--success {

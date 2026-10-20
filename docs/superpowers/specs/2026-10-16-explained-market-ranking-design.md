@@ -9,8 +9,9 @@
 Extend the protected `/analysis` flow so an authenticated user receives a
 transparent, explained ranking for the selected assets. The first version
 uses the existing provider-neutral `MarketDataResponse`, a deterministic local
-scoring model, server-rendered Razor cards, and a deterministic explanation.
-It does not integrate a real AI model or production market-data provider.
+scoring model, server-rendered Razor cards, and one provider-neutral AI summary
+per asset grounded only in the normalized evidence shown on the page. Provider
+activation remains outside this slice.
 
 ## Decisions
 
@@ -24,8 +25,13 @@ It does not integrate a real AI model or production market-data provider.
   - 30-day trend: 40%
 - Show the score contributors and their numeric contribution so the score is
   inspectable rather than presented as a prediction.
-- Use deterministic local text for the explanation, built only from displayed
-  metrics, factors, freshness, quality, and available evidence.
+- Request one grounded AI summary per asset only when at least two factors are
+  available. The AI boundary accepts normalized metrics, factors, freshness,
+  quality, warnings, and score; it never accepts raw provider payloads,
+  provider identifiers, credentials, or hidden evidence.
+- Treat missing evidence, unavailable AI, timeout, cancellation, and malformed
+  output as bounded states. Preserve the score, factors, metrics, chart, and
+  ranking whenever those were calculated.
 - Sort cards by score descending; preserve the submitted asset order for ties.
 - Keep partial results per asset. A usable result remains visible when another
   selected asset has an error.
@@ -46,9 +52,10 @@ The change adds a focused analysis layer:
 3. `OpportunityScorer` converts available performance values into a bounded
    score and returns factor records containing the factor name, value, weight,
    contribution, and evidence status.
-4. `AnalysisExplanationBuilder` creates a deterministic, bounded summary from
-   the same metrics and factors shown in the UI. It does not call a model,
-   network, or provider-specific API.
+4. A provider-neutral summary generator receives a bounded request containing
+   only normalized evidence already displayed by the UI. Its adapter is
+   replaceable and may be unavailable; no provider SDK or activation decision
+   belongs in the analysis domain.
 5. The `/analysis` PageModel invokes the existing market-data service, passes
    the response to the analysis layer, and exposes ranked cards plus per-asset
    error states to the Razor view.
@@ -70,7 +77,8 @@ The page shows a ranked list of responsive cards. Each usable card contains:
 - at least two factors when sufficient evidence exists;
 - each factor's direction, weight, and contribution;
 - a simple historical chart using the normalized historical points;
-- a deterministic summary grounded in the displayed evidence.
+- an AI-generated summary grounded in the displayed evidence, when available;
+  otherwise a bounded unavailable or insufficient-evidence state.
 
 An asset without enough evidence receives a bounded insufficient-evidence state
 and explains what is missing. An asset with a provider error receives a bounded
@@ -103,8 +111,11 @@ and must be covered by unit tests.
 - Partial results are preserved per asset.
 - Missing, stale, delayed, or incomplete evidence remains visible to the
   analysis and explanation layers.
-- Deterministic summaries must acknowledge uncertainty and must not invent
-  facts absent from the normalized response.
+- Summaries must acknowledge uncertainty and must not invent facts absent from
+  the normalized response. Only displayed normalized evidence may enter a
+  summary.
+- AI failures, timeouts, cancellations, and malformed output must never remove
+  otherwise valid analysis results.
 - The production provider-approval gate and fake-provider environment boundary
   remain unchanged.
 
@@ -116,7 +127,9 @@ Automated tests will cover:
 - missing and out-of-range history points;
 - score normalization, fixed weights, rounding, and bounds;
 - factor contribution output and insufficient-evidence behavior;
-- deterministic explanation output and no invented data;
+- grounded summary input, per-asset invocation, insufficient evidence,
+  unavailable/timeout/cancellation handling, malformed output, and no invented
+  data;
 - ranking order and stable tie handling;
 - preservation of successful partial results alongside per-asset errors;
 - Razor rendering of score, metrics, factors, chart, summary, quality states,
@@ -130,8 +143,8 @@ legibility, and the educational-not-advice boundary.
 
 ## Explicit non-goals
 
-- Real AI or LLM integration.
-- Production market-data provider activation.
+- AI Copilot, chat, follow-up questions, or conversational interaction.
+- Provider activation, provider selection, and production credential decisions.
 - JavaScript dashboard or client-side state management.
 - Persistent analyses, watchlists, alerts, or portfolio features.
 - Separate per-asset routes.
