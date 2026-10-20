@@ -95,8 +95,10 @@
                             <h3>Wybierz aktywa</h3>
                             <p>Przejdź klawiszem Tab do kontrolki.</p>
                         </div>
-                        <label class="asset-option">
-                            <input class="asset-option__input" type="checkbox" autofocus />
+                        <label class="asset-option ui-state-fixture__focus-target"
+                               data-focus-visible-example
+                               tabindex="0">
+                            <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>BTC-USD</strong>
                                 <small>Crypto</small>
@@ -195,17 +197,31 @@
             <h2 id="state-loading">Loading</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
-                    <div class="analysis-form">
+                    <form method="post"
+                          class="analysis-form"
+                          data-analysis-form
+                          data-pending="true"
+                          aria-busy="true">
                         <div class="analysis-form__header">
                             <h3>Wybierz aktywa</h3>
                             <p>Przygotowywanie analizy.</p>
                         </div>
-                        <button class="button" type="button" disabled>Przygotowywanie analizy...</button>
-                    </div>
+                        <p class="analysis-form__pending"
+                           data-pending-status
+                           role="status">
+                            Analiza jest przygotowywana. Nie zamykaj tej strony.
+                        </p>
+                        <button class="button"
+                                type="submit"
+                                data-submit-button
+                                disabled>
+                            Przygotowywanie analizy...
+                        </button>
+                    </form>
                 </aside>
                 <div class="analysis-workspace__content">
                     <h3>Dashboard analizy</h3>
-                    <article class="analysis-result-card analysis-result-card--success">
+                    <article class="analysis-result-card ui-state-fixture__loading-card">
                         <div class="analysis-result-card__body">
                             <header class="analysis-result-card__header">
                                 <p class="analysis-result-card__rank">Analiza w toku</p>

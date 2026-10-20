@@ -529,6 +529,17 @@ button:focus-visible {
     padding: var(--space-3);
 }
 
+.ui-state-fixture__focus-target:focus-visible,
+.ui-state-fixture__focus-target[data-focus-visible-example] {
+    outline: 0.1875rem solid var(--color-focus);
+    outline-offset: 0.25rem;
+}
+
+.ui-state-fixture__loading-card {
+    border-color: var(--color-secondary-border);
+    background: var(--color-surface);
+}
+
 .analysis-page__boundary {
     margin: 0;
 }

@@ -41,6 +41,14 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("analysis-workspace__content", html);
         Assert.Contains("analysis-result-card__metrics", html);
         Assert.Contains("role=\"status\"", html);
+        Assert.Contains("data-focus-visible-example", html);
+        Assert.Contains("class=\"asset-option ui-state-fixture__focus-target\"", html);
+        Assert.Contains("tabindex=\"0\"", html);
+        Assert.Contains("data-analysis-form", html);
+        Assert.Contains("data-submit-button", html);
+        Assert.Contains("data-pending-status", html);
+        Assert.Contains("ui-state-fixture__loading-card", html);
+        Assert.DoesNotContain("analysis-result-card analysis-result-card--success", html);
     }
 
     [Fact]
