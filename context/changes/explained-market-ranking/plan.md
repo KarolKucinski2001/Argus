@@ -426,9 +426,9 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [x] 1.1 Summary request and result contracts compile with nullable safety enabled.
-- [x] 1.2 The generator port supports cancellation and deterministic test replacement.
-- [x] 1.3 Unconfigured AI fails closed to a bounded unavailable state.
+- [x] 1.1 Summary request and result contracts compile with nullable safety enabled. — 6b8a4bb
+- [x] 1.2 The generator port supports cancellation and deterministic test replacement. — 6b8a4bb
+- [x] 1.3 Unconfigured AI fails closed to a bounded unavailable state. — 6b8a4bb
 
 #### Manual
 
@@ -439,12 +439,12 @@ backward-compatible when the AI adapter is unavailable.
 
 #### Automated
 
-- [ ] 2.1 Sufficient evidence invokes the generator with only displayed evidence.
-- [ ] 2.2 Insufficient evidence skips the generator.
-- [ ] 2.3 Generator failure preserves score, ranking, factors, metrics, and chart points.
-- [ ] 2.4 Errored market-data results never invoke the generator.
-- [ ] 2.5 Empty, oversized, or malformed generator output is handled safely.
-- [ ] 2.6 Existing analysis and market-data contract tests remain green.
+- [x] 2.1 Sufficient evidence invokes the generator with only displayed evidence.
+- [x] 2.2 Insufficient evidence skips the generator.
+- [x] 2.3 Generator failure preserves score, ranking, factors, metrics, and chart points.
+- [x] 2.4 Errored market-data results never invoke the generator.
+- [x] 2.5 Empty, oversized, or malformed generator output is handled safely.
+- [x] 2.6 Existing analysis and market-data contract tests remain green.
 
 #### Manual
 

@@ -86,7 +86,10 @@ public sealed class IndexModel(
         CurrentQuotes = result.Response!.Results
             .Where(item => item.CurrentQuote is not null)
             .ToDictionary(item => item.Asset.Id, item => item.CurrentQuote!, StringComparer.OrdinalIgnoreCase);
-        AnalysisResults = analysisService.Analyze(result.Response, DateTimeOffset.UtcNow);
+        AnalysisResults = await analysisService.AnalyzeAsync(
+            result.Response,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
         HasStarted = true;
         StartedMessage = AnalysisResults.Results.Any(item => item.Error is not null)
             ? "Częściowe wyniki są gotowe. Aktywa z brakującymi danymi pokazują bezpieczny stan."

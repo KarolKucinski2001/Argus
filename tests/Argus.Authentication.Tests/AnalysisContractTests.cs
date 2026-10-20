@@ -210,6 +210,149 @@ public sealed class AnalysisContractTests
     }
 
     [Fact]
+    public async Task AnalyzeAsync_invokes_generator_with_displayed_evidence()
+    {
+            var generator = new RecordingSummaryGenerator(
+                _ => AnalysisSummaryResult.Generated("Grounded summary."));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+            Assert.Equal("Grounded summary.", result.Summary);
+            Assert.NotNull(generator.LastRequest);
+            var request = generator.LastRequest!;
+            Assert.Equal(result.Asset, request.Asset);
+            Assert.Equal(result.Score, request.Score);
+            Assert.Equal(result.Performance, request.Performance);
+            Assert.Equal(result.Factors, request.Factors);
+            Assert.Equal(result.Quality, request.Quality);
+            Assert.Equal(result.Freshness, request.Freshness);
+            Assert.Equal(result.IsDelayed, request.IsDelayed);
+            Assert.Equal(result.Warnings.Select(warning => warning.Category), request.WarningCategories);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_skips_generator_when_evidence_is_insufficient()
+    {
+            var generator = new RecordingSummaryGenerator(
+                _ => AnalysisSummaryResult.Generated("Should not be used."));
+            var service = CreateAnalysisService(
+                generator,
+                new StaticPerformanceCalculator(
+                    new AssetPerformance(
+                        new PerformanceMetric("24h", 20m, true),
+                        new PerformanceMetric("7d", null, false),
+                        new PerformanceMetric("30d", null, false),
+                        [])));
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("THIN", "Thin history", MarketAssetClass.Equity),
+                    Point(AsOf.AddDays(-7), 100m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Null(generator.LastRequest);
+            Assert.Null(result.Score);
+            Assert.Equal(AnalysisSummaryStatus.InsufficientEvidence, result.SummaryResult?.Status);
+            Assert.Null(result.Summary);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_preserves_evidence_when_generator_fails()
+    {
+            var generator = new RecordingSummaryGenerator(
+                _ => throw new InvalidOperationException("provider detail must not escape"));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
+            Assert.Null(result.Summary);
+            Assert.NotNull(result.Score);
+            Assert.NotEmpty(result.Factors);
+            Assert.NotEmpty(result.ChartPoints);
+            Assert.Null(result.Error);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_does_not_invoke_generator_for_market_data_errors()
+    {
+            var generator = new RecordingSummaryGenerator(
+                _ => AnalysisSummaryResult.Generated("Should not be used."));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateErrorResult(
+                    new AssetReference("ERR", "Errored asset", MarketAssetClass.Equity),
+                    new MarketDataError(MarketDataErrorCategory.Timeout, "raw provider detail", true),
+                    [],
+                    null)
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Null(generator.LastRequest);
+            Assert.Null(result.SummaryResult);
+            Assert.Null(result.Score);
+            Assert.NotNull(result.Error);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_rejects_empty_and_oversized_generator_output()
+    {
+            foreach (var generated in new[]
+            {
+                AnalysisSummaryResult.Generated(" "),
+                AnalysisSummaryResult.Generated(new string('x', AnalysisSummaryResult.MaximumSummaryLength + 1))
+            })
+            {
+                var generator = new RecordingSummaryGenerator(_ => generated);
+                var service = CreateAnalysisService(generator);
+                var marketData = new MarketDataResponse(
+                [
+                    CreateResult(
+                        120m,
+                        new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                        Point(AsOf.AddHours(-24), 100m),
+                        Point(AsOf.AddDays(-7), 96m),
+                        Point(AsOf.AddDays(-30), 80m))
+                ]);
+
+                var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+                var result = Assert.Single(response.Results);
+                Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
+                Assert.Null(result.Summary);
+            }
+    }
+
+    [Fact]
     public void Assess_normalizes_each_factor_to_zero_to_one_hundred()
     {
         var scorer = new OpportunityScorer();
@@ -466,11 +609,14 @@ public sealed class AnalysisContractTests
             error);
     }
 
-    private static AnalysisService CreateAnalysisService() =>
+    private static AnalysisService CreateAnalysisService(
+        IAnalysisSummaryGenerator? summaryGenerator = null,
+        IPerformanceCalculator? performanceCalculator = null) =>
         new(
-            new PerformanceCalculator(),
+            performanceCalculator ?? new PerformanceCalculator(),
             new OpportunityScorer(),
-            new AnalysisExplanationBuilder());
+            new AnalysisExplanationBuilder(),
+            summaryGenerator);
 
     private static HistoricalPricePoint Point(DateTimeOffset timestamp, decimal close) =>
         new(timestamp, null, null, null, close, null, "USD", true);
@@ -497,5 +643,25 @@ public sealed class AnalysisContractTests
         Assert.Equal(isAvailable, factor.IsAvailable);
         Assert.False(string.IsNullOrWhiteSpace(factor.Label));
         Assert.False(string.IsNullOrWhiteSpace(factor.Explanation));
+    }
+
+    private sealed class RecordingSummaryGenerator(
+        Func<AnalysisSummaryRequest, AnalysisSummaryResult> handler) : IAnalysisSummaryGenerator
+    {
+        public AnalysisSummaryRequest? LastRequest { get; private set; }
+
+        public Task<AnalysisSummaryResult> GenerateAsync(
+            AnalysisSummaryRequest request,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            LastRequest = request;
+            return Task.FromResult(handler(request));
+        }
+    }
+
+    private sealed class StaticPerformanceCalculator(AssetPerformance performance) : IPerformanceCalculator
+    {
+        public AssetPerformance Calculate(MarketDataResult result, DateTimeOffset asOf) => performance;
     }
 }
