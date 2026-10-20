@@ -321,6 +321,16 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains(".analysis-result-card__chart-point:not([hidden])", stylesheet);
         Assert.Contains("overflow-x: hidden", stylesheet);
 
+        // Quiet/active point opacity must be scoped to the SVG circle so the no-JS textual
+        // fallback <li> rows (sharing the same class) stay fully readable.
+        Assert.Contains("circle.analysis-result-card__chart-point:not([hidden])", stylesheet);
+        Assert.Contains("circle.analysis-result-card__chart-point:hover", stylesheet);
+        Assert.DoesNotMatch(@"(?<!circle)\.analysis-result-card__chart-point:not\(\[hidden\]\)", stylesheet);
+        Assert.Contains(".analysis-result-card__chart-points .analysis-result-card__chart-point {", stylesheet);
+        Assert.Matches(
+            @"\.analysis-result-card__chart-points \.analysis-result-card__chart-point \{[^}]*opacity:\s*1;",
+            stylesheet);
+
         var chartScript = File.ReadAllText(RepositoryPath("wwwroot", "js", "analysis-chart.js"));
 
         Assert.Contains("data-chart-range-option", chartScript);

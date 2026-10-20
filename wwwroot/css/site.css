@@ -676,7 +676,7 @@ button:focus-visible {
     stroke-width: 3;
 }
 
-.analysis-result-card__chart-point:not([hidden]) {
+circle.analysis-result-card__chart-point:not([hidden]) {
     fill: var(--color-surface-raised);
     stroke: var(--color-accent);
     r: 2.5;
@@ -687,16 +687,16 @@ button:focus-visible {
     transition: r 160ms ease, opacity 160ms ease, fill 160ms ease;
 }
 
-.analysis-result-card__chart-point:hover,
-.analysis-result-card__chart-point.is-active,
-.analysis-result-card__chart-point:focus-visible {
+circle.analysis-result-card__chart-point:hover,
+circle.analysis-result-card__chart-point.is-active,
+circle.analysis-result-card__chart-point:focus-visible {
     fill: var(--color-accent);
     stroke: var(--color-on-accent);
     r: 5;
     opacity: 1;
 }
 
-.analysis-result-card__chart-point:focus-visible {
+circle.analysis-result-card__chart-point:focus-visible {
     fill: var(--color-accent);
     stroke: var(--color-text);
     filter: drop-shadow(0 0 0.25rem var(--color-accent));
@@ -734,6 +734,7 @@ button:focus-visible {
     min-width: 0;
     padding-block: var(--space-1);
     border-bottom: 0.0625rem solid var(--color-divider);
+    opacity: 1;
 }
 
 .analysis-result-card__chart-points .analysis-result-card__chart-point:last-child {
