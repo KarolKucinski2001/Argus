@@ -55,7 +55,22 @@
             return points;
         }
 
-        var latest = points[points.length - 1].timestamp.getTime();
+        // The last DOM point is usually the latest, but a malformed timestamp
+        // on that single record must not poison the cutoff for every other
+        // point. Scan every record and keep the newest *valid* timestamp;
+        // only fall back to the full history when none of the points parse.
+        var latest = NaN;
+        points.forEach(function (point) {
+            var time = point.timestamp.getTime();
+            if (!isNaN(time) && (isNaN(latest) || time > latest)) {
+                latest = time;
+            }
+        });
+
+        if (isNaN(latest)) {
+            return points;
+        }
+
         var cutoff = latest - (RANGE_DAYS[range] * 24 * 60 * 60 * 1000);
         var selected = points.filter(function (point) {
             var time = point.timestamp.getTime();
