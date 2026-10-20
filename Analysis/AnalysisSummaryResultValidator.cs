@@ -2,6 +2,24 @@ namespace _bootstrap_scaffold.Analysis;
 
 public static class AnalysisSummaryResultValidator
 {
+    private static readonly string[] DisallowedTerms =
+    [
+        "buy",
+        "sell",
+        "best investment",
+        "guaranteed",
+        "top opportunity",
+        "investment advice",
+        "provider",
+        "model",
+        "prompt",
+        "kup",
+        "sprzedaj",
+        "najlepsza inwestycja",
+        "gwarant",
+        "porada inwestycyjna"
+    ];
+
     public static AnalysisSummaryResult Validate(AnalysisSummaryResult? result)
     {
         if (result is null || result.Status != AnalysisSummaryStatus.Generated)
@@ -29,7 +47,9 @@ public static class AnalysisSummaryResultValidator
 
         if (normalized.Length == 0 ||
             normalized.Length > AnalysisSummaryResult.MaximumSummaryLength ||
-            normalized.Any(char.IsControl))
+            normalized.Any(char.IsControl) ||
+            DisallowedTerms.Any(term =>
+                normalized.Contains(term, StringComparison.OrdinalIgnoreCase)))
         {
             return null;
         }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using _bootstrap_scaffold.MarketData;
 
 namespace _bootstrap_scaffold.Analysis;
@@ -6,10 +7,15 @@ public sealed class AnalysisService(
     IPerformanceCalculator performanceCalculator,
     IOpportunityScorer opportunityScorer,
     IAnalysisExplanationBuilder explanationBuilder,
-    IAnalysisSummaryGenerator? summaryGenerator = null) : IAnalysisService
+    IAnalysisSummaryGenerator? summaryGenerator = null,
+    IOptions<AnalysisSummaryOptions>? configuredSummaryOptions = null) : IAnalysisService
 {
     private readonly IAnalysisSummaryGenerator summaryGenerator =
         summaryGenerator ?? new UnavailableAnalysisSummaryGenerator();
+    private readonly TimeSpan summaryTimeout =
+        configuredSummaryOptions?.Value.RequestTimeout > TimeSpan.Zero
+            ? configuredSummaryOptions.Value.RequestTimeout
+            : TimeSpan.FromSeconds(10);
 
     public AnalysisResponse Analyze(MarketDataResponse marketDataResponse, DateTimeOffset asOf)
     {
@@ -139,7 +145,9 @@ public sealed class AnalysisService(
         AnalysisSummaryResult summary;
         try
         {
-            summary = await summaryGenerator.GenerateAsync(request, cancellationToken);
+            using var summaryCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            summaryCancellation.CancelAfter(summaryTimeout);
+            summary = await summaryGenerator.GenerateAsync(request, summaryCancellation.Token);
             summary = AnalysisSummaryResultValidator.Validate(summary);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

@@ -1,7 +1,7 @@
 ---
 change_id: explained-market-ranking
 title: Deliver grounded explained market ranking
-status: implemented
+status: impl_reviewed
 created: 2026-10-20
 updated: 2026-10-20
 archived_at: null

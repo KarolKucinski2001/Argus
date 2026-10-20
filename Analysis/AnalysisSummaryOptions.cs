@@ -12,12 +12,14 @@ public sealed class AnalysisSummaryOptions
 
     public string? Endpoint { get; set; }
 
-    public string? ApiKey { get; set; }
+    public string? ApiKeyConfigurationKey { get; set; }
+
+    public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
     public bool IsConfigured =>
         Enabled &&
         ApprovedProvider &&
         !string.IsNullOrWhiteSpace(Provider) &&
         !string.IsNullOrWhiteSpace(Endpoint) &&
-        !string.IsNullOrWhiteSpace(ApiKey);
+        !string.IsNullOrWhiteSpace(ApiKeyConfigurationKey);
 }
