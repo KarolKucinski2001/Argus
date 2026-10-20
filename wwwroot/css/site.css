@@ -715,7 +715,7 @@ button:focus-visible {
     background: var(--color-bg);
 }
 
-.analysis-result-card__chart-point {
+.analysis-result-card__chart-points .analysis-result-card__chart-point {
     display: flex;
     justify-content: space-between;
     gap: var(--space-3);
@@ -724,12 +724,12 @@ button:focus-visible {
     border-bottom: 0.0625rem solid var(--color-divider);
 }
 
-.analysis-result-card__chart-point:last-child {
+.analysis-result-card__chart-points .analysis-result-card__chart-point:last-child {
     border-bottom: 0;
 }
 
-.analysis-result-card__chart-point span,
-.analysis-result-card__chart-point time,
+.analysis-result-card__chart-points .analysis-result-card__chart-point span,
+.analysis-result-card__chart-points .analysis-result-card__chart-point time,
 .analysis-result-card__summary {
     min-width: 0;
     overflow-wrap: anywhere;
@@ -815,7 +815,7 @@ button:focus-visible {
     }
 
     .analysis-result-card__header,
-    .analysis-result-card__chart-point {
+    .analysis-result-card__chart-points .analysis-result-card__chart-point {
         grid-template-columns: 1fr;
     }
 
@@ -832,7 +832,7 @@ button:focus-visible {
         grid-template-columns: 1fr;
     }
 
-    .analysis-result-card__chart-point {
+    .analysis-result-card__chart-points .analysis-result-card__chart-point {
         display: grid;
         gap: var(--space-1);
     }

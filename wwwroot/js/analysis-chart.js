@@ -16,11 +16,36 @@
         "Max": null
     };
 
+    // .NET "O" round-trip timestamps can carry up to 7 fractional-second
+    // digits and may omit an explicit UTC offset. `new Date(...)` handles
+    // neither case reliably across engines, so normalize to a 3-digit
+    // fraction with an explicit offset (defaulting to UTC) before parsing.
+    // Malformed input falls through to the native parser, which yields an
+    // Invalid Date and preserves the existing fallback behavior.
+    var TIMESTAMP_PATTERN = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})?$/;
+
+    function parseTimestamp(value) {
+        var text = typeof value === "string" ? value : "";
+        var match = TIMESTAMP_PATTERN.exec(text);
+
+        if (!match) {
+            return new Date(text);
+        }
+
+        var fraction = (match[3] || "").slice(0, 3);
+        while (fraction.length < 3) {
+            fraction += "0";
+        }
+
+        var offset = match[4] || "Z";
+        return new Date(match[1] + "T" + match[2] + "." + fraction + offset);
+    }
+
     function readPoint(point, index) {
         return {
             element: point,
             index: index,
-            timestamp: new Date(point.getAttribute("data-chart-timestamp") || ""),
+            timestamp: parseTimestamp(point.getAttribute("data-chart-timestamp")),
             close: Number(point.getAttribute("data-chart-close") || "0")
         };
     }
@@ -119,30 +144,30 @@
                 return point.element;
             }));
 
-            if (activePoint && !selectedSet.has(activePoint)) {
-                pinned = false;
-                clearActive();
-            }
+            // Fail-safe: deselected circles are hidden, but also reset to the
+            // origin so a stale `hidden` attribute (e.g. cleared elsewhere)
+            // cannot leave a point rendered at an old position.
+            pointRecords.forEach(function (point) {
+                if (!selectedSet.has(point.element)) {
+                    point.element.hidden = true;
+                    point.element.setAttribute("cx", "0");
+                    point.element.setAttribute("cy", "0");
+                }
+            });
 
             var minimum = Math.min.apply(null, selectedPoints.map(function (point) { return point.close; }));
             var maximum = Math.max.apply(null, selectedPoints.map(function (point) { return point.close; }));
             var range = maximum - minimum;
             var path = [];
 
-            pointRecords.forEach(function (point) {
-                var isSelected = selectedSet.has(point.element);
-                point.element.hidden = !isSelected;
-                if (!isSelected) {
-                    return;
-                }
-
-                var selectedIndex = selectedPoints.indexOf(point);
+            selectedPoints.forEach(function (point, selectedIndex) {
                 var x = selectedPoints.length === 1
                     ? chartLeft + plotWidth / 2
                     : chartLeft + (selectedIndex * plotWidth / (selectedPoints.length - 1));
                 var normalized = range === 0 ? 0.5 : (point.close - minimum) / range;
                 var y = chartTop + ((1 - normalized) * plotHeight);
 
+                point.element.hidden = false;
                 point.element.setAttribute("cx", x.toFixed(2));
                 point.element.setAttribute("cy", y.toFixed(2));
                 path.push((selectedIndex === 0 ? "M" : "L") + x.toFixed(2) + "," + y.toFixed(2));
