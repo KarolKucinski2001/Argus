@@ -570,7 +570,7 @@ button:focus-visible {
 
 .analysis-results__list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(var(--workspace-card-min), 100%), 1fr));
+    grid-template-columns: repeat(2, minmax(min(var(--workspace-card-min), 100%), 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
@@ -616,6 +616,7 @@ button:focus-visible {
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
 }
 
 .analysis-result-card__rank,
@@ -637,8 +638,8 @@ button:focus-visible {
     padding: var(--space-1) var(--space-2);
     border: 0.0625rem solid var(--color-action);
     border-radius: 999px;
-    background: var(--color-bg);
-    color: var(--color-action);
+    background: var(--color-action);
+    color: var(--color-on-accent);
     font-size: 1.125rem;
     font-weight: 800;
     white-space: nowrap;
@@ -823,7 +824,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     max-block-size: var(--result-chart-max-height);
     overflow: auto;
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-divider);
+    border: 0.0625rem solid var(--color-secondary-border);
     border-radius: var(--radius-md);
     background: var(--color-bg);
 }
@@ -854,7 +855,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     gap: var(--space-2);
     margin: 0;
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-divider);
+    border: 0.0625rem solid var(--color-secondary-border);
     border-radius: var(--radius-md);
     background: var(--color-bg);
     color: var(--color-muted);
@@ -920,6 +921,10 @@ circle.analysis-result-card__chart-point:focus-visible {
 
     .analysis-workspace__sidebar {
         position: static;
+    }
+
+    .analysis-results__list {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -213,6 +213,11 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("weight 35%", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("weight 40%", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Score ", html);
+        Assert.Contains("analysis-result-card__header", html);
+        Assert.Contains("analysis-result-card__score", html);
+        Assert.Contains("analysis-result-card__metrics", html);
+        Assert.Contains("analysis-result-card__chart", html);
+        Assert.Contains("analysis-result-card__summary", html);
         Assert.Contains("Historia cenowa", html);
         Assert.Contains("data-chart-asset=\"AAPL\"", html);
         Assert.Contains("data-chart-close=\"80", html);
