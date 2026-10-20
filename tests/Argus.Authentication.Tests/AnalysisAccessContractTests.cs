@@ -48,7 +48,16 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-submit-button", html);
         Assert.Contains("data-pending-status", html);
         Assert.Contains("ui-state-fixture__loading-card", html);
-        Assert.DoesNotContain("analysis-result-card analysis-result-card--success", html);
+        Assert.Contains("Analysis result states", html);
+        Assert.Contains("Completed", html);
+        Assert.Contains("Partial result", html);
+        Assert.Contains("Stale data", html);
+        Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("analysis-result-card analysis-result-card--success analysis-result-card--stale", html);
+        Assert.Contains("analysis-result-card analysis-result-card--insufficient-evidence", html);
+        Assert.Contains("Częściowe wyniki", html);
+        Assert.Contains("Dane nieaktualne", html);
+        Assert.Contains("Niewystarczające dane do wyliczenia score.", html);
     }
 
     [Fact]
@@ -480,6 +489,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains(".analysis-result-card:focus-within", stylesheet);
         Assert.Contains(".analysis-result-card--success", stylesheet);
         Assert.Contains(".analysis-result-card__metrics", stylesheet);
+        Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr));", stylesheet);
+        Assert.DoesNotContain("grid-template-columns: repeat(3, minmax(var(--result-metric-min), 1fr));", stylesheet);
         Assert.Contains(".analysis-result-card__chart", stylesheet);
         Assert.Contains(".analysis-result-card__chart-svg", stylesheet);
         Assert.Contains(".analysis-result-card__chart-point:focus-visible", stylesheet);

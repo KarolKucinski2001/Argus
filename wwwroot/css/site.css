@@ -677,7 +677,7 @@ button:focus-visible {
 
 .analysis-result-card__metrics {
     display: grid;
-    grid-template-columns: repeat(3, minmax(var(--result-metric-min), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
     margin: 0;
 }
