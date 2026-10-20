@@ -570,7 +570,7 @@ button:focus-visible {
 
 .analysis-results__list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(var(--workspace-card-min), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--workspace-card-min), 100%), 1fr));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
@@ -910,6 +910,16 @@ circle.analysis-result-card__chart-point:focus-visible {
 @media (min-width: 64rem) {
     .landing-hero {
         grid-template-columns: minmax(0, 1.1fr) minmax(var(--preview-column-min), 0.85fr);
+    }
+}
+
+@media (max-width: 64rem) {
+    .analysis-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-workspace__sidebar {
+        position: static;
     }
 }
 
