@@ -156,7 +156,11 @@ public sealed class AnalysisService(
         {
             summary = fallbackSummary;
         }
-        catch (Exception)
+        catch (HttpRequestException)
+        {
+            summary = fallbackSummary;
+        }
+        catch (TimeoutException)
         {
             summary = fallbackSummary;
         }

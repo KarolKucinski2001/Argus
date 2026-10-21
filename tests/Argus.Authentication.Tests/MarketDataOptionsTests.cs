@@ -67,4 +67,15 @@ public sealed class MarketDataOptionsTests
 
         Assert.True(options.Validate(Options.DefaultName, options).Succeeded);
     }
+
+    [Fact]
+    public void Null_allowed_assets_are_rejected()
+    {
+        var options = new MarketDataOptions
+        {
+            AllowedAssets = null!
+        };
+
+        Assert.False(options.Validate(Options.DefaultName, options).Succeeded);
+    }
 }

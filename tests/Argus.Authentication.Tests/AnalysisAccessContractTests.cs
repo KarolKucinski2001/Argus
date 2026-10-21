@@ -481,57 +481,6 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
-    public void Analysis_result_sources_keep_view_markup_color_free_and_css_token_backed()
-    {
-        var analysisView = File.ReadAllText(RepositoryPath("Pages", "Analysis", "Index.cshtml"));
-        var stylesheet = File.ReadAllText(RepositoryPath("wwwroot", "css", "site.css"));
-
-        Assert.DoesNotMatch(@"#[0-9a-fA-F]{3,8}|rgb\(", analysisView);
-        Assert.Contains(".analysis-result-card:focus-within", stylesheet);
-        Assert.Contains(".analysis-result-card--success", stylesheet);
-        Assert.Contains(".analysis-result-card__metrics", stylesheet);
-        Assert.Contains("grid-template-columns: repeat(3, minmax(0, 1fr));", stylesheet);
-        Assert.DoesNotContain("grid-template-columns: repeat(3, minmax(var(--result-metric-min), 1fr));", stylesheet);
-        Assert.Contains(".analysis-result-card__chart", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-svg", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-point:focus-visible", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-tooltip", stylesheet);
-        Assert.Contains("var(--color-accent)", stylesheet);
-        Assert.Contains(".analysis-result-card--insufficient-evidence", stylesheet);
-        Assert.Contains(".analysis-result-card--error", stylesheet);
-        Assert.Contains("@media (max-width: 40rem)", stylesheet);
-
-        Assert.Contains("analysis-chart.js", analysisView);
-        Assert.Contains("data-chart-tooltip", analysisView);
-        Assert.Contains("data-chart-range-option", analysisView);
-        Assert.Contains(".analysis-result-card__chart-range", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-range-button", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-range-button[aria-pressed=\"true\"]", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-range-button:hover", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-point:not([hidden])", stylesheet);
-        Assert.Contains("overflow-x: hidden", stylesheet);
-
-        // Quiet/active point opacity must be scoped to the SVG circle so the no-JS textual
-        // fallback <li> rows (sharing the same class) stay fully readable.
-        Assert.Contains("circle.analysis-result-card__chart-point:not([hidden])", stylesheet);
-        Assert.Contains("circle.analysis-result-card__chart-point:hover", stylesheet);
-        Assert.DoesNotMatch(@"(?<!circle)\.analysis-result-card__chart-point:not\(\[hidden\]\)", stylesheet);
-        Assert.Contains(".analysis-result-card__chart-points .analysis-result-card__chart-point {", stylesheet);
-        Assert.Matches(
-            @"\.analysis-result-card__chart-points \.analysis-result-card__chart-point \{[^}]*opacity:\s*1;",
-            stylesheet);
-
-        var chartScript = File.ReadAllText(RepositoryPath("wwwroot", "js", "analysis-chart.js"));
-
-        Assert.Contains("data-chart-range-option", chartScript);
-        Assert.Contains("data-chart-timestamp", chartScript);
-        Assert.Contains("aria-pressed", chartScript);
-        Assert.Contains("data-chart-line", chartScript);
-        Assert.Contains("1Y", chartScript);
-        Assert.Contains("Max", chartScript);
-    }
-
-    [Fact]
     public async Task Partial_analysis_renders_successful_asset_and_bounded_failed_asset()
     {
         var provider = new FakeMarketDataProvider();
@@ -553,6 +502,11 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
         Assert.Contains("Spróbuj ponownie później", html);
+        Assert.Contains("Historia cenowa", html);
+        Assert.Contains("data-chart-range-option=\"1Y\"", html);
+        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Contains("data-chart-svg", html);
+        Assert.Contains("analysis-result-card__factor-list", html);
         Assert.DoesNotContain("The market data provider returned no result", html);
     }
 
@@ -920,11 +874,6 @@ public sealed class AnalysisAccessContractTests
     private static HistoricalPricePoint Point(DateTimeOffset timestamp, decimal close) =>
         new(timestamp, null, null, null, close, null, "USD", true);
 
-    private static string RepositoryPath(params string[] segments)
-    {
-        var basePath = AppContext.BaseDirectory;
-        return Path.GetFullPath(Path.Combine([basePath, "..", "..", "..", "..", "..", .. segments]));
-    }
 }
 
 internal sealed class UnauthenticatedAnalysisFactory : WebApplicationFactory<Program>

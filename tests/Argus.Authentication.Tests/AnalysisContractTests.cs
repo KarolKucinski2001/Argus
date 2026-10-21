@@ -273,10 +273,10 @@ public sealed class AnalysisContractTests
     }
 
     [Fact]
-    public async Task AnalyzeAsync_preserves_evidence_when_generator_fails()
+    public async Task AnalyzeAsync_propagates_unexpected_generator_failures()
     {
             var generator = new RecordingSummaryGenerator(
-                _ => throw new InvalidOperationException("provider detail must not escape"));
+                _ => throw new InvalidOperationException("generator bug"));
             var service = CreateAnalysisService(generator);
             var marketData = new MarketDataResponse(
             [
@@ -288,16 +288,8 @@ public sealed class AnalysisContractTests
                     Point(AsOf.AddDays(-30), 80m))
             ]);
 
-            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
-
-            var result = Assert.Single(response.Results);
-            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
-            Assert.NotNull(result.Summary);
-            Assert.Contains("Score", result.Summary);
-            Assert.NotNull(result.Score);
-            Assert.NotEmpty(result.Factors);
-            Assert.NotEmpty(result.ChartPoints);
-            Assert.Null(result.Error);
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.AnalyzeAsync(marketData, AsOf, CancellationToken.None));
     }
 
     [Fact]
@@ -324,6 +316,30 @@ public sealed class AnalysisContractTests
             Assert.Contains("Score", result.Summary);
             Assert.NotNull(result.Score);
             Assert.NotEmpty(result.Factors);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_preserves_evidence_when_generator_has_http_failure()
+    {
+            var generator = new BehaviorSummaryGenerator(
+                (_, _) => throw new HttpRequestException("provider unavailable"));
+            var service = CreateAnalysisService(generator);
+            var marketData = new MarketDataResponse(
+            [
+                CreateResult(
+                    120m,
+                    new AssetReference("AAPL", "Apple", MarketAssetClass.Equity),
+                    Point(AsOf.AddHours(-24), 100m),
+                    Point(AsOf.AddDays(-7), 96m),
+                    Point(AsOf.AddDays(-30), 80m))
+            ]);
+
+            var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
+
+            var result = Assert.Single(response.Results);
+            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+            Assert.NotNull(result.Summary);
+            Assert.Contains("Score", result.Summary);
     }
 
     [Fact]
@@ -362,7 +378,7 @@ public sealed class AnalysisContractTests
                     calls.Add(request.Asset.Id);
                     return request.Asset.Id == "AAPL"
                         ? Task.FromResult(AnalysisSummaryResult.Generated("AAPL grounded summary."))
-                        : throw new InvalidOperationException("second asset unavailable");
+                        : throw new HttpRequestException("second asset unavailable");
                 });
             var service = CreateAnalysisService(generator);
             var marketData = new MarketDataResponse(
