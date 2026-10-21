@@ -103,16 +103,16 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Matches(
-            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"AAPL\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
+            "<span class=\"asset-glyph asset-accent--apple\" data-asset-glyph=\"AAPL\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
             html);
         Assert.Matches(
-            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"MSFT\">\\s*<svg class=\"asset-glyph__svg\"",
+            "<span class=\"asset-glyph asset-accent--microsoft\" data-asset-glyph=\"MSFT\">\\s*<svg class=\"asset-glyph__svg\"",
             html);
         Assert.Matches(
             "<span class=\"asset-glyph asset-accent--bitcoin\" data-asset-glyph=\"BTC-USD\">\\s*<span class=\"asset-glyph__monogram\">₿</span>",
             html);
         Assert.Matches(
-            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"NVDA\">\\s*<span class=\"asset-glyph__monogram\">N</span>",
+            "<span class=\"asset-glyph asset-accent--nvidia\" data-asset-glyph=\"NVDA\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
             html);
         Assert.Matches(
             "<article class=\"analysis-result-card__body insight-card insight-card--[a-z]+ asset-accent--ethereum\"",

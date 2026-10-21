@@ -364,8 +364,8 @@ None — no persisted data or configuration changes.
 
 #### Automated
 
-- [x] 1.1 Release build passes
-- [x] 1.2 Tests pass
+- [x] 1.1 Release build passes — 917c547
+- [x] 1.2 Tests pass — 917c547
 
 #### Manual
 
@@ -375,8 +375,8 @@ None — no persisted data or configuration changes.
 
 #### Automated
 
-- [ ] 2.1 Tests pass
-- [ ] 2.2 Presenter tests include all 4 trend boundary cases
+- [x] 2.1 Tests pass
+- [x] 2.2 Presenter tests include all 4 trend boundary cases
 
 #### Manual
 

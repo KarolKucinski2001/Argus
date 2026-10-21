@@ -1,4 +1,5 @@
 using System.Globalization;
+using _bootstrap_scaffold.MarketData;
 
 namespace _bootstrap_scaffold.Analysis;
 
@@ -24,6 +25,13 @@ public enum FactorDirection
     Unavailable
 }
 
+public enum TrendDirection
+{
+    Rising,
+    Mixed,
+    Falling
+}
+
 public sealed record FactorBarView(
     string Key,
     string Label,
@@ -45,13 +53,19 @@ public sealed record AssetInsightView(
     IReadOnlyList<FactorBarView> FactorBars,
     string Takeaway,
     SparklineView? Sparkline,
-    ScoreBand? Band);
+    ScoreBand? Band,
+    TrendDirection? Trend,
+    string? TrendLabel,
+    string AssetClassLabel,
+    string WhyHeading,
+    IReadOnlyList<string> WhyBullets);
 
 public static class AnalysisInsightPresenter
 {
     private const decimal SparklineWidth = 100m;
     private const decimal SparklineHeight = 32m;
     private const decimal SparklinePadding = 2m;
+    private const int MaximumWhyBullets = 3;
 
     private static readonly (string Key, string Label, string Period)[] FactorOrder =
     [
@@ -60,7 +74,7 @@ public static class AnalysisInsightPresenter
         ("trend-30d", "Trend 30d", "30 dni")
     ];
 
-    public static AssetInsightView Present(AssetAnalysis analysis, int? rank = null)
+    public static AssetInsightView Present(AssetAnalysis analysis, int? rank = null, decimal? averageScore = null)
     {
         var sevenDay = analysis.Performance.Change7Days is { IsAvailable: true, Percentage: { } percentage }
             ? percentage
@@ -68,16 +82,55 @@ public static class AnalysisInsightPresenter
         var bars = FactorOrder
             .Select(entry => CreateBar(entry.Key, entry.Label, analysis.Factors))
             .ToArray();
+        var strongest = StrongestFactorIndex(bars);
+        var trend = TrendFor(bars.Select(bar => bar.Direction));
+        var isRanked = rank.HasValue && analysis.Score.HasValue;
 
         return new AssetInsightView(
             AssetIdentityCatalog.For(analysis.Asset.Id),
             ToneFor(sevenDay),
             sevenDay,
             bars,
-            BuildTakeaway(bars, analysis.Score, rank),
+            BuildTakeaway(bars, strongest, analysis.Score, rank),
             BuildSparkline(analysis.ChartPoints),
-            analysis.Score is { } score ? BandFor(score) : null);
+            analysis.Score is { } score ? BandFor(score) : null,
+            trend,
+            trend is { } direction ? TrendLabel(direction) : null,
+            AssetClassLabel(analysis.Asset.AssetClass),
+            isRanked ? $"Dlaczego miejsce #{rank}?" : "Co wiemy o tym aktywie",
+            BuildWhyBullets(bars, strongest, analysis.Factors, analysis.Score, averageScore));
     }
+
+    public static TrendDirection? TrendFor(IEnumerable<FactorDirection> directions)
+    {
+        var available = directions.Where(direction => direction != FactorDirection.Unavailable).ToArray();
+        if (available.Length == 0)
+        {
+            return null;
+        }
+
+        var rising = available.Count(direction => direction == FactorDirection.Rising);
+        var falling = available.Count(direction => direction == FactorDirection.Falling);
+
+        return rising * 2 > available.Length ? TrendDirection.Rising
+            : falling * 2 > available.Length ? TrendDirection.Falling
+            : TrendDirection.Mixed;
+    }
+
+    public static string TrendLabel(TrendDirection trend) =>
+        trend switch
+        {
+            TrendDirection.Rising => "Trend wzrostowy",
+            TrendDirection.Falling => "Trend spadkowy",
+            _ => "Trend mieszany"
+        };
+
+    public static string AssetClassLabel(MarketAssetClass assetClass) =>
+        assetClass switch
+        {
+            MarketAssetClass.Crypto => "Krypto",
+            _ => "Akcje"
+        };
 
     // Same 0–100 scale as OpportunityScorer.Normalize, rounded for display.
     public static decimal Normalize(decimal percentage) =>
@@ -147,7 +200,55 @@ public static class AnalysisInsightPresenter
             FactorWord(direction));
     }
 
-    private static string BuildTakeaway(IReadOnlyList<FactorBarView> bars, decimal? score, int? rank)
+    private static IReadOnlyList<string> BuildWhyBullets(
+        IReadOnlyList<FactorBarView> bars,
+        int strongest,
+        IReadOnlyList<AnalysisFactor> factors,
+        decimal? score,
+        decimal? averageScore)
+    {
+        var bullets = new List<string>(MaximumWhyBullets);
+        if (score is { } value && averageScore is { } average)
+        {
+            var difference = Math.Round(value - average, 1, MidpointRounding.AwayFromZero);
+            bullets.Add(difference switch
+            {
+                > 0m => $"Wynik {Format(value)} — o {Format(difference)} pkt powyżej średniej analizy",
+                < 0m => $"Wynik {Format(value)} — o {Format(-difference)} pkt poniżej średniej analizy",
+                _ => $"Wynik {Format(value)} — równy średniej analizy"
+            });
+        }
+
+        if (strongest < 0)
+        {
+            bullets.Add("Za mało danych rynkowych, aby uzasadnić pozycję.");
+            return bullets;
+        }
+
+        var remaining = bars
+            .Select((bar, index) => (Bar: bar, Index: index))
+            .Where(entry => entry.Bar.IsAvailable && entry.Index != strongest)
+            .OrderByDescending(entry => Math.Abs(
+                factors.FirstOrDefault(factor => factor.Key == entry.Bar.Key)?.Contribution ?? 0m))
+            .ThenBy(entry => entry.Index)
+            .Select(entry => FactorPhrase(entry.Bar));
+
+        bullets.AddRange(remaining.Take(MaximumWhyBullets - bullets.Count));
+        return bullets;
+    }
+
+    private static string FactorPhrase(FactorBarView bar)
+    {
+        var change = FormatSignedPercent(bar.Percentage!.Value);
+        return bar.Direction switch
+        {
+            FactorDirection.Rising => $"{bar.Label} rośnie ({change})",
+            FactorDirection.Falling => $"{bar.Label} spada ({change})",
+            _ => $"{bar.Label} bez wyraźnej zmiany ({change})"
+        };
+    }
+
+    private static int StrongestFactorIndex(IReadOnlyList<FactorBarView> bars)
     {
         var strongest = -1;
         for (var index = 0; index < bars.Count; index++)
@@ -164,6 +265,11 @@ public static class AnalysisInsightPresenter
             }
         }
 
+        return strongest;
+    }
+
+    private static string BuildTakeaway(IReadOnlyList<FactorBarView> bars, int strongest, decimal? score, int? rank)
+    {
         if (strongest < 0)
         {
             return "Za mało danych rynkowych, aby opisać zmianę ceny.";
