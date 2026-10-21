@@ -250,66 +250,19 @@
     <section class="ui-state-fixture__state" aria-labelledby="result-surface-states">
         <h2 id="result-surface-states">Analysis result states</h2>
         <div class="ui-state-fixture__grid">
-            <article class="analysis-result-card analysis-result-card--success">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Completed</p>
-                        <h3>AAPL</h3>
-                        <p class="analysis-result-card__score">Score 82/100</p>
-                    </header>
-                    <dl class="analysis-result-card__metrics">
-                        <div class="analysis-result-card__metric">
-                            <dt>Jakość danych</dt>
-                            <dd>Complete</dd>
-                        </div>
-                    </dl>
-                    <p class="analysis-result-card__summary">
-                        Wynik ukończony na podstawie wyświetlonych danych.
-                    </p>
+            @foreach (var state in Model.ResultStates)
+            {
+                <div class="ui-state-fixture__result-state">
+                    <h3>@state.Heading</h3>
+                    @if (state.Note is not null)
+                    {
+                        <p role="status">@Html.Raw(state.Note)</p>
+                    }
+                    <ol class="analysis-results__list">
+                        <partial name="_InsightCard" model="state.Card" />
+                    </ol>
                 </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--success">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Partial result</p>
-                        <h3>MSFT</h3>
-                        <p class="analysis-result-card__status" role="status">
-                            Częściowe wyniki — część aktywów nie ma pełnych danych.
-                        </p>
-                    </header>
-                    <p class="analysis-result-card__state" role="status">Dane niepełne</p>
-                </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--success analysis-result-card--stale">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Stale data</p>
-                        <h3>BTC-USD</h3>
-                        <p class="analysis-result-card__score">Score 64/100</p>
-                    </header>
-                    <dl class="analysis-result-card__metrics">
-                        <div class="analysis-result-card__metric">
-                            <dt>Świeżość danych</dt>
-                            <dd>stale</dd>
-                        </div>
-                    </dl>
-                    <p class="analysis-result-card__state" role="status">Dane nieaktualne</p>
-                </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--insufficient-evidence">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Insufficient evidence</p>
-                        <h3>ETH-USD</h3>
-                        <p class="analysis-result-card__status" role="status">
-                            Niewystarczające dane do wyliczenia score.
-                        </p>
-                    </header>
-                </div>
-            </article>
+            }
         </div>
     </section>
 </section>

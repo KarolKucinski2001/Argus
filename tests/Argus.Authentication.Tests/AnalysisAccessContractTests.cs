@@ -59,6 +59,13 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Dane nieaktualne", html);
         Assert.Contains("Niewystarczające dane do wyliczenia score.", html);
+        Assert.Contains("class=\"insight-card__monogram\"", html);
+        Assert.Contains("data-sparkline", html);
+        Assert.Contains("data-factor-bar=\"trend-30d\"", html);
+        Assert.Contains("insight-card__bar insight-card__bar--unavailable", html);
+        Assert.Contains("Wniosek z danych", html);
+        Assert.Contains("<details class=\"insight-card__details\"", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
     }
 
     [Fact]
