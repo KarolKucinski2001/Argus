@@ -71,7 +71,27 @@
     --insight-bar-label-size: 0.875rem;
     --insight-name-size: 1.125rem;
     --workspace-wide-width: 120rem;
-    --workspace-title-size: 2rem;
+    --workspace-title-size: 1.25rem;
+    --workspace-header-gap: var(--space-2);
+    --accent-apple: #e5e7eb;
+    --accent-microsoft: #38bdf8;
+    --accent-nvidia: #76b900;
+    --accent-tesla: #e82127;
+    --insight-badge-surface: var(--color-surface-raised);
+    --insight-badge-text: var(--color-muted);
+    --insight-badge-radius: var(--radius-sm);
+    --insight-badge-size: 0.75rem;
+    --insight-badge-padding-block: 0.125rem;
+    --insight-badge-padding-inline: var(--space-1);
+    --insight-trend-rising: var(--color-positive);
+    --insight-trend-mixed: var(--color-warning);
+    --insight-trend-falling: var(--color-negative);
+    --insight-trend-size: 0.8125rem;
+    --insight-price-size: 1rem;
+    --insight-why-gap: 0.25rem;
+    --insight-why-heading-size: 0.875rem;
+    --insight-why-text-size: 0.875rem;
+    --insight-why-indent: var(--space-3);
     --color-selected-surface: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
     --asset-option-selected-bar: 0.25rem;
     --asset-option-glyph-size: 2rem;
@@ -611,7 +631,7 @@ button:focus-visible {
 
 .analysis-workspace__content {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--workspace-header-gap);
     min-width: 0;
 }
 
@@ -681,7 +701,7 @@ button:focus-visible {
 
 .analysis-results {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--workspace-header-gap);
     container: analysis-results / inline-size;
 }
 
@@ -1081,6 +1101,22 @@ circle.analysis-result-card__chart-point:focus-visible {
 
 .asset-accent--ethereum {
     --asset-accent: var(--color-asset-ethereum);
+}
+
+.asset-accent--apple {
+    --asset-accent: var(--accent-apple);
+}
+
+.asset-accent--microsoft {
+    --asset-accent: var(--accent-microsoft);
+}
+
+.asset-accent--nvidia {
+    --asset-accent: var(--accent-nvidia);
+}
+
+.asset-accent--tesla {
+    --asset-accent: var(--accent-tesla);
 }
 
 .asset-glyph {

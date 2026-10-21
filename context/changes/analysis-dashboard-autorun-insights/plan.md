@@ -375,8 +375,8 @@ None — no persisted data or configuration changes.
 
 #### Automated
 
-- [x] 2.1 Tests pass
-- [x] 2.2 Presenter tests include all 4 trend boundary cases
+- [x] 2.1 Tests pass — 8211512
+- [x] 2.2 Presenter tests include all 4 trend boundary cases — 8211512
 
 #### Manual
 
@@ -386,8 +386,8 @@ None — no persisted data or configuration changes.
 
 #### Automated
 
-- [ ] 3.1 Build passes
-- [ ] 3.2 No literal colors in views
+- [x] 3.1 Build passes
+- [x] 3.2 No literal colors in views
 
 ### Phase 4: View
 
