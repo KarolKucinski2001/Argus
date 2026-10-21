@@ -244,15 +244,53 @@ public sealed class AnalysisAccessContractTests
             "<span class=\"asset-option__copy\">\\s*<strong>Apple</strong>\\s*<small>AAPL</small>",
             decoded);
         Assert.Matches("<span class=\"asset-option__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", decoded);
-        Assert.DoesNotContain("analysis-summary-strip", decoded);
-        Assert.DoesNotContain("asset-option__score", decoded);
+        foreach (var assetId in new[] { "AAPL", "MSFT", "BTC-USD", "ETH-USD" })
+        {
+            Assert.Matches(
+                $"<input[^>]*value=\"{Regex.Escape(assetId)}\"[^>]*checked=\"checked\"",
+                decoded);
+        }
+
+        Assert.Contains("analysis-summary-strip", decoded);
+        Assert.Equal(4, Regex.Matches(decoded, "<li class=\"analysis-result-card analysis-result-card--success").Count);
+        Assert.Equal(4, Regex.Matches(decoded, "class=\"asset-option__score\"").Count);
+    }
+
+    [Fact]
+    public async Task Authenticated_analysis_page_autoruns_only_configured_default_assets()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResultForAnalysis("AAPL"));
+        await using var factory = new AnalysisProviderFactory(
+            provider,
+            options =>
+            {
+                options.AllowedAssets.Clear();
+                options.AllowedAssets["NVDA"] = MarketAssetClass.Equity;
+                options.AllowedAssets["AAPL"] = MarketAssetClass.Equity;
+            });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, provider.CallCount);
+        Assert.Equal(["AAPL"], provider.LastRequest!.Assets.Select(asset => asset.Id));
+        Assert.Matches("<input[^>]*value=\"AAPL\"[^>]*checked=\"checked\"", html);
+        Assert.DoesNotMatch("<input[^>]*value=\"NVDA\"[^>]*checked=\"checked\"", html);
     }
 
     [Fact]
     public async Task Empty_asset_configuration_renders_an_explanatory_disabled_action()
     {
+        var provider = new FakeMarketDataProvider();
         await using var factory = new AnalysisProviderFactory(
-            new FakeMarketDataProvider(),
+            provider,
             options => options.AllowedAssets.Clear());
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
@@ -265,6 +303,8 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Brak skonfigurowanych aktywów", html);
+        Assert.DoesNotContain("analysis-summary-strip", html);
+        Assert.Equal(0, provider.CallCount);
         Assert.Contains("data-submit-button", html);
         Assert.Contains("disabled=\"disabled\"", html);
         Assert.Contains("data-pending-status", html);
@@ -895,8 +935,15 @@ public sealed class AnalysisAccessContractTests
     public async Task Valid_analysis_submission_sends_the_canonical_daily_history_request()
     {
         var provider = new FakeMarketDataProvider();
-        provider.SetResults(CreateResultForAnalysis("AAPL"));
-        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        provider.SetResults(CreateResultForAnalysis("NVDA"));
+        await using var factory = new AnalysisProviderFactory(
+            provider,
+            options =>
+            {
+                // A non-default asset keeps the GET autorun (and its cache) out of this request.
+                options.AllowedAssets.Clear();
+                options.AllowedAssets["NVDA"] = MarketAssetClass.Equity;
+            });
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
@@ -909,12 +956,13 @@ public sealed class AnalysisAccessContractTests
             new FormUrlEncodedContent(
             [
                 new KeyValuePair<string, string>("__RequestVerificationToken", token),
-                new KeyValuePair<string, string>("SelectedAssetIds", "AAPL")
+                new KeyValuePair<string, string>("SelectedAssetIds", "NVDA")
             ]));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, provider.CallCount);
         Assert.NotNull(provider.LastRequest);
-        Assert.Equal(["AAPL"], provider.LastRequest!.Assets.Select(asset => asset.Id));
+        Assert.Equal(["NVDA"], provider.LastRequest!.Assets.Select(asset => asset.Id));
         Assert.Equal(
             new MarketDataHistoryRequest(
                 DateOnly.FromDateTime(DateTime.UtcNow).AddMonths(-12),
