@@ -226,6 +226,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Miejsce 1", html);
         Assert.Contains("100/100", html);
         Assert.Contains("50/100", html);
+        Assert.Contains("Cena wzrosła o 50% w ciągu 24 godzin — najwyżej oceniane aktywo w tej analizie.", html);
+        Assert.Contains("Cena pozostała stabilna w ciągu 24 godzin (0%) — miejsce 2 w tej analizie.", html);
         Assert.Contains("Cena aktualna", html);
         Assert.Contains("24 godziny", html);
         Assert.Contains("7 dni", html);
@@ -288,13 +290,13 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.True(details > 0, "The card must contain a collapsed details element.");
         Assert.DoesNotContain("<details class=\"insight-card__details\" open", card);
-        Assert.Contains("Apple Inc.", card[..details]);
+        Assert.Contains(">Apple</h3>", card[..details]);
         Assert.Contains("class=\"insight-card__monogram\"", card[..details]);
         Assert.Contains("+25%", card[..details]);
         Assert.Contains("data-sparkline", card[..details]);
         Assert.Equal(3, Regex.Matches(card[..details], "data-factor-bar=").Count);
         Assert.Contains("Wniosek z danych", card[..details]);
-        Assert.Contains("Najsilniejszy sygnał: Trend 30d (+50%); najsłabszy: Momentum 24h (+20%).", card[..details]);
+        Assert.Contains("Cena wzrosła o 50% w ciągu 30 dni — najwyżej oceniane aktywo w tej analizie.", card[..details]);
         Assert.Contains("analysis-result-card__metrics", card[details..]);
         Assert.Contains("analysis-result-card__factor-list", card[details..]);
         Assert.Contains("data-chart-svg", card[details..]);

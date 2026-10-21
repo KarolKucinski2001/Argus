@@ -4,7 +4,7 @@
 @model InsightCardModel
 @{
     var result = Model.Result;
-    var insight = AnalysisInsightPresenter.Present(result);
+    var insight = AnalysisInsightPresenter.Present(result, Model.Rank);
     var toneClass = $"insight-card--{insight.Tone.ToString().ToLowerInvariant()}";
     var cardStateClass = result.Error is not null
         ? "analysis-result-card--error"
@@ -106,7 +106,7 @@
 
             <p class="insight-card__insight">
                 <span class="insight-card__insight-label">Wniosek z danych</span>
-                @insight.Insight
+                @insight.Takeaway
             </p>
 
             <details class="insight-card__details">
