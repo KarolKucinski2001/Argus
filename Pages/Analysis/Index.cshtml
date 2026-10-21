@@ -1,5 +1,4 @@
 @page "/analysis"
-@using System.Globalization
 @using _bootstrap_scaffold.Analysis
 @using _bootstrap_scaffold.MarketData
 @using _bootstrap_scaffold.Pages.Analysis
@@ -7,13 +6,12 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Start analizy";
-    var rankById = new Dictionary<string, (int Rank, decimal? Score)>(StringComparer.OrdinalIgnoreCase);
+    var scoreById = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
     if (Model.HasResults)
     {
-        for (var rankIndex = 0; rankIndex < Model.AnalysisResults!.Results.Count; rankIndex++)
+        foreach (var analyzed in Model.AnalysisResults!.Results)
         {
-            var ranked = Model.AnalysisResults.Results[rankIndex];
-            rankById[ranked.Asset.Id] = (rankIndex + 1, ranked.Score);
+            scoreById[analyzed.Asset.Id] = analyzed.Score;
         }
     }
 }
@@ -21,8 +19,7 @@
 <section class="analysis-workspace" aria-labelledby="analysis-title">
     <aside class="analysis-workspace__sidebar">
         <div class="analysis-page__header">
-            <p class="eyebrow">Nowa analiza</p>
-            <h1 id="analysis-title">Wybierz aktywa do sprawdzenia</h1>
+            <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
         </div>
 
         <form method="post" class="analysis-form" data-analysis-form>
@@ -43,23 +40,11 @@
             {
                 var isSelected = Model.SelectedAssetIds.Any(id =>
                     string.Equals(id, asset.Id, StringComparison.OrdinalIgnoreCase));
-                var identity = AssetIdentityCatalog.For(asset.Id);
-                <label class="asset-option">
-                    <input class="asset-option__input"
-                           type="checkbox"
-                           name="SelectedAssetIds"
-                           value="@asset.Id"
-                           checked="@(isSelected ? "checked" : null)" />
-                    <span class="asset-option__monogram" aria-hidden="true">@identity.Monogram</span>
-                    <span class="asset-option__copy">
-                        <strong>@asset.Id</strong>
-                        <small>@identity.Name</small>
-                    </span>
-                    @if (rankById.TryGetValue(asset.Id, out var rank) && rank.Score is { } rankScore)
-                    {
-                        <span class="asset-option__rank">#@rank.Rank · @AnalysisFormatting.Decimal(rankScore)</span>
-                    }
-                </label>
+                var option = new AssetOptionModel(
+                    asset.Id,
+                    isSelected,
+                    scoreById.TryGetValue(asset.Id, out var optionScore) ? optionScore : null);
+                <partial name="_AssetOption" model="option" />
             }
         </div>
 
@@ -102,7 +87,7 @@
                 type="submit"
                 data-submit-button
                 disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
-            Rozpocznij analizę
+            Generuj ranking
         </button>
         </form>
 
@@ -116,6 +101,10 @@
         <header class="analysis-workspace__header">
             <p class="eyebrow">Market intelligence</p>
             <h2>Dashboard analizy</h2>
+            @if (Model.HasResults)
+            {
+                <partial name="_SummaryStrip" model="AnalysisSummaryStripPresenter.Build(Model.AnalysisResults!.Results)" />
+            }
         </header>
 
         <section class="analysis-results" aria-labelledby="analysis-results-title">

@@ -63,6 +63,14 @@
     --insight-band-size: 0.75rem;
     --insight-bar-value-size: 0.8125rem;
     --workspace-wide-width: 120rem;
+    --workspace-title-size: 2rem;
+    --color-selected-surface: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+    --asset-option-selected-bar: 0.25rem;
+    --asset-option-glyph-size: 2rem;
+    --asset-option-ticker-size: 0.75rem;
+    --summary-strip-item-min: 10rem;
+    --summary-strip-label-size: 0.8125rem;
+    --summary-strip-value-size: 1.125rem;
     --results-two-column-min: 46rem;
     --insight-area-opacity: 18%;
     color-scheme: dark;
@@ -388,6 +396,11 @@ button:focus-visible {
     line-height: 1;
 }
 
+.analysis-page__header .analysis-workspace__title {
+    max-width: none;
+    font-size: var(--workspace-title-size);
+}
+
 .analysis-page__lede,
 .analysis-page__boundary,
 .analysis-form__header p {
@@ -434,14 +447,14 @@ button:focus-visible {
 
 .asset-list {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-1);
 }
 
 .asset-option {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
     border: 0.0625rem solid var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-secondary-surface);
@@ -455,6 +468,8 @@ button:focus-visible {
 
 .asset-option:has(.asset-option__input:checked) {
     border-color: var(--color-action);
+    background: var(--color-selected-surface);
+    box-shadow: inset var(--asset-option-selected-bar) 0 0 var(--color-action);
 }
 
 .asset-option__input {
@@ -470,11 +485,13 @@ button:focus-visible {
 
 .asset-option__copy {
     display: grid;
-    gap: var(--space-1);
+    gap: 0;
+    min-width: 0;
 }
 
 .asset-option__copy small {
     color: var(--color-muted);
+    font-size: var(--asset-option-ticker-size);
 }
 
 .validation-message,
@@ -597,6 +614,56 @@ button:focus-visible {
 }
 
 .analysis-workspace__header p {
+    color: var(--color-muted);
+}
+
+.analysis-summary-strip__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--summary-strip-item-min), 1fr));
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.analysis-summary-strip__item {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.analysis-summary-strip__item dt {
+    color: var(--color-muted);
+    font-size: var(--summary-strip-label-size);
+}
+
+.analysis-summary-strip__value {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1);
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--summary-strip-value-size);
+    font-weight: 700;
+}
+
+.analysis-summary-strip__value--muted {
+    color: var(--color-muted);
+    font-weight: 400;
+}
+
+.analysis-summary-strip__change--positive {
+    color: var(--color-positive);
+}
+
+.analysis-summary-strip__change--negative {
+    color: var(--color-negative);
+}
+
+.analysis-summary-strip__change--neutral {
     color: var(--color-muted);
 }
 
@@ -1020,6 +1087,12 @@ circle.analysis-result-card__chart-point:focus-visible {
     fill: currentColor;
 }
 
+.asset-option__monogram {
+    flex: none;
+    inline-size: var(--asset-option-glyph-size);
+    block-size: var(--asset-option-glyph-size);
+}
+
 .insight-card__identity {
     min-width: 0;
 }
@@ -1288,7 +1361,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     white-space: nowrap;
 }
 
-.asset-option__rank {
+.asset-option__score {
     margin-inline-start: auto;
     color: var(--color-accent);
     font-weight: 600;

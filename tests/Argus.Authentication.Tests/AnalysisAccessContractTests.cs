@@ -83,6 +83,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Wniosek z danych", html);
         Assert.Contains("<details class=\"insight-card__details\"", html);
         Assert.DoesNotContain("chwilowo niedostępne", html);
+        Assert.Contains("Generuj ranking", html);
+        Assert.DoesNotContain("Rozpocznij analizę", html);
     }
 
     [Fact]
@@ -185,6 +187,17 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-workspace__sidebar\"", html);
         Assert.Contains("class=\"analysis-workspace__content\"", html);
         Assert.Contains("class=\"analysis-results__list\"", html);
+        var decoded = WebUtility.HtmlDecode(html);
+        Assert.Contains("<h1 id=\"analysis-title\" class=\"analysis-workspace__title\">Nowa analiza</h1>", decoded);
+        Assert.Contains("Generuj ranking", decoded);
+        Assert.DoesNotContain("Rozpocznij analizę", decoded);
+        Assert.DoesNotContain("Wybierz aktywa do sprawdzenia", decoded);
+        Assert.Matches(
+            "<span class=\"asset-option__copy\">\\s*<strong>Apple</strong>\\s*<small>AAPL</small>",
+            decoded);
+        Assert.Matches("<span class=\"asset-option__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", decoded);
+        Assert.DoesNotContain("analysis-summary-strip", decoded);
+        Assert.DoesNotContain("asset-option__score", decoded);
     }
 
     [Fact]
@@ -271,6 +284,19 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("24 godziny", html);
         Assert.Contains("7 dni", html);
         Assert.Contains("30 dni", html);
+        Assert.Contains("<section class=\"analysis-summary-strip\" aria-label=\"Podsumowanie rankingu\">", html);
+        Assert.Matches("<dt>Przeanalizowane aktywa</dt>\\s*<dd class=\"analysis-summary-strip__value\">2</dd>", html);
+        Assert.Matches(
+            "<dt>Najlepszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<span class=\"analysis-summary-strip__name\">Microsoft</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+50%</span>",
+            html);
+        Assert.Matches(
+            "<dt>Najsłabszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--neutral\">0%</span>",
+            html);
+        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">75</dd>", html);
     }
 
     [Fact]
@@ -445,8 +471,10 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("class=\"asset-option__monogram\"", html);
-        Assert.Contains("#1 · 100", html);
-        Assert.Contains("#2 · 50", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>100</span>", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>50</span>", html);
+        Assert.Equal(2, Regex.Matches(html, "class=\"asset-option__score\"").Count);
+        Assert.DoesNotContain("asset-option__rank", html);
         Assert.Equal(2, Regex.Matches(html, "data-sparkline").Count);
         Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
         Assert.DoesNotContain("RAW outage", html);

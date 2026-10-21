@@ -1,0 +1,22 @@
+@using _bootstrap_scaffold.Analysis
+@using _bootstrap_scaffold.Pages.Analysis
+@model AssetOptionModel
+@{
+    var identity = AssetIdentityCatalog.For(Model.AssetId);
+}
+<label class="asset-option">
+    <input class="asset-option__input"
+           type="checkbox"
+           name="SelectedAssetIds"
+           value="@Model.AssetId"
+           checked="@(Model.IsSelected ? "checked" : null)" />
+    <span class="asset-option__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="Model.AssetId" /></span>
+    <span class="asset-option__copy">
+        <strong>@identity.Name</strong>
+        <small>@Model.AssetId</small>
+    </span>
+    @if (Model.Score is { } score)
+    {
+        <span class="asset-option__score"><span class="visually-hidden">Score </span>@AnalysisFormatting.Decimal(score)</span>
+    }
+</label>
