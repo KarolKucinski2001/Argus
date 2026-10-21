@@ -15,6 +15,7 @@
             : "analysis-result-card--insufficient-evidence";
     var isDelayed = result.IsDelayed || result.Warnings.Any(warning =>
         warning.Category == MarketDataWarningCategory.DelayedData);
+    var hasChips = isDelayed || result.Freshness.IsStale || result.Quality != MarketDataQuality.Complete;
 }
 
 <li class="analysis-result-card @cardStateClass">
@@ -44,20 +45,23 @@
         }
         else
         {
-            <div class="insight-card__chips">
-                @if (isDelayed)
-                {
-                    <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane opóźnione</span>
-                }
-                @if (result.Freshness.IsStale)
-                {
-                    <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane nieaktualne</span>
-                }
-                @if (result.Quality != MarketDataQuality.Complete)
-                {
-                    <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@AnalysisFormatting.Quality(result.Quality)</span>
-                }
-            </div>
+            @if (hasChips)
+            {
+                <div class="insight-card__chips">
+                    @if (isDelayed)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane opóźnione</span>
+                    }
+                    @if (result.Freshness.IsStale)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane nieaktualne</span>
+                    }
+                    @if (result.Quality != MarketDataQuality.Complete)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@AnalysisFormatting.Quality(result.Quality)</span>
+                    }
+                </div>
+            }
 
             <div class="insight-card__headline">
                 <p class="insight-card__change">@AnalysisFormatting.NullablePercent(insight.SevenDayChange)</p>

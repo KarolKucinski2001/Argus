@@ -39,8 +39,30 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
                 2)),
             new("Insufficient evidence", null, Card(
                 Sample("ETH-USD", null, null, null, -2.4m, [3500m], MarketDataQuality.Incomplete, current, AnalysisSummaryResult.InsufficientEvidence()),
-                3))
+                3)),
+            new("Delayed data", null, Card(
+                Sample("NVDA", 71m, 0.6m, 3.9m, 8.1m, [118m, 121m, 119m, 124m, 126m], MarketDataQuality.Complete, current, generated, isDelayed: true),
+                4)),
+            new("Failed", null, FailedCard())
         ];
+    }
+
+    private static InsightCardModel FailedCard()
+    {
+        var now = new DateTimeOffset(2026, 10, 20, 0, 0, 0, TimeSpan.Zero);
+        var error = new MarketDataError(MarketDataErrorCategory.Timeout, "Fixture timeout.", true);
+        var analysis = Sample(
+            "TSLA", null, null, null, null, [], MarketDataQuality.Incomplete,
+            new MarketDataFreshness(now, now, null, false),
+            AnalysisSummaryResult.Unavailable(),
+            error: error);
+
+        return new InsightCardModel(
+            analysis,
+            5,
+            null,
+            IndexModel.MapAssetErrorMessage(error.Category),
+            IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable));
     }
 
     private static InsightCardModel Card(AssetAnalysis analysis, int index) =>
@@ -60,7 +82,9 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
         decimal[] closes,
         MarketDataQuality quality,
         MarketDataFreshness freshness,
-        AnalysisSummaryResult summary)
+        AnalysisSummaryResult summary,
+        bool isDelayed = false,
+        MarketDataError? error = null)
     {
         var points = closes
             .Select((close, index) => new AnalysisChartPoint(freshness.ObservedAt.AddDays(index - closes.Length), close))
@@ -87,9 +111,9 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
             summary,
             quality,
             freshness,
-            false,
+            isDelayed,
             [],
-            null);
+            error);
     }
 
     private static PerformanceMetric Metric(string period, decimal? percentage) =>

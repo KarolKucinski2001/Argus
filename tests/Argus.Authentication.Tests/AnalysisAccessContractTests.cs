@@ -26,7 +26,7 @@ public sealed class AnalysisAccessContractTests
         });
 
         using var response = await client.GetAsync("/analysis/ui-state-fixture");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Default", html);
@@ -58,6 +58,12 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("analysis-result-card analysis-result-card--insufficient-evidence", html);
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Dane nieaktualne", html);
+        Assert.Contains("Failed", html);
+        Assert.Contains("Delayed data", html);
+        Assert.Contains("analysis-result-card analysis-result-card--error", html);
+        Assert.Contains("insight-card__error", html);
+        Assert.Contains("Dane opóźnione", html);
+        Assert.DoesNotMatch(@"insight-card__chips""[^>]*>\s*</div>", html);
         Assert.Contains("Niewystarczające dane do wyliczenia score.", html);
         Assert.Contains("class=\"insight-card__monogram\"", html);
         Assert.Contains("data-sparkline", html);

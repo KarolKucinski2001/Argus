@@ -256,7 +256,7 @@
                     <h3>@state.Heading</h3>
                     @if (state.Note is not null)
                     {
-                        <p role="status">@Html.Raw(state.Note)</p>
+                        <p role="status">@state.Note</p>
                     }
                     <ol class="analysis-results__list">
                         <partial name="_InsightCard" model="state.Card" />
