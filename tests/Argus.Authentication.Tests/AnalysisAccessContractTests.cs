@@ -709,6 +709,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("AAPL", html);
         Assert.Contains("Niewystarczające dane", html);
         Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("insight-card__change insight-card__change--muted\">n/d</p>", html);
         Assert.DoesNotContain("0/100", html);
         Assert.DoesNotContain("Score 0", html);
     }
