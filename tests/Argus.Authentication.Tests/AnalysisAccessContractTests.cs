@@ -246,6 +246,93 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Insight_card_puts_identity_change_sparkline_bars_and_insight_first()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+        var card = html[html.IndexOf("class=\"analysis-results__list\"", StringComparison.Ordinal)..];
+        var details = card.IndexOf("<details class=\"insight-card__details\"", StringComparison.Ordinal);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(details > 0, "The card must contain a collapsed details element.");
+        Assert.DoesNotContain("<details class=\"insight-card__details\" open", card);
+        Assert.Contains("Apple Inc.", card[..details]);
+        Assert.Contains("class=\"insight-card__monogram\"", card[..details]);
+        Assert.Contains("+25%", card[..details]);
+        Assert.Contains("data-sparkline", card[..details]);
+        Assert.Equal(3, Regex.Matches(card[..details], "data-factor-bar=").Count);
+        Assert.Contains("Wniosek z danych", card[..details]);
+        Assert.Contains("Najsilniejszy sygnał: Trend 30d (+50%); najsłabszy: Momentum 24h (+20%).", card[..details]);
+        Assert.Contains("analysis-result-card__metrics", card[details..]);
+        Assert.Contains("analysis-result-card__factor-list", card[details..]);
+        Assert.Contains("data-chart-svg", card[details..]);
+        Assert.Contains("Podsumowanie", card[details..]);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
+    }
+
+    [Fact]
+    public async Task Sidebar_shows_rank_and_score_and_failed_cards_have_no_sparkline()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 120m, 120m, 120m),
+            CreateScoredResult("MSFT", MarketAssetClass.Equity, 120m, 80m, 80m, 80m),
+            CreateErrorResult(
+                "BTC-USD",
+                MarketAssetClass.Crypto,
+                new MarketDataError(MarketDataErrorCategory.UpstreamUnavailable, "RAW outage", true)));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT", "BTC-USD");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("class=\"asset-option__monogram\"", html);
+        Assert.Contains("#1 · 100", html);
+        Assert.Contains("#2 · 50", html);
+        Assert.Equal(2, Regex.Matches(html, "data-sparkline").Count);
+        Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
+        Assert.DoesNotContain("RAW outage", html);
+    }
+
+    [Fact]
+    public async Task Results_boundary_is_a_single_educational_line()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Contains("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.", html);
+        Assert.DoesNotContain("spersonalizowanych obietnic", html);
+        Assert.DoesNotContain("Rankingi, kontekst rynkowy i czynniki wyjaśniające", html);
+    }
+
+    [Fact]
     public async Task Analysis_results_render_accessible_svg_geometry_and_text_fallback()
     {
         var provider = new FakeMarketDataProvider();

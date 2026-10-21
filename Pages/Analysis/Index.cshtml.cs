@@ -136,7 +136,7 @@ public sealed class IndexModel(
     private bool EnsureAuthenticated() =>
         User.Identity?.IsAuthenticated ?? false;
 
-    public string MapAssetErrorMessage(MarketDataErrorCategory? category) =>
+    public static string MapAssetErrorMessage(MarketDataErrorCategory? category) =>
         category switch
         {
             MarketDataErrorCategory.Timeout =>
@@ -149,7 +149,7 @@ public sealed class IndexModel(
                 "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
         };
 
-    public string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
+    public static string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
         status switch
         {
             AnalysisSummaryStatus.InsufficientEvidence =>
