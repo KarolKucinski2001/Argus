@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Analysis.UiStateFixtureModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Analysis UI states";
+    ViewData["Title"] = "Stany interfejsu analizy";
 }
 
 @if (Model.ShowRankedGrid)
@@ -29,7 +29,6 @@
 
         <div class="analysis-workspace__content">
             <header class="analysis-workspace__header">
-                <p class="eyebrow">Market intelligence</p>
                 <h2>Dashboard analizy</h2>
                 <partial name="_SummaryStrip" model="Model.RankedSummary" />
             </header>
@@ -53,17 +52,17 @@ else
 {
 <section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
     <div class="analysis-page__header">
-        <p class="eyebrow">Testing only</p>
-        <h1 id="ui-state-fixture-title">Analysis UI state fixture</h1>
+        <p class="eyebrow">Tylko testy</p>
+        <h1 id="ui-state-fixture-title">Stany interfejsu analizy</h1>
         <p class="analysis-page__lede">
-            Review the shared analysis surfaces and interaction states before
-            changing the production flow.
+            Sprawdź wspólne elementy analizy i stany interakcji przed zmianą
+            przepływu produkcyjnego.
         </p>
     </div>
 
     <div class="ui-state-fixture__grid">
         <section class="ui-state-fixture__state" aria-labelledby="state-default">
-            <h2 id="state-default">Default</h2>
+            <h2 id="state-default">Domyślny</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -75,7 +74,7 @@ else
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>AAPL</strong>
-                                <small>Equity</small>
+                                <small>Akcje</small>
                             </span>
                         </label>
                         <button class="button" type="button">Generuj ranking</button>
@@ -92,7 +91,7 @@ else
                             </header>
                             <dl class="analysis-result-card__metrics">
                                 <div class="analysis-result-card__metric">
-                                    <dt>Score</dt>
+                                    <dt>Wynik</dt>
                                     <dd>82/100</dd>
                                 </div>
                             </dl>
@@ -103,7 +102,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-hover">
-            <h2 id="state-hover">Hover</h2>
+            <h2 id="state-hover">Najechanie</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -115,7 +114,7 @@ else
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>MSFT</strong>
-                                <small>Equity</small>
+                                <small>Akcje</small>
                             </span>
                         </label>
                     </div>
@@ -133,7 +132,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-focus">
-            <h2 id="state-focus">Focus-visible</h2>
+            <h2 id="state-focus">Fokus klawiatury</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -147,7 +146,7 @@ else
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>BTC-USD</strong>
-                                <small>Crypto</small>
+                                <small>Krypto</small>
                             </span>
                         </label>
                     </div>
@@ -165,7 +164,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
-            <h2 id="state-disabled">Disabled</h2>
+            <h2 id="state-disabled">Wyłączony</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -188,7 +187,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-error">
-            <h2 id="state-error">Error</h2>
+            <h2 id="state-error">Błąd</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -200,7 +199,7 @@ else
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>ETH-USD</strong>
-                                <small>Crypto</small>
+                                <small>Krypto</small>
                             </span>
                         </label>
                     </div>
@@ -217,7 +216,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-empty">
-            <h2 id="state-empty">Empty</h2>
+            <h2 id="state-empty">Brak danych</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -240,7 +239,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-loading">
-            <h2 id="state-loading">Loading</h2>
+            <h2 id="state-loading">Ładowanie</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <form method="post"
@@ -278,7 +277,7 @@ else
                             </header>
                             <dl class="analysis-result-card__metrics" aria-label="Ładowanie metryk">
                                 <div class="analysis-result-card__metric" aria-hidden="true">
-                                    <dt>Score</dt>
+                                    <dt>Wynik</dt>
                                     <dd>...</dd>
                                 </div>
                                 <div class="analysis-result-card__metric" aria-hidden="true">
@@ -294,7 +293,7 @@ else
     </div>
 
     <section class="ui-state-fixture__state" aria-labelledby="result-surface-states">
-        <h2 id="result-surface-states">Analysis result states</h2>
+        <h2 id="result-surface-states">Stany wyników analizy</h2>
         <div class="ui-state-fixture__grid">
             @foreach (var state in Model.ResultStates)
             {

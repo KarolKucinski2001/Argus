@@ -68,22 +68,22 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
 
         return
         [
-            new("Completed", null, Card(
+            new("Wynik gotowy", null, Card(
                 Sample("AAPL", 82m, 1.2m, 4.8m, 9.6m, [210m, 212m, 209m, 214m, 216m, 215.5m], MarketDataQuality.Complete, current, generated),
                 0)),
-            new("Partial result", "Częściowe wyniki — część aktywów nie ma pełnych danych.", Card(
+            new("Częściowy wynik", "Częściowe wyniki — część aktywów nie ma pełnych danych.", Card(
                 Sample("MSFT", 58m, null, 2.1m, 3.4m, [418m, 421m, 419m, 420.25m], MarketDataQuality.Incomplete, current, generated),
                 1)),
-            new("Stale data", null, Card(
+            new("Nieaktualne dane", null, Card(
                 Sample("BTC-USD", 64m, -0.8m, 3.5m, 12.2m, [64000m, 66500m, 65200m, 68000m], MarketDataQuality.Complete, stale, generated),
                 2)),
-            new("Insufficient evidence", null, Card(
+            new("Niewystarczające dane", null, Card(
                 Sample("ETH-USD", null, null, null, -2.4m, [3500m], MarketDataQuality.Incomplete, current, AnalysisSummaryResult.InsufficientEvidence()),
                 3)),
-            new("Delayed data", null, Card(
+            new("Opóźnione dane", null, Card(
                 Sample("NVDA", 71m, 0.6m, 3.9m, 8.1m, [118m, 121m, 119m, 124m, 126m], MarketDataQuality.Complete, current, generated, isDelayed: true),
                 4)),
-            new("Failed", null, FailedCard())
+            new("Błąd", null, FailedCard())
         ];
     }
 

@@ -29,13 +29,13 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Default", html);
-        Assert.Contains("Hover", html);
-        Assert.Contains("Focus-visible", html);
-        Assert.Contains("Disabled", html);
-        Assert.Contains("Error", html);
-        Assert.Contains("Empty", html);
-        Assert.Contains("Loading", html);
+        Assert.Contains("Domyślny", html);
+        Assert.Contains("Najechanie", html);
+        Assert.Contains("Fokus klawiatury", html);
+        Assert.Contains("Wyłączony", html);
+        Assert.Contains("Błąd", html);
+        Assert.Contains("Brak danych", html);
+        Assert.Contains("Ładowanie", html);
         Assert.Contains("ui-state-fixture__grid", html);
         Assert.Contains("analysis-workspace", html);
         Assert.Contains("analysis-workspace__sidebar", html);
@@ -49,17 +49,17 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-submit-button", html);
         Assert.Contains("data-pending-status", html);
         Assert.Contains("ui-state-fixture__loading-card", html);
-        Assert.Contains("Analysis result states", html);
-        Assert.Contains("Completed", html);
-        Assert.Contains("Partial result", html);
-        Assert.Contains("Stale data", html);
-        Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("Stany wyników analizy", html);
+        Assert.Contains("Wynik gotowy", html);
+        Assert.Contains("Częściowy wynik", html);
+        Assert.Contains("Nieaktualne dane", html);
+        Assert.Contains("Niewystarczające dane", html);
         Assert.Contains("analysis-result-card analysis-result-card--success analysis-result-card--stale", html);
         Assert.Contains("analysis-result-card analysis-result-card--insufficient-evidence", html);
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Dane nieaktualne", html);
-        Assert.Contains("Failed", html);
-        Assert.Contains("Delayed data", html);
+        Assert.Contains("Błąd", html);
+        Assert.Contains("Opóźnione dane", html);
         Assert.Contains("analysis-result-card analysis-result-card--error", html);
         Assert.Contains("insight-card__error", html);
         Assert.Contains("Dane opóźnione", html);
@@ -138,7 +138,7 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.DoesNotContain("Analysis result states", html);
+        Assert.DoesNotContain("Stany wyników analizy", html);
         Assert.Contains("<section class=\"analysis-results\" aria-labelledby=\"analysis-results-title\">", html);
         var listStart = html.IndexOf("<ol class=\"analysis-results__list\">", StringComparison.Ordinal);
         Assert.True(listStart > 0, "The ranked view must render the real results list.");
@@ -846,7 +846,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("AAPL", html);
         Assert.Contains("Niewystarczające dane", html);
-        Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("Niewystarczające dane", html);
         Assert.Contains("insight-card__change insight-card__change--muted\">n/d</p>", html);
         Assert.DoesNotContain("0/100", html);
         Assert.DoesNotContain("Score 0", html);
