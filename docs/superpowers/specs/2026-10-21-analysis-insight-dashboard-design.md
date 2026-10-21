@@ -25,7 +25,8 @@ roughly 75% less explanatory text. Approved mockup:
 Pure, I/O-free class. `Present(AssetAnalysis analysis)` returns `AssetInsightView`:
 
 - `Name`, `Monogram`, `Tone` from a static ticker map:
-  `AAPL` → "Apple Inc.", "A"; `MSFT` → "Microsoft", "M";
+  `AAPL` → "Apple", "A"; `MSFT` → "Microsoft", "M";
+  `NVDA` → "NVIDIA", "N"; `TSLA` → "Tesla", "T";
   `BTC-USD` → "Bitcoin", "₿"; `ETH-USD` → "Ethereum", "Ξ".
   Unknown tickers use the ticker as name and its first character as monogram.
 - `FactorBars`: one entry per existing factor (`momentum-24h`, `momentum-7d`,
@@ -34,9 +35,10 @@ Pure, I/O-free class. `Present(AssetAnalysis analysis)` returns `AssetInsightVie
   Unavailable factors have `IsAvailable = false` and no value.
 - `Insight`: one deterministic sentence naming the strongest and weakest
   available factor with their percentages, e.g.
-  "30-day trend leads (+8.2%); 24h momentum is weakest (−1.1%)."
-  With one available factor it names only that factor; with none it returns
-  "Not enough market data for an insight."
+  "Trend 30d był najsilniejszym czynnikiem (+8,2%), a momentum 24h
+  najsłabszym (-1,1%)."
+  With one available factor it names only that factor; with none it returns a
+  Polish insufficient-data message.
 - `Tone` maps the 7-day change sign to `positive`, `negative`, or `neutral`.
 
 ### `Pages/Analysis/_InsightCard.cshtml` (new partial)
@@ -44,14 +46,14 @@ Pure, I/O-free class. `Present(AssetAnalysis analysis)` returns `AssetInsightVie
 Order inside the card:
 
 1. Identity row: monogram badge, name, ticker, rank, status chips.
-2. Score badge (`Score` or "Not scored").
+2. Score badge (numeric score or "Wynik nierankingowy").
 3. Headline 7-day % change.
 4. SVG sparkline from `ChartPoints` (polyline + gradient fill, colored by tone).
 5. Three factor bars.
 6. Insight line: the AI summary when available, otherwise the presenter
-   insight labeled "Data insight".
+   insight labeled "Wniosek z danych".
 7. Collapsed `<details>` containing methodology, factor explanations,
-   exact-value table, and chart range controls.
+   detailed metrics, and chart range controls.
 
 ### `Pages/Analysis/Index.cshtml`
 
@@ -78,11 +80,11 @@ views contain no literal colors or arbitrary layout values.
 | State | Card rendering |
 | --- | --- |
 | Completed | Full card |
-| Partial | Missing bars show muted "n/a"; warning chip |
-| Insufficient evidence | "Not scored" badge, "Not enough data to score"; chart if ≥ 2 points |
-| Stale / delayed | Amber "Delayed" chip next to the name |
+| Partial | Missing bars show muted "n/d"; warning chip |
+| Insufficient evidence | "Wynik nierankingowy", insufficient-data message; chart if ≥ 2 points |
+| Stale / delayed | Warning chip next to the name |
 | Failed | Compact error row with retry hint; no chart |
-| Chart < 2 points | "No chart data" placeholder |
+| Chart < 2 points | "Brak danych do wykresu" placeholder |
 
 Page-level fixture states (empty assets, loading, validation, etc.) remain and
 adopt the compact styling. The text "chwilowo niedostępne" never renders.
@@ -95,7 +97,7 @@ adopt the compact styling. The text "chwilowo niedostępne" never renders.
 - Dev provider tests: the four assets produce pairwise different normalized
   series; repeated calls are deterministic.
 - Contract tests: card contains name, score badge, 7-day change, sparkline,
-  three factor bars, insight; methodology and exact-value table live inside
-  `<details>`; no "chwilowo niedostępne"; fixture still covers all states.
+  three factor bars, insight; methodology and chart live inside `<details>`;
+  no "chwilowo niedostępne"; fixture still covers all states.
 - Gates: all tests pass, build has 0 warnings, hardcoded-value scan clean,
   screenshot compared against the mockup before the manual gate.

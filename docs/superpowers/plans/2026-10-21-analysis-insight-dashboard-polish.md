@@ -1763,7 +1763,7 @@ with:
 
 7f. Check whether `@using System.Globalization` is still needed in `Index.cshtml` (search the file for `CultureInfo`). Remove the using only if no reference remains.
 
-`wwwroot/js/analysis-form.js` was checked while planning: it never contains "Rozpocznij". It only sets the pending text "Przygotowywanie analizy...", so no JS change is needed.
+`wwwroot/js/analysis-form.js` was checked while planning: it never contains "Rozpocznij" and only sets the pending text "Przygotowywanie analizy...". The dependency-free chart controller in `wwwroot/js/analysis-chart.js` remains responsible for localized range handling.
 
 - [ ] **Step 8: Update the fixture button copy**
 
@@ -2303,8 +2303,10 @@ Run `git status --short` afterwards. `.superpowers/**` and `.github/.10x-cli-man
 
 **Constraint checks:**
 - `OpportunityScorer.cs`, `AnalysisContracts.cs` and `AnalysisService.cs` are never touched.
-- There is no JS chart library and no JS change.
-- Views have no literal colors or sizes. The only numeric values in views are SVG `viewBox` drawing coordinates.
+- There is no JS chart library; the existing dependency-free chart controller
+  remains the only client-side chart behavior.
+- Views have no literal colors or arbitrary layout sizes outside the approved
+  inline SVG chart geometry.
 - New strings contain none of the forbidden words. Checked case-insensitively for "buy", "provider" and "exception" across "Bitcoin", "Generuj ranking", "Podsumowanie rankingu", "Przeanalizowane aktywa" and the class names.
 
 **Deliberate test updates** (all elements removed or renamed by the addendum):
@@ -2320,4 +2322,3 @@ Run `git status --short` afterwards. `.superpowers/**` and `.github/.10x-cli-man
 - `InsightCardModel.Rank` is used in Tasks 1 and 3.
 - `AnalysisSummaryStripView` / `SummaryPerformer` are used in Tasks 4 and 5.
 - `AssetOptionModel(AssetId, IsSelected, Score)` is used in Tasks 4 and 5.
-
