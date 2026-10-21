@@ -132,6 +132,8 @@ public sealed class AnalysisService(
                 AnalysisSummaryResult.InsufficientEvidence());
         }
 
+        var fallbackSummary = AnalysisSummaryResult.Generated(
+            explanationBuilder.Build(result, performance, assessment));
         var request = new AnalysisSummaryRequest(
             result.Asset,
             assessment.Score,
@@ -152,11 +154,16 @@ public sealed class AnalysisService(
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            summary = AnalysisSummaryResult.Unavailable();
+            summary = fallbackSummary;
         }
         catch (Exception)
         {
-            summary = AnalysisSummaryResult.Unavailable();
+            summary = fallbackSummary;
+        }
+
+        if (summary.Status == AnalysisSummaryStatus.Unavailable)
+        {
+            summary = fallbackSummary;
         }
 
         return CreateAnalysisResult(result, performance, assessment, summary);

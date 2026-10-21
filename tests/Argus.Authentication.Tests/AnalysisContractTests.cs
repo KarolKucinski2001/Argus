@@ -291,8 +291,9 @@ public sealed class AnalysisContractTests
             var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
 
             var result = Assert.Single(response.Results);
-            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
-            Assert.Null(result.Summary);
+            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+            Assert.NotNull(result.Summary);
+            Assert.Contains("Score", result.Summary);
             Assert.NotNull(result.Score);
             Assert.NotEmpty(result.Factors);
             Assert.NotEmpty(result.ChartPoints);
@@ -318,8 +319,9 @@ public sealed class AnalysisContractTests
             var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
 
             var result = Assert.Single(response.Results);
-            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
-            Assert.Null(result.Summary);
+            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+            Assert.NotNull(result.Summary);
+            Assert.Contains("Score", result.Summary);
             Assert.NotNull(result.Score);
             Assert.NotEmpty(result.Factors);
     }
@@ -385,7 +387,11 @@ public sealed class AnalysisContractTests
             Assert.Collection(
                 response.Results,
                 result => Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status),
-                result => Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status));
+                result =>
+                {
+                    Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+                    Assert.NotNull(result.Summary);
+                });
             Assert.All(response.Results, result =>
             {
                 Assert.NotNull(result.Score);
@@ -442,8 +448,9 @@ public sealed class AnalysisContractTests
                 var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
 
                 var result = Assert.Single(response.Results);
-                Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
-                Assert.Null(result.Summary);
+                Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+                Assert.NotNull(result.Summary);
+                Assert.Contains("Score", result.Summary);
             }
     }
 
@@ -466,8 +473,9 @@ public sealed class AnalysisContractTests
             var response = await service.AnalyzeAsync(marketData, AsOf, CancellationToken.None);
 
             var result = Assert.Single(response.Results);
-            Assert.Equal(AnalysisSummaryStatus.Unavailable, result.SummaryResult?.Status);
-            Assert.Null(result.Summary);
+            Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
+            Assert.NotNull(result.Summary);
+            Assert.Contains("Score", result.Summary);
     }
 
     [Fact]

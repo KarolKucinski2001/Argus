@@ -427,7 +427,7 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
-    public async Task Unavailable_summary_keeps_analysis_evidence_and_uses_bounded_copy()
+    public async Task Deterministic_summary_keeps_analysis_evidence_when_generator_is_unavailable()
     {
         var provider = new FakeMarketDataProvider();
         provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
@@ -443,7 +443,8 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Podsumowanie analizy jest chwilowo niedostępne", html);
+        Assert.Contains("Podsumowanie", html);
+        Assert.Contains("Score 100/100", html);
         Assert.Contains("100/100", html);
         Assert.Contains("Czynniki", html);
         Assert.DoesNotContain("provider", html, StringComparison.OrdinalIgnoreCase);
