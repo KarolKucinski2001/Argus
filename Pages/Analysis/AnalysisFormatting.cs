@@ -32,6 +32,9 @@ public static class AnalysisFormatting
             _ => "Dane kompletne"
         };
 
+    public static string Freshness(bool isStale) =>
+        isStale ? "Nieaktualne" : "Aktualne";
+
     public static string Warning(MarketDataWarningCategory category) =>
         category switch
         {

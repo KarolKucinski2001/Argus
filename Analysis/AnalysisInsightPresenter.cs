@@ -119,6 +119,9 @@ public static class AnalysisInsightPresenter
             _ => FactorDirection.Stable
         };
 
+    public static string FactorLabel(string key) =>
+        FactorOrder.FirstOrDefault(entry => entry.Key == key).Label ?? "Czynnik";
+
     public static string FactorWord(FactorDirection direction) =>
         direction switch
         {

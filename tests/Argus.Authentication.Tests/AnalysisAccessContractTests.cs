@@ -118,6 +118,9 @@ public sealed class AnalysisAccessContractTests
             "<article class=\"analysis-result-card__body insight-card insight-card--[a-z]+ asset-accent--ethereum\"",
             html);
         Assert.Matches("<span class=\"insight-card__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--ethereum\" data-asset-glyph=\"ETH-USD\">\\s*<span class=\"asset-glyph__monogram\">Ξ</span>",
+            html);
         Assert.DoesNotMatch("<svg class=\"asset-glyph__svg\"[^>]*(fill|stroke)=", html);
     }
 
@@ -322,10 +325,10 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("50/100", html);
         Assert.Contains("Cena wzrosła o 50% w ciągu 24 godzin — najwyżej oceniane aktywo w tej analizie.", html);
         Assert.Contains("Cena pozostała stabilna w ciągu 24 godzin (0%) — miejsce 2 w tej analizie.", html);
-                Assert.Contains("insight-card__score-block insight-card__score-block--moderate", html);
-                Assert.Contains("<p class=\"insight-card__band\">Umiarkowany</p>", html);
-                Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--stable\">Stabilny</span>", html);
-                Assert.Contains("Cena aktualna", html);
+        Assert.Contains("insight-card__score-block insight-card__score-block--moderate", html);
+        Assert.Contains("<p class=\"insight-card__band\">Umiarkowany</p>", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--stable\">Stabilny</span>", html);
+        Assert.Contains("Cena aktualna", html);
         Assert.Contains("24 godziny", html);
         Assert.Contains("7 dni", html);
         Assert.Contains("30 dni", html);
@@ -361,13 +364,13 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Czynniki", html);
-        Assert.Contains("24-hour momentum", html);
-        Assert.Contains("7-day momentum", html);
-        Assert.Contains("30-day trend", html);
-        Assert.Contains("contribution", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 25%", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 35%", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 40%", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("<strong>Momentum 24h</strong>", html);
+        Assert.Contains("<strong>Momentum 7d</strong>", html);
+        Assert.Contains("<strong>Trend 30d</strong>", html);
+        Assert.Contains("wkład ", html);
+        Assert.Contains("waga 25%", html);
+        Assert.Contains("waga 35%", html);
+        Assert.Contains("waga 40%", html);
         Assert.Contains("Score ", html);
         Assert.Contains("analysis-result-card__header", html);
         Assert.Contains("analysis-result-card__score", html);
@@ -417,6 +420,17 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("<span class=\"insight-card__bar-value\">+20%</span>", card[..details]);
         Assert.Contains("analysis-result-card__metrics", card[details..]);
         Assert.Contains("analysis-result-card__factor-list", card[details..]);
+        var detailsHtml = card[details..];
+        Assert.Contains("<strong>Momentum 24h</strong>", detailsHtml);
+        Assert.Contains("<strong>Trend 30d</strong>", detailsHtml);
+        Assert.Contains("waga ", detailsHtml);
+        Assert.Contains("wkład ", detailsHtml);
+        Assert.Contains("Dane kompletne", detailsHtml);
+        Assert.Contains("<dd>Aktualne</dd>", detailsHtml);
+        Assert.DoesNotMatch("(?<![-_])\\b(weight|contribution)\\b", detailsHtml);
+        Assert.DoesNotContain("</strong>:", detailsHtml);
+        Assert.DoesNotContain(">stale<", detailsHtml);
+        Assert.DoesNotContain(">current<", detailsHtml);
         Assert.Contains("data-chart-svg", card[details..]);
         Assert.Contains("Podsumowanie", card[details..]);
         Assert.DoesNotContain("chwilowo niedostępne", html);
@@ -444,7 +458,8 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("analysis-result-card--stale", html);
-        Assert.Equal(1, Regex.Matches(html, "Dane nieaktualne").Count);
+        Assert.Single(Regex.Matches(html, "role=\"status\">Dane nieaktualne"));
+        Assert.Contains("<dd>Nieaktualne</dd>", html);
     }
 
     [Fact]

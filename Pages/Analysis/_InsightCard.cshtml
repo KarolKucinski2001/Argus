@@ -145,11 +145,11 @@
                     </div>
                     <div class="analysis-result-card__metric">
                         <dt>Jakość danych</dt>
-                        <dd>@result.Quality</dd>
+                        <dd>@AnalysisFormatting.Quality(result.Quality)</dd>
                     </div>
                     <div class="analysis-result-card__metric">
                         <dt>Świeżość danych</dt>
-                        <dd>@(result.Freshness.IsStale ? "stale" : "current")</dd>
+                        <dd>@AnalysisFormatting.Freshness(result.Freshness.IsStale)</dd>
                     </div>
                 </dl>
 
@@ -172,19 +172,18 @@
                         @foreach (var factor in result.Factors)
                         {
                             <li class="analysis-result-card__factor">
-                                <strong>@factor.Label</strong>:
+                                <strong>@AnalysisInsightPresenter.FactorLabel(factor.Key)</strong>
                                 @if (factor.IsAvailable)
                                 {
                                     <span>@AnalysisFormatting.NullablePercent(factor.Percentage)</span>
-                                    <span class="analysis-result-card__factor-weight">weight @AnalysisFormatting.Weight(factor.Weight)</span>
-                                    <span class="analysis-result-card__factor-contribution">contribution @AnalysisFormatting.NullableDecimal(factor.Contribution)</span>
+                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
+                                    <span class="analysis-result-card__factor-contribution">wkład @AnalysisFormatting.NullableDecimal(factor.Contribution)</span>
                                 }
                                 else
                                 {
                                     <span>niedostępny</span>
-                                    <span class="analysis-result-card__factor-weight">weight @AnalysisFormatting.Weight(factor.Weight)</span>
+                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
                                 }
-                                <span>@factor.Explanation</span>
                             </li>
                         }
                     </ul>

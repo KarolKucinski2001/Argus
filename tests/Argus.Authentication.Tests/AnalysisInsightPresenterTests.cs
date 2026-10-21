@@ -23,6 +23,21 @@ public sealed class AnalysisInsightPresenterTests
         Assert.Equal(accent, identity.Accent);
     }
 
+    [Theory]
+    [InlineData("momentum-24h", "Momentum 24h")]
+    [InlineData("momentum-7d", "Momentum 7d")]
+    [InlineData("trend-30d", "Trend 30d")]
+    [InlineData("other", "Czynnik")]
+    public void Factor_labels_are_polish_and_fall_back_for_unknown_keys(string key, string label) =>
+        Assert.Equal(label, AnalysisInsightPresenter.FactorLabel(key));
+
+    [Fact]
+    public void Freshness_is_rendered_in_polish()
+    {
+        Assert.Equal("Nieaktualne", _bootstrap_scaffold.Pages.Analysis.AnalysisFormatting.Freshness(true));
+        Assert.Equal("Aktualne", _bootstrap_scaffold.Pages.Analysis.AnalysisFormatting.Freshness(false));
+    }
+
     [Fact]
     public void Unknown_ticker_falls_back_to_ticker_first_letter_and_neutral_accent()
     {
