@@ -5,6 +5,52 @@
     ViewData["Title"] = "Analysis UI states";
 }
 
+@if (Model.ShowRankedGrid)
+{
+    <section class="analysis-workspace" aria-labelledby="analysis-title">
+        <aside class="analysis-workspace__sidebar">
+            <div class="analysis-page__header">
+                <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
+            </div>
+            <div class="analysis-form">
+                <div class="analysis-form__header">
+                    <h2>Dostępne aktywa</h2>
+                    <p>Możesz wybrać maksymalnie 5 aktywów.</p>
+                </div>
+                <div class="asset-list">
+                    @foreach (var option in Model.RankedOptions)
+                    {
+                        <partial name="_AssetOption" model="option" />
+                    }
+                </div>
+                <button class="button" type="button">Generuj ranking</button>
+            </div>
+        </aside>
+
+        <div class="analysis-workspace__content">
+            <header class="analysis-workspace__header">
+                <p class="eyebrow">Market intelligence</p>
+                <h2>Dashboard analizy</h2>
+                <partial name="_SummaryStrip" model="Model.RankedSummary" />
+            </header>
+
+            <section class="analysis-results" aria-labelledby="analysis-results-title">
+                <h2 id="analysis-results-title">Ranking analizy</h2>
+                <p class="analysis-results__boundary">
+                    Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+                </p>
+                <ol class="analysis-results__list">
+                    @foreach (var rankedCard in Model.RankedCards)
+                    {
+                        <partial name="_InsightCard" model="rankedCard" />
+                    }
+                </ol>
+            </section>
+        </div>
+    </section>
+}
+else
+{
 <section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
     <div class="analysis-page__header">
         <p class="eyebrow">Testing only</p>
@@ -266,3 +312,4 @@
         </div>
     </section>
 </section>
+}

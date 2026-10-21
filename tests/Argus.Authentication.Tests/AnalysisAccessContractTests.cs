@@ -85,6 +85,7 @@ public sealed class AnalysisAccessContractTests
         Assert.DoesNotContain("chwilowo niedostępne", html);
         Assert.Contains("Generuj ranking", html);
         Assert.DoesNotContain("Rozpocznij analizę", html);
+        Assert.DoesNotContain("analysis-summary-strip", html);
     }
 
     [Fact]
@@ -118,6 +119,50 @@ public sealed class AnalysisAccessContractTests
             html);
         Assert.Matches("<span class=\"insight-card__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", html);
         Assert.DoesNotMatch("<svg class=\"asset-glyph__svg\"[^>]*(fill|stroke)=", html);
+    }
+
+    [Fact]
+    public async Task Ui_state_fixture_ranked_view_renders_four_cards_in_the_results_grid()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture?view=ranked");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.DoesNotContain("Analysis result states", html);
+        Assert.Contains("<section class=\"analysis-results\" aria-labelledby=\"analysis-results-title\">", html);
+        var listStart = html.IndexOf("<ol class=\"analysis-results__list\">", StringComparison.Ordinal);
+        Assert.True(listStart > 0, "The ranked view must render the real results list.");
+        var list = html[listStart..];
+        Assert.Equal(4, Regex.Matches(list, "<li class=\"analysis-result-card analysis-result-card--success\">").Count);
+        var positions = new[] { ">Apple</h3>", ">Microsoft</h3>", ">Bitcoin</h3>", ">Ethereum</h3>" }
+            .Select(name => list.IndexOf(name, StringComparison.Ordinal))
+            .ToArray();
+        Assert.All(positions, position => Assert.True(position >= 0));
+        Assert.Equal(positions.OrderBy(position => position), positions);
+        Assert.Single(Regex.Matches(list, "<p class=\"insight-card__band\">Silny</p>"));
+        Assert.Equal(2, Regex.Matches(list, "<p class=\"insight-card__band\">Umiarkowany</p>").Count);
+        Assert.Single(Regex.Matches(list, "<p class=\"insight-card__band\">Słaby</p>"));
+        Assert.Contains("Cena spadła o 6.2% w ciągu 30 dni — miejsce 4 w tej analizie.", list);
+        Assert.Matches("<dt>Przeanalizowane aktywa</dt>\\s*<dd class=\"analysis-summary-strip__value\">4</dd>", html);
+        Assert.Matches(
+            "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+4.8%</span>",
+            html);
+        Assert.Matches(
+            "<span class=\"analysis-summary-strip__name\">Ethereum</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--negative\">-3.9%</span>",
+            html);
+        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">56.8</dd>", html);
+        Assert.Equal(4, Regex.Matches(html, "class=\"asset-option__score\"").Count);
+        Assert.Contains("Generuj ranking", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
     }
 
     [Fact]

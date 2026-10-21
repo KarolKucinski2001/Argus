@@ -14,10 +14,50 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
 {
     public IReadOnlyList<FixtureResultState> ResultStates { get; } = BuildResultStates();
 
-    public IActionResult OnGet() =>
-        string.Equals(environment.EnvironmentName, "Testing", StringComparison.Ordinal)
-            ? Page()
-            : NotFound();
+    public bool ShowRankedGrid { get; private set; }
+
+    public IReadOnlyList<AssetAnalysis> RankedResults { get; } = BuildRankedResults();
+
+    public IReadOnlyList<InsightCardModel> RankedCards =>
+        RankedResults.Select((analysis, index) => Card(analysis, index)).ToArray();
+
+    public AnalysisSummaryStripView RankedSummary => AnalysisSummaryStripPresenter.Build(RankedResults);
+
+    public IReadOnlyList<AssetOptionModel> RankedOptions =>
+        RankedResults
+            .Select(analysis => new AssetOptionModel(analysis.Asset.Id, true, analysis.Score))
+            .Concat(
+            [
+                new AssetOptionModel("NVDA", false, null),
+                new AssetOptionModel("TSLA", false, null)
+            ])
+            .ToArray();
+
+    public IActionResult OnGet(string? view)
+    {
+        if (!string.Equals(environment.EnvironmentName, "Testing", StringComparison.Ordinal))
+        {
+            return NotFound();
+        }
+
+        ShowRankedGrid = string.Equals(view, "ranked", StringComparison.OrdinalIgnoreCase);
+        return Page();
+    }
+
+    private static IReadOnlyList<AssetAnalysis> BuildRankedResults()
+    {
+        var now = new DateTimeOffset(2026, 10, 20, 0, 0, 0, TimeSpan.Zero);
+        var current = new MarketDataFreshness(now, now, now.AddMinutes(5), false);
+        var generated = AnalysisSummaryResult.Generated("Wynik oparty na wyświetlonych danych.");
+
+        return
+        [
+            Sample("AAPL", 78m, 1.2m, 4.8m, 9.6m, [210m, 212m, 209m, 214m, 216m, 215.5m], MarketDataQuality.Complete, current, generated),
+            Sample("MSFT", 66m, 0.4m, 1.6m, 3.4m, [412m, 415m, 414m, 418m, 419m, 420.25m], MarketDataQuality.Complete, current, generated),
+            Sample("BTC-USD", 52m, -0.8m, -0.6m, 2.1m, [66000m, 67200m, 66800m, 67500m, 66900m, 67100m], MarketDataQuality.Complete, current, generated),
+            Sample("ETH-USD", 31m, -1.5m, -3.9m, -6.2m, [3720m, 3690m, 3650m, 3610m, 3580m, 3540m], MarketDataQuality.Complete, current, generated)
+        ];
+    }
 
     private static IReadOnlyList<FixtureResultState> BuildResultStates()
     {
