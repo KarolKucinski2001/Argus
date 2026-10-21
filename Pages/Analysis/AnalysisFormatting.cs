@@ -41,7 +41,7 @@ public static class AnalysisFormatting
             MarketDataWarningCategory.StaleData => "Dane nieaktualne",
             MarketDataWarningCategory.DelayedData => "Dane opóźnione",
             MarketDataWarningCategory.ProviderQuota => "Ograniczona dostępność danych",
-            MarketDataWarningCategory.UpstreamUnavailable => "Źródło danych chwilowo niedostępne",
+            MarketDataWarningCategory.UpstreamUnavailable => "Źródło danych niedostępne",
             _ => "Ograniczona jakość danych"
         };
 

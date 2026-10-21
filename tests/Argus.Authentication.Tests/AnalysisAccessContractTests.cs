@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Xunit;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
+using _bootstrap_scaffold.Pages.Analysis;
 
 namespace Argus.Authentication.Tests;
 
@@ -278,6 +279,51 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-chart-svg", card[details..]);
         Assert.Contains("Podsumowanie", card[details..]);
         Assert.DoesNotContain("chwilowo niedostępne", html);
+    }
+
+    [Fact]
+    public async Task Upstream_unavailable_warning_renders_approved_copy_without_chwilowo()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m) with
+            {
+                Quality = MarketDataQuality.Incomplete,
+                Warnings =
+                [
+                    new MarketDataWarning(
+                        MarketDataWarningCategory.UpstreamUnavailable,
+                        "RAW upstream outage ticket provider-555.",
+                        true)
+                ]
+            });
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Źródło danych niedostępne", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
+        Assert.DoesNotContain("RAW upstream outage", html);
+        Assert.DoesNotContain("provider-555", html);
+    }
+
+    [Fact]
+    public void Unavailable_summary_status_message_does_not_use_chwilowo_phrase()
+    {
+        var message = IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable);
+
+        Assert.Equal(
+            "Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+            message);
+        Assert.DoesNotContain("chwilowo niedostępne", message);
     }
 
     [Fact]

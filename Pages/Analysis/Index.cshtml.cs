@@ -155,7 +155,7 @@ public sealed class IndexModel(
             AnalysisSummaryStatus.InsufficientEvidence =>
                 "Niewystarczające dane do przygotowania podsumowania.",
             AnalysisSummaryStatus.Unavailable =>
-                "Podsumowanie analizy jest chwilowo niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+                "Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne.",
             _ =>
                 "Podsumowanie analizy."
         };
