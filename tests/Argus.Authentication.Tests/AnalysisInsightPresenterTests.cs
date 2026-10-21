@@ -52,6 +52,33 @@ public sealed class AnalysisInsightPresenterTests
     }
 
     [Fact]
+    public void Insight_with_only_negative_factors_names_the_least_and_most_negative()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", -1.1m, -3m, -8.2m, 10m, 20m, 15m));
+
+        Assert.Equal(InsightTone.Negative, view.Tone);
+        Assert.Equal(
+            "Najsilniejszy sygnał: Momentum 24h (-1.1%); najsłabszy: Trend 30d (-8.2%).",
+            view.Insight);
+    }
+
+    [Fact]
+    public void Available_factor_without_percentage_is_an_unavailable_bar_excluded_from_insight()
+    {
+        var analysis = Analysis("AAPL", -1.1m, 3m, 8.2m, 10m, 20m, 15m);
+        var factors = analysis.Factors.ToArray();
+        factors[0] = factors[0] with { IsAvailable = true, Percentage = null };
+
+        var view = AnalysisInsightPresenter.Present(analysis with { Factors = factors });
+
+        Assert.False(view.FactorBars[0].IsAvailable);
+        Assert.Null(view.FactorBars[0].Value);
+        Assert.Equal(
+            "Najsilniejszy sygnał: Trend 30d (+8.2%); najsłabszy: Momentum 7d (+3%).",
+            view.Insight);
+    }
+
+    [Fact]
     public void Insight_with_one_factor_names_only_that_factor()
     {
         var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, 5m, 10m, 11m));

@@ -69,6 +69,14 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-sparkline", html);
         Assert.Contains("data-factor-bar=\"trend-30d\"", html);
         Assert.Contains("insight-card__bar insight-card__bar--unavailable", html);
+        var factorBars = Regex.Matches(html, "<li class=\"insight-card__bar[^\"]*\"[\\s\\S]*?</li>")
+            .Select(match => match.Value)
+            .ToArray();
+        var unavailableBars = factorBars.Where(bar => bar.Contains("insight-card__bar--unavailable", StringComparison.Ordinal)).ToArray();
+        Assert.NotEmpty(unavailableBars);
+        Assert.NotEmpty(factorBars.Except(unavailableBars));
+        Assert.All(unavailableBars, bar => Assert.Matches("<meter[^>]*aria-hidden=\"true\"", bar));
+        Assert.All(factorBars.Except(unavailableBars), bar => Assert.DoesNotContain("aria-hidden=\"true\"", bar));
         Assert.Contains("Wniosek z danych", html);
         Assert.Contains("<details class=\"insight-card__details\"", html);
         Assert.DoesNotContain("chwilowo niedostępne", html);
@@ -292,6 +300,31 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-chart-svg", card[details..]);
         Assert.Contains("Podsumowanie", card[details..]);
         Assert.DoesNotContain("chwilowo niedostępne", html);
+    }
+
+    [Fact]
+    public async Task Stale_quality_renders_the_stale_data_chip_exactly_once()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m, isStale: true) with
+            {
+                Quality = MarketDataQuality.Stale
+            });
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("analysis-result-card--stale", html);
+        Assert.Equal(1, Regex.Matches(html, "Dane nieaktualne").Count);
     }
 
     [Fact]
@@ -855,11 +888,9 @@ public sealed class AnalysisAccessContractTests
                 new KeyValuePair<string, string>("__RequestVerificationToken", token),
                 new KeyValuePair<string, string>("SelectedAssetIds", "AAPL")
             ]));
-        var html = await response.Content.ReadAsStringAsync();
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Nie udało się rozpocząć analizy", html);
-        Assert.Contains("Analiza jest", html);
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+        Assert.Contains("Analiza jest obecnie niedostępna. Spróbuj ponownie później.", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
         Assert.DoesNotContain("approved-test-provider", html);
         Assert.DoesNotContain("An approved provider is not registered", html);
     }

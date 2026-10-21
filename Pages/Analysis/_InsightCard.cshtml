@@ -15,7 +15,9 @@
             : "analysis-result-card--insufficient-evidence";
     var isDelayed = result.IsDelayed || result.Warnings.Any(warning =>
         warning.Category == MarketDataWarningCategory.DelayedData);
-    var hasChips = isDelayed || result.Freshness.IsStale || result.Quality != MarketDataQuality.Complete;
+    var isStaleQuality = result.Freshness.IsStale && result.Quality == MarketDataQuality.Stale;
+    var showQualityChip = result.Quality != MarketDataQuality.Complete && !isStaleQuality;
+    var hasChips = isDelayed || result.Freshness.IsStale || showQualityChip;
 }
 
 <li class="analysis-result-card @cardStateClass">
@@ -56,7 +58,7 @@
                     {
                         <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane nieaktualne</span>
                     }
-                    @if (result.Quality != MarketDataQuality.Complete)
+                    @if (showQualityChip)
                     {
                         <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@AnalysisFormatting.Quality(result.Quality)</span>
                     }
@@ -95,6 +97,7 @@
                                min="0"
                                max="100"
                                value="@AnalysisFormatting.Decimal(bar.Value ?? 0m)"
+                               aria-hidden="@(bar.IsAvailable ? null : "true")"
                                aria-label="@bar.Label">@AnalysisFormatting.Decimal(bar.Value ?? 0m)</meter>
                         <span class="insight-card__bar-value">@(bar.IsAvailable ? AnalysisFormatting.NullablePercent(bar.Percentage) : "n/d")</span>
                     </li>

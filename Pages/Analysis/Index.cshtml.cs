@@ -165,7 +165,7 @@ public sealed class IndexModel(
         {
             MarketDataErrorCategory.ProviderNotApproved or
             MarketDataErrorCategory.NotConfigured =>
-                "Analiza jest chwilowo niedostępna. Spróbuj ponownie później.",
+                "Analiza jest obecnie niedostępna. Spróbuj ponownie później.",
             MarketDataErrorCategory.Timeout =>
                 "Pobieranie danych trwało zbyt długo. Spróbuj ponownie.",
             MarketDataErrorCategory.QuotaExceeded =>
