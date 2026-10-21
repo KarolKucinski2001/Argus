@@ -69,6 +69,9 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-sparkline", html);
         Assert.Contains("data-factor-bar=\"trend-30d\"", html);
         Assert.Contains("insight-card__bar insight-card__bar--unavailable", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--falling\">Malejący</span>", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--unavailable\">n/d</span>", html);
+        Assert.Contains("<p class=\"analysis-result-card__rank\">Wynik nierankingowy</p>", html);
         var factorBars = Regex.Matches(html, "<li class=\"insight-card__bar[^\"]*\"[\\s\\S]*?</li>")
             .Select(match => match.Value)
             .ToArray();
@@ -261,7 +264,10 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("50/100", html);
         Assert.Contains("Cena wzrosła o 50% w ciągu 24 godzin — najwyżej oceniane aktywo w tej analizie.", html);
         Assert.Contains("Cena pozostała stabilna w ciągu 24 godzin (0%) — miejsce 2 w tej analizie.", html);
-        Assert.Contains("Cena aktualna", html);
+                Assert.Contains("insight-card__score-block insight-card__score-block--moderate", html);
+                Assert.Contains("<p class=\"insight-card__band\">Umiarkowany</p>", html);
+                Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--stable\">Stabilny</span>", html);
+                Assert.Contains("Cena aktualna", html);
         Assert.Contains("24 godziny", html);
         Assert.Contains("7 dni", html);
         Assert.Contains("30 dni", html);
@@ -330,6 +336,14 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(3, Regex.Matches(card[..details], "data-factor-bar=").Count);
         Assert.Contains("Wniosek z danych", card[..details]);
         Assert.Contains("Cena wzrosła o 50% w ciągu 30 dni — najwyżej oceniane aktywo w tej analizie.", card[..details]);
+        Assert.Matches(
+            "<div class=\"insight-card__score-block insight-card__score-block--strong\">\\s*" +
+            "<p class=\"analysis-result-card__rank\"><span aria-hidden=\"true\">#1</span><span class=\"visually-hidden\">Miejsce 1</span></p>\\s*" +
+            "<p class=\"analysis-result-card__score\"><span class=\"visually-hidden\">Score 100/100</span><span class=\"insight-card__score-value\" aria-hidden=\"true\">100</span></p>\\s*" +
+            "<p class=\"insight-card__band\">Silny</p>",
+            card[..details]);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--rising\">Rosnący</span>", card[..details]);
+        Assert.Contains("<span class=\"insight-card__bar-value\">+20%</span>", card[..details]);
         Assert.Contains("analysis-result-card__metrics", card[details..]);
         Assert.Contains("analysis-result-card__factor-list", card[details..]);
         Assert.Contains("data-chart-svg", card[details..]);
@@ -489,7 +503,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
         Assert.Contains("data-chart-tooltip", html);
         Assert.Contains("role=\"status\"", html);
-        Assert.Contains("<time datetime=", html);
+        Assert.DoesNotContain("analysis-result-card__chart-points", html);
+        Assert.DoesNotContain("<time datetime=", html);
         Assert.Contains("Historyczne obserwacje ceny zamknięcia", html);
         Assert.DoesNotContain("prognoz", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("data-chart-range", html);

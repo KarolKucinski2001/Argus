@@ -129,20 +129,6 @@
         {
             <p class="analysis-result-card__chart-state" role="status">Dostępna jest jedna historyczna obserwacja.</p>
         }
-        <ul class="analysis-result-card__chart-points">
-            @foreach (var point in chartPoints)
-            {
-                <li class="analysis-result-card__chart-point"
-                    data-chart-asset="@result.Asset.Id"
-                    data-chart-timestamp="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)"
-                    data-chart-close="@AnalysisFormatting.Decimal(point.Close)">
-                    <time datetime="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)">
-                        @point.Timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-                    </time>
-                    <span>@AnalysisFormatting.Decimal(point.Close)</span>
-                </li>
-            }
-        </ul>
     }
     else
     {

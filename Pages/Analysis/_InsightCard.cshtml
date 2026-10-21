@@ -31,14 +31,21 @@
                 <h3 id="analysis-result-@result.Asset.Id">@insight.Identity.Name</h3>
                 <p class="insight-card__ticker">@result.Asset.Id</p>
             </div>
-            <p class="analysis-result-card__rank">@(result.Score.HasValue ? $"Miejsce {Model.Index + 1}" : "Wynik nierankingowy")</p>
-            @if (result.Score.HasValue)
+            @if (result.Score is { } score && insight.Band is { } band)
             {
-                <p class="analysis-result-card__score">Score @AnalysisFormatting.Decimal(result.Score.Value)/100</p>
+                <div class="insight-card__score-block insight-card__score-block--@band.ToString().ToLowerInvariant()">
+                    <p class="analysis-result-card__rank"><span aria-hidden="true">#@Model.Rank</span><span class="visually-hidden">Miejsce @Model.Rank</span></p>
+                    <p class="analysis-result-card__score"><span class="visually-hidden">Score @AnalysisFormatting.Decimal(score)/100</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
+                    <p class="insight-card__band">@AnalysisInsightPresenter.BandLabel(band)</p>
+                </div>
             }
-            else if (result.Error is null)
+            else
             {
-                <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
+                <p class="analysis-result-card__rank">Wynik nierankingowy</p>
+                if (result.Error is null)
+                {
+                    <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
+                }
             }
         </header>
 
@@ -100,7 +107,13 @@
                                value="@AnalysisFormatting.Decimal(bar.Value ?? 0m)"
                                aria-hidden="@(bar.IsAvailable ? null : "true")"
                                aria-label="@bar.Label">@AnalysisFormatting.Decimal(bar.Value ?? 0m)</meter>
-                        <span class="insight-card__bar-value">@(bar.IsAvailable ? AnalysisFormatting.NullablePercent(bar.Percentage) : "n/d")</span>
+                        <span class="insight-card__bar-reading">
+                            <span class="insight-card__bar-word insight-card__bar-word--@bar.Direction.ToString().ToLowerInvariant()">@bar.Word</span>
+                            @if (bar.IsAvailable)
+                            {
+                                <span class="insight-card__bar-value">@AnalysisFormatting.NullablePercent(bar.Percentage)</span>
+                            }
+                        </span>
                     </li>
                 }
             </ul>
