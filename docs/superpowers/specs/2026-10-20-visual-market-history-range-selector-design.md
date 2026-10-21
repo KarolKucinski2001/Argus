@@ -4,7 +4,7 @@
 
 Improve the existing market-history chart so it presents a clean, readable
 straight-line trend and lets users choose the visible history range:
-`1M`, `3M`, `6M`, `1Y`, or `Max`. The default range is `1Y`.
+`1M`, `3M`, `6M`, `1Y`, or `Maks.`. The default range is `1Y`.
 
 This remains a frontend presentation change. It does not change market-data
 retrieval, scoring, ranking, summaries, authentication, or the provider
@@ -19,11 +19,11 @@ boundary.
 - Render the complete normalized history into the page so the text fallback
   remains complete and JavaScript can switch ranges locally.
 - Use `1Y` as the default active range.
-- Provide `1M`, `3M`, `6M`, `1Y`, and `Max` controls above the chart.
+- Provide `1M`, `3M`, `6M`, `1Y`, and `Maks.` controls above the chart.
 - Mark the active range with both visual styling and `aria-pressed`.
-- Keep the full textual date/close list available below the chart and usable
-  without JavaScript.
-- Use `Max` or the nearest available history when a selected range cannot be
+- Keep each chart point's accessible date/close label available without
+  JavaScript; do not add a standalone price table.
+- Use `Maks.` or the nearest available history when a selected range cannot be
   represented by the available observations.
 
 ## Interaction and data flow

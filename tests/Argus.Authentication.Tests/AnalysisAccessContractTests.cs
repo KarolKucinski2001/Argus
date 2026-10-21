@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Xunit;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
+using _bootstrap_scaffold.Pages.Analysis;
 
 namespace Argus.Authentication.Tests;
 
@@ -25,16 +26,16 @@ public sealed class AnalysisAccessContractTests
         });
 
         using var response = await client.GetAsync("/analysis/ui-state-fixture");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Default", html);
-        Assert.Contains("Hover", html);
-        Assert.Contains("Focus-visible", html);
-        Assert.Contains("Disabled", html);
-        Assert.Contains("Error", html);
-        Assert.Contains("Empty", html);
-        Assert.Contains("Loading", html);
+        Assert.Contains("Domyślny", html);
+        Assert.Contains("Najechanie", html);
+        Assert.Contains("Fokus klawiatury", html);
+        Assert.Contains("Wyłączony", html);
+        Assert.Contains("Błąd", html);
+        Assert.Contains("Brak danych", html);
+        Assert.Contains("Ładowanie", html);
         Assert.Contains("ui-state-fixture__grid", html);
         Assert.Contains("analysis-workspace", html);
         Assert.Contains("analysis-workspace__sidebar", html);
@@ -48,16 +49,123 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-submit-button", html);
         Assert.Contains("data-pending-status", html);
         Assert.Contains("ui-state-fixture__loading-card", html);
-        Assert.Contains("Analysis result states", html);
-        Assert.Contains("Completed", html);
-        Assert.Contains("Partial result", html);
-        Assert.Contains("Stale data", html);
-        Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("Stany wyników analizy", html);
+        Assert.Contains("Wynik gotowy", html);
+        Assert.Contains("Częściowy wynik", html);
+        Assert.Contains("Nieaktualne dane", html);
+        Assert.Contains("Niewystarczające dane", html);
         Assert.Contains("analysis-result-card analysis-result-card--success analysis-result-card--stale", html);
         Assert.Contains("analysis-result-card analysis-result-card--insufficient-evidence", html);
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Dane nieaktualne", html);
+        Assert.Contains("Błąd", html);
+        Assert.Contains("Opóźnione dane", html);
+        Assert.Contains("analysis-result-card analysis-result-card--error", html);
+        Assert.Contains("insight-card__error", html);
+        Assert.Contains("Dane opóźnione", html);
+        Assert.DoesNotMatch(@"insight-card__chips""[^>]*>\s*</div>", html);
         Assert.Contains("Niewystarczające dane do wyliczenia score.", html);
+        Assert.Contains("class=\"insight-card__monogram\"", html);
+        Assert.Contains("data-sparkline", html);
+        Assert.Contains("data-factor-bar=\"trend-30d\"", html);
+        Assert.Contains("insight-card__bar insight-card__bar--unavailable", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--falling\">Malejący</span>", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--unavailable\">n/d</span>", html);
+        Assert.Contains("<p class=\"analysis-result-card__rank\">Wynik nierankingowy</p>", html);
+        var factorBars = Regex.Matches(html, "<li class=\"insight-card__bar[^\"]*\"[\\s\\S]*?</li>")
+            .Select(match => match.Value)
+            .ToArray();
+        var unavailableBars = factorBars.Where(bar => bar.Contains("insight-card__bar--unavailable", StringComparison.Ordinal)).ToArray();
+        Assert.NotEmpty(unavailableBars);
+        Assert.NotEmpty(factorBars.Except(unavailableBars));
+        Assert.All(unavailableBars, bar => Assert.Matches("<meter[^>]*aria-hidden=\"true\"", bar));
+        Assert.All(factorBars.Except(unavailableBars), bar => Assert.DoesNotContain("aria-hidden=\"true\"", bar));
+        Assert.Contains("Wniosek z danych", html);
+        Assert.Contains("<details class=\"insight-card__details\"", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
+        Assert.Contains("Generuj ranking", html);
+        Assert.DoesNotContain("Rozpocznij analizę", html);
+        Assert.DoesNotContain("analysis-summary-strip", html);
+    }
+
+    [Fact]
+    public async Task Ui_state_fixture_renders_own_asset_glyphs_and_accents()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"AAPL\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"MSFT\">\\s*<svg class=\"asset-glyph__svg\"",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--bitcoin\" data-asset-glyph=\"BTC-USD\">\\s*<span class=\"asset-glyph__monogram\">₿</span>",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"NVDA\">\\s*<span class=\"asset-glyph__monogram\">N</span>",
+            html);
+        Assert.Matches(
+            "<article class=\"analysis-result-card__body insight-card insight-card--[a-z]+ asset-accent--ethereum\"",
+            html);
+        Assert.Matches("<span class=\"insight-card__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--ethereum\" data-asset-glyph=\"ETH-USD\">\\s*<span class=\"asset-glyph__monogram\">Ξ</span>",
+            html);
+        Assert.DoesNotMatch("<svg class=\"asset-glyph__svg\"[^>]*(fill|stroke)=", html);
+    }
+
+    [Fact]
+    public async Task Ui_state_fixture_ranked_view_renders_four_cards_in_the_results_grid()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture?view=ranked");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.DoesNotContain("Stany wyników analizy", html);
+        Assert.Contains("<section class=\"analysis-results\" aria-labelledby=\"analysis-results-title\">", html);
+        var listStart = html.IndexOf("<ol class=\"analysis-results__list\">", StringComparison.Ordinal);
+        Assert.True(listStart > 0, "The ranked view must render the real results list.");
+        var list = html[listStart..];
+        Assert.Equal(4, Regex.Matches(list, "<li class=\"analysis-result-card analysis-result-card--success\">").Count);
+        var positions = new[] { ">Apple</h3>", ">Microsoft</h3>", ">Bitcoin</h3>", ">Ethereum</h3>" }
+            .Select(name => list.IndexOf(name, StringComparison.Ordinal))
+            .ToArray();
+        Assert.All(positions, position => Assert.True(position >= 0));
+        Assert.Equal(positions.OrderBy(position => position), positions);
+        Assert.Single(Regex.Matches(list, "<p class=\"insight-card__band\">Silny</p>"));
+        Assert.Equal(2, Regex.Matches(list, "<p class=\"insight-card__band\">Umiarkowany</p>").Count);
+        Assert.Single(Regex.Matches(list, "<p class=\"insight-card__band\">Słaby</p>"));
+        Assert.Contains("Cena spadła o 6.2% w ciągu 30 dni — miejsce 4 w tej analizie.", list);
+        Assert.Matches("<dt>Przeanalizowane aktywa</dt>\\s*<dd class=\"analysis-summary-strip__value\">4</dd>", html);
+        Assert.Matches(
+            "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+4.8%</span>",
+            html);
+        Assert.Matches(
+            "<span class=\"analysis-summary-strip__name\">Ethereum</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--negative\">-3.9%</span>",
+            html);
+        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">56.8</dd>", html);
+        Assert.Equal(4, Regex.Matches(html, "class=\"asset-option__score\"").Count);
+        Assert.Contains("Generuj ranking", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
     }
 
     [Fact]
@@ -127,6 +235,17 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-workspace__sidebar\"", html);
         Assert.Contains("class=\"analysis-workspace__content\"", html);
         Assert.Contains("class=\"analysis-results__list\"", html);
+        var decoded = WebUtility.HtmlDecode(html);
+        Assert.Contains("<h1 id=\"analysis-title\" class=\"analysis-workspace__title\">Nowa analiza</h1>", decoded);
+        Assert.Contains("Generuj ranking", decoded);
+        Assert.DoesNotContain("Rozpocznij analizę", decoded);
+        Assert.DoesNotContain("Wybierz aktywa do sprawdzenia", decoded);
+        Assert.Matches(
+            "<span class=\"asset-option__copy\">\\s*<strong>Apple</strong>\\s*<small>AAPL</small>",
+            decoded);
+        Assert.Matches("<span class=\"asset-option__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", decoded);
+        Assert.DoesNotContain("analysis-summary-strip", decoded);
+        Assert.DoesNotContain("asset-option__score", decoded);
     }
 
     [Fact]
@@ -204,10 +323,28 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Miejsce 1", html);
         Assert.Contains("100/100", html);
         Assert.Contains("50/100", html);
+        Assert.Contains("Cena wzrosła o 50% w ciągu 24 godzin — najwyżej oceniane aktywo w tej analizie.", html);
+        Assert.Contains("Cena pozostała stabilna w ciągu 24 godzin (0%) — miejsce 2 w tej analizie.", html);
+        Assert.Contains("insight-card__score-block insight-card__score-block--moderate", html);
+        Assert.Contains("<p class=\"insight-card__band\">Umiarkowany</p>", html);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--stable\">Stabilny</span>", html);
         Assert.Contains("Cena aktualna", html);
         Assert.Contains("24 godziny", html);
         Assert.Contains("7 dni", html);
         Assert.Contains("30 dni", html);
+        Assert.Contains("<section class=\"analysis-summary-strip\" aria-label=\"Podsumowanie rankingu\">", html);
+        Assert.Matches("<dt>Przeanalizowane aktywa</dt>\\s*<dd class=\"analysis-summary-strip__value\">2</dd>", html);
+        Assert.Matches(
+            "<dt>Najlepszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<span class=\"analysis-summary-strip__name\">Microsoft</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+50%</span>",
+            html);
+        Assert.Matches(
+            "<dt>Najsłabszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--neutral\">0%</span>",
+            html);
+        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">75</dd>", html);
     }
 
     [Fact]
@@ -227,13 +364,13 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Czynniki", html);
-        Assert.Contains("24-hour momentum", html);
-        Assert.Contains("7-day momentum", html);
-        Assert.Contains("30-day trend", html);
-        Assert.Contains("contribution", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 25%", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 35%", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("weight 40%", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("<strong>Momentum 24h</strong>", html);
+        Assert.Contains("<strong>Momentum 7d</strong>", html);
+        Assert.Contains("<strong>Trend 30d</strong>", html);
+        Assert.Contains("wkład ", html);
+        Assert.Contains("waga 25%", html);
+        Assert.Contains("waga 35%", html);
+        Assert.Contains("waga 40%", html);
         Assert.Contains("Score ", html);
         Assert.Contains("analysis-result-card__header", html);
         Assert.Contains("analysis-result-card__score", html);
@@ -243,6 +380,185 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Historia cenowa", html);
         Assert.Contains("data-chart-asset=\"AAPL\"", html);
         Assert.Contains("data-chart-close=\"80", html);
+    }
+
+    [Fact]
+    public async Task Insight_card_puts_identity_change_sparkline_bars_and_insight_first()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+        var card = html[html.IndexOf("class=\"analysis-results__list\"", StringComparison.Ordinal)..];
+        var details = card.IndexOf("<details class=\"insight-card__details\"", StringComparison.Ordinal);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.True(details > 0, "The card must contain a collapsed details element.");
+        Assert.DoesNotContain("<details class=\"insight-card__details\" open", card);
+        Assert.Contains(">Apple</h3>", card[..details]);
+        Assert.Contains("class=\"insight-card__monogram\"", card[..details]);
+        Assert.Contains("+25%", card[..details]);
+        Assert.Contains("data-sparkline", card[..details]);
+        Assert.Equal(3, Regex.Matches(card[..details], "data-factor-bar=").Count);
+        Assert.Contains("Wniosek z danych", card[..details]);
+        Assert.Contains("Cena wzrosła o 50% w ciągu 30 dni — najwyżej oceniane aktywo w tej analizie.", card[..details]);
+        Assert.Matches(
+            "<div class=\"insight-card__score-block insight-card__score-block--strong\">\\s*" +
+            "<p class=\"analysis-result-card__rank\"><span aria-hidden=\"true\">#1</span><span class=\"visually-hidden\">Miejsce 1</span></p>\\s*" +
+            "<p class=\"analysis-result-card__score\"><span class=\"visually-hidden\">Score 100/100</span><span class=\"insight-card__score-value\" aria-hidden=\"true\">100</span></p>\\s*" +
+            "<p class=\"insight-card__band\">Silny</p>",
+            card[..details]);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--rising\">Rosnący</span>", card[..details]);
+        Assert.Contains("<span class=\"insight-card__bar-value\">+20%</span>", card[..details]);
+        Assert.Contains("analysis-result-card__metrics", card[details..]);
+        Assert.Contains("analysis-result-card__factor-list", card[details..]);
+        var detailsHtml = card[details..];
+        Assert.Contains("<strong>Momentum 24h</strong>", detailsHtml);
+        Assert.Contains("<strong>Trend 30d</strong>", detailsHtml);
+        Assert.Contains("waga ", detailsHtml);
+        Assert.Contains("wkład ", detailsHtml);
+        Assert.Contains("Dane kompletne", detailsHtml);
+        Assert.Contains("<dd>Aktualne</dd>", detailsHtml);
+        Assert.DoesNotMatch("(?<![-_])\\b(weight|contribution)\\b", detailsHtml);
+        Assert.DoesNotContain("</strong>:", detailsHtml);
+        Assert.DoesNotContain(">stale<", detailsHtml);
+        Assert.DoesNotContain(">current<", detailsHtml);
+        Assert.Contains("data-chart-svg", card[details..]);
+        Assert.Contains("Podsumowanie", card[details..]);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
+    }
+
+    [Fact]
+    public async Task Stale_quality_renders_the_stale_data_chip_exactly_once()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m, isStale: true) with
+            {
+                Quality = MarketDataQuality.Stale
+            });
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("analysis-result-card--stale", html);
+        Assert.Single(Regex.Matches(html, "role=\"status\">Dane nieaktualne"));
+        Assert.Contains("<dd>Nieaktualne</dd>", html);
+    }
+
+    [Fact]
+    public async Task Upstream_unavailable_warning_renders_approved_copy_without_chwilowo()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m) with
+            {
+                Quality = MarketDataQuality.Incomplete,
+                Warnings =
+                [
+                    new MarketDataWarning(
+                        MarketDataWarningCategory.UpstreamUnavailable,
+                        "RAW upstream outage ticket provider-555.",
+                        true)
+                ]
+            });
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Źródło danych niedostępne", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
+        Assert.DoesNotContain("RAW upstream outage", html);
+        Assert.DoesNotContain("provider-555", html);
+    }
+
+    [Fact]
+    public void Unavailable_summary_status_message_does_not_use_chwilowo_phrase()
+    {
+        var message = IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable);
+
+        Assert.Equal(
+            "Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+            message);
+        Assert.DoesNotContain("chwilowo niedostępne", message);
+    }
+
+    [Fact]
+    public async Task Sidebar_shows_rank_and_score_and_failed_cards_have_no_sparkline()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(
+            CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 120m, 120m, 120m),
+            CreateScoredResult("MSFT", MarketAssetClass.Equity, 120m, 80m, 80m, 80m),
+            CreateErrorResult(
+                "BTC-USD",
+                MarketAssetClass.Crypto,
+                new MarketDataError(MarketDataErrorCategory.UpstreamUnavailable, "RAW outage", true)));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL", "MSFT", "BTC-USD");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("class=\"asset-option__monogram\"", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>100</span>", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>50</span>", html);
+        Assert.Equal(2, Regex.Matches(html, "class=\"asset-option__score\"").Count);
+        Assert.DoesNotContain("asset-option__rank", html);
+        Assert.Equal(2, Regex.Matches(html, "data-sparkline").Count);
+        Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
+        Assert.DoesNotContain("RAW outage", html);
+    }
+
+    [Fact]
+    public async Task Results_boundary_is_a_single_educational_line()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(provider, _ => { });
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var token = await GetAntiforgeryTokenAsync(client);
+        using var response = await PostAnalysisAsync(client, token, "AAPL");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Contains("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.", html);
+        Assert.DoesNotContain("spersonalizowanych obietnic", html);
+        Assert.DoesNotContain("Rankingi, kontekst rynkowy i czynniki wyjaśniające", html);
     }
 
     [Fact]
@@ -275,7 +591,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
         Assert.Contains("data-chart-tooltip", html);
         Assert.Contains("role=\"status\"", html);
-        Assert.Contains("<time datetime=", html);
+        Assert.DoesNotContain("analysis-result-card__chart-points", html);
+        Assert.DoesNotContain("<time datetime=", html);
         Assert.Contains("Historyczne obserwacje ceny zamknięcia", html);
         Assert.DoesNotContain("prognoz", html, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("data-chart-range", html);
@@ -285,7 +602,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-chart-range-option=\"3M\"", html);
         Assert.Contains("data-chart-range-option=\"6M\"", html);
         Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
         Assert.Matches("data-chart-range-option=\"1Y\"[^>]*aria-pressed=\"true\"", html);
         Assert.Matches("data-chart-range-option=\"1M\"[^>]*aria-pressed=\"false\"", html);
     }
@@ -504,7 +821,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Spróbuj ponownie później", html);
         Assert.Contains("Historia cenowa", html);
         Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
         Assert.Contains("data-chart-svg", html);
         Assert.Contains("analysis-result-card__factor-list", html);
         Assert.DoesNotContain("The market data provider returned no result", html);
@@ -529,7 +846,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("AAPL", html);
         Assert.Contains("Niewystarczające dane", html);
-        Assert.Contains("Insufficient evidence", html);
+        Assert.Contains("Niewystarczające dane", html);
+        Assert.Contains("insight-card__change insight-card__change--muted\">n/d</p>", html);
         Assert.DoesNotContain("0/100", html);
         Assert.DoesNotContain("Score 0", html);
     }
@@ -709,11 +1027,9 @@ public sealed class AnalysisAccessContractTests
                 new KeyValuePair<string, string>("__RequestVerificationToken", token),
                 new KeyValuePair<string, string>("SelectedAssetIds", "AAPL")
             ]));
-        var html = await response.Content.ReadAsStringAsync();
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Nie udało się rozpocząć analizy", html);
-        Assert.Contains("Analiza jest", html);
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+        Assert.Contains("Analiza jest obecnie niedostępna. Spróbuj ponownie później.", html);
+        Assert.DoesNotContain("chwilowo niedostępne", html);
         Assert.DoesNotContain("approved-test-provider", html);
         Assert.DoesNotContain("An approved provider is not registered", html);
     }

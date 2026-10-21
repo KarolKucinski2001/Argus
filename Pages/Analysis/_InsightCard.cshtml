@@ -1,0 +1,228 @@
+@using _bootstrap_scaffold.Analysis
+@using _bootstrap_scaffold.MarketData
+@using _bootstrap_scaffold.Pages.Analysis
+@model InsightCardModel
+@{
+    var result = Model.Result;
+    var insight = AnalysisInsightPresenter.Present(result, Model.Rank);
+    var toneClass = $"insight-card--{insight.Tone.ToString().ToLowerInvariant()}";
+    var accentClass = AssetIdentityCatalog.AccentClass(insight.Identity.Accent);
+    var cardStateClass = result.Error is not null
+        ? "analysis-result-card--error"
+        : result.Score.HasValue
+            ? result.Freshness.IsStale
+                ? "analysis-result-card--success analysis-result-card--stale"
+                : "analysis-result-card--success"
+            : "analysis-result-card--insufficient-evidence";
+    var isDelayed = result.IsDelayed || result.Warnings.Any(warning =>
+        warning.Category == MarketDataWarningCategory.DelayedData);
+    var isStaleQuality = result.Freshness.IsStale && result.Quality == MarketDataQuality.Stale;
+    var showQualityChip = result.Quality != MarketDataQuality.Complete && !isStaleQuality;
+    var hasChips = isDelayed || result.Freshness.IsStale || showQualityChip;
+}
+
+<li class="analysis-result-card @cardStateClass">
+    <article class="analysis-result-card__body insight-card @toneClass @accentClass"
+             aria-labelledby="analysis-result-@result.Asset.Id"
+             tabindex="0">
+        <header class="analysis-result-card__header">
+            <span class="insight-card__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="@result.Asset.Id" /></span>
+            <div class="insight-card__identity">
+                <h3 id="analysis-result-@result.Asset.Id">@insight.Identity.Name</h3>
+                <p class="insight-card__ticker">@result.Asset.Id</p>
+            </div>
+            @if (result.Score is { } score && insight.Band is { } band)
+            {
+                <div class="insight-card__score-block insight-card__score-block--@band.ToString().ToLowerInvariant()">
+                    <p class="analysis-result-card__rank"><span aria-hidden="true">#@Model.Rank</span><span class="visually-hidden">Miejsce @Model.Rank</span></p>
+                    <p class="analysis-result-card__score"><span class="visually-hidden">Score @AnalysisFormatting.Decimal(score)/100</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
+                    <p class="insight-card__band">@AnalysisInsightPresenter.BandLabel(band)</p>
+                </div>
+            }
+            else
+            {
+                <p class="analysis-result-card__rank">Wynik nierankingowy</p>
+                if (result.Error is null)
+                {
+                    <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
+                }
+            }
+        </header>
+
+        @if (result.Error is not null)
+        {
+            <p class="analysis-result-card__status insight-card__error" role="status">@Model.ErrorMessage</p>
+        }
+        else
+        {
+            @if (hasChips)
+            {
+                <div class="insight-card__chips">
+                    @if (isDelayed)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane opóźnione</span>
+                    }
+                    @if (result.Freshness.IsStale)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane nieaktualne</span>
+                    }
+                    @if (showQualityChip)
+                    {
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@AnalysisFormatting.Quality(result.Quality)</span>
+                    }
+                </div>
+            }
+
+            <div class="insight-card__headline">
+                <p class="insight-card__change@(insight.SevenDayChange.HasValue ? null : " insight-card__change--muted")">@(insight.SevenDayChange.HasValue ? AnalysisFormatting.NullablePercent(insight.SevenDayChange) : "n/d")</p>
+                <p class="insight-card__change-label">7 dni</p>
+            </div>
+
+            @if (insight.Sparkline is { } sparkline)
+            {
+                <svg class="insight-card__sparkline"
+                     viewBox="@sparkline.ViewBox"
+                     preserveAspectRatio="none"
+                     role="img"
+                     aria-label="Trend ceny: @insight.Identity.Name"
+                     data-sparkline>
+                    <path class="insight-card__sparkline-area" d="@sparkline.AreaPath" />
+                    <polyline class="insight-card__sparkline-line" points="@sparkline.LinePoints" />
+                </svg>
+            }
+            else
+            {
+                <p class="insight-card__sparkline-empty" role="status">Brak danych do wykresu</p>
+            }
+
+            <ul class="insight-card__bars" aria-label="Czynniki rankingu dla @result.Asset.Id">
+                @foreach (var bar in insight.FactorBars)
+                {
+                    <li class="insight-card__bar @(bar.IsAvailable ? null : "insight-card__bar--unavailable")"
+                        data-factor-bar="@bar.Key">
+                        <span class="insight-card__bar-label">@bar.Label</span>
+                        <meter class="insight-card__bar-meter"
+                               min="0"
+                               max="100"
+                               value="@AnalysisFormatting.Decimal(bar.Value ?? 0m)"
+                               aria-hidden="@(bar.IsAvailable ? null : "true")"
+                               aria-label="@bar.Label">@AnalysisFormatting.Decimal(bar.Value ?? 0m)</meter>
+                        <span class="insight-card__bar-reading">
+                            <span class="insight-card__bar-word insight-card__bar-word--@bar.Direction.ToString().ToLowerInvariant()">@bar.Word</span>
+                            @if (bar.IsAvailable)
+                            {
+                                <span class="insight-card__bar-value">@AnalysisFormatting.NullablePercent(bar.Percentage)</span>
+                            }
+                        </span>
+                    </li>
+                }
+            </ul>
+
+            <p class="insight-card__insight">
+                <span class="insight-card__insight-label">Wniosek z danych</span>
+                @insight.Takeaway
+            </p>
+
+            <details class="insight-card__details">
+                <summary>Szczegóły i metodologia</summary>
+
+                <dl class="analysis-result-card__metrics">
+                    <div class="analysis-result-card__metric">
+                        <dt>Cena aktualna</dt>
+                        <dd>@(Model.Quote is { } quote ? $"{AnalysisFormatting.Decimal(quote.Value)} {quote.Currency}" : "niedostępna")</dd>
+                    </div>
+                    <div class="analysis-result-card__metric">
+                        <dt>24 godziny</dt>
+                        <dd>@AnalysisFormatting.Metric(result.Performance.Change24Hours)</dd>
+                    </div>
+                    <div class="analysis-result-card__metric">
+                        <dt>7 dni</dt>
+                        <dd>@AnalysisFormatting.Metric(result.Performance.Change7Days)</dd>
+                    </div>
+                    <div class="analysis-result-card__metric">
+                        <dt>30 dni</dt>
+                        <dd>@AnalysisFormatting.Metric(result.Performance.Change30Days)</dd>
+                    </div>
+                    <div class="analysis-result-card__metric">
+                        <dt>Jakość danych</dt>
+                        <dd>@AnalysisFormatting.Quality(result.Quality)</dd>
+                    </div>
+                    <div class="analysis-result-card__metric">
+                        <dt>Świeżość danych</dt>
+                        <dd>@AnalysisFormatting.Freshness(result.Freshness.IsStale)</dd>
+                    </div>
+                </dl>
+
+                @if (result.Warnings.Count > 0)
+                {
+                    <section class="analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
+                        <h4>Ostrzeżenia</h4>
+                        <ul>
+                            @foreach (var warning in result.Warnings.Select(warning => AnalysisFormatting.Warning(warning.Category)).Distinct())
+                            {
+                                <li>@warning</li>
+                            }
+                        </ul>
+                    </section>
+                }
+
+                <section class="analysis-result-card__factors" aria-label="Czynniki dla @result.Asset.Id">
+                    <h4>Czynniki</h4>
+                    <ul class="analysis-result-card__factor-list">
+                        @foreach (var factor in result.Factors)
+                        {
+                            <li class="analysis-result-card__factor">
+                                <strong>@AnalysisInsightPresenter.FactorLabel(factor.Key)</strong>
+                                @if (factor.IsAvailable)
+                                {
+                                    <span>@AnalysisFormatting.NullablePercent(factor.Percentage)</span>
+                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
+                                    <span class="analysis-result-card__factor-contribution">wkład @AnalysisFormatting.NullableDecimal(factor.Contribution)</span>
+                                }
+                                else
+                                {
+                                    <span>niedostępny</span>
+                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </section>
+
+                <partial name="_PriceHistoryChart" model="result" />
+
+                <section class="analysis-result-card__summary"
+                         aria-label="Podsumowanie analizy dla @result.Asset.Id">
+                    @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
+                    {
+                        <h4>Podsumowanie</h4>
+                        <p>@generatedSummary.Text</p>
+                    }
+                    else if (result.SummaryResult is { Status: var summaryStatus })
+                    {
+                        <p class="analysis-result-card__summary--status" role="status">
+                            <strong>Podsumowanie:</strong>
+                            @Model.SummaryStatusMessage
+                            @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
+                            {
+                                <span class="visually-hidden">Niewystarczające dane</span>
+                            }
+                        </p>
+                    }
+                    else if (result.Summary is not null)
+                    {
+                        <h4>Podsumowanie</h4>
+                        <p>@result.Summary</p>
+                    }
+                    else
+                    {
+                        <p class="analysis-result-card__summary--status" role="status">
+                            <strong>Podsumowanie:</strong>
+                            @IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
+                        </p>
+                    }
+                </section>
+            </details>
+        }
+    </article>
+</li>

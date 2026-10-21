@@ -136,7 +136,7 @@ public sealed class IndexModel(
     private bool EnsureAuthenticated() =>
         User.Identity?.IsAuthenticated ?? false;
 
-    public string MapAssetErrorMessage(MarketDataErrorCategory? category) =>
+    public static string MapAssetErrorMessage(MarketDataErrorCategory? category) =>
         category switch
         {
             MarketDataErrorCategory.Timeout =>
@@ -149,13 +149,13 @@ public sealed class IndexModel(
                 "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
         };
 
-    public string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
+    public static string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
         status switch
         {
             AnalysisSummaryStatus.InsufficientEvidence =>
                 "Niewystarczające dane do przygotowania podsumowania.",
             AnalysisSummaryStatus.Unavailable =>
-                "Podsumowanie analizy jest chwilowo niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+                "Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne.",
             _ =>
                 "Podsumowanie analizy."
         };
@@ -165,7 +165,7 @@ public sealed class IndexModel(
         {
             MarketDataErrorCategory.ProviderNotApproved or
             MarketDataErrorCategory.NotConfigured =>
-                "Analiza jest chwilowo niedostępna. Spróbuj ponownie później.",
+                "Analiza jest obecnie niedostępna. Spróbuj ponownie później.",
             MarketDataErrorCategory.Timeout =>
                 "Pobieranie danych trwało zbyt długo. Spróbuj ponownie.",
             MarketDataErrorCategory.QuotaExceeded =>

@@ -2,22 +2,67 @@
 @model _bootstrap_scaffold.Pages.Analysis.UiStateFixtureModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Analysis UI states";
+    ViewData["Title"] = "Stany interfejsu analizy";
 }
 
+@if (Model.ShowRankedGrid)
+{
+    <section class="analysis-workspace" aria-labelledby="analysis-title">
+        <aside class="analysis-workspace__sidebar">
+            <div class="analysis-page__header">
+                <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
+            </div>
+            <div class="analysis-form">
+                <div class="analysis-form__header">
+                    <h2>Dostępne aktywa</h2>
+                    <p>Możesz wybrać maksymalnie 5 aktywów.</p>
+                </div>
+                <div class="asset-list">
+                    @foreach (var option in Model.RankedOptions)
+                    {
+                        <partial name="_AssetOption" model="option" />
+                    }
+                </div>
+                <button class="button" type="button">Generuj ranking</button>
+            </div>
+        </aside>
+
+        <div class="analysis-workspace__content">
+            <header class="analysis-workspace__header">
+                <h2>Dashboard analizy</h2>
+                <partial name="_SummaryStrip" model="Model.RankedSummary" />
+            </header>
+
+            <section class="analysis-results" aria-labelledby="analysis-results-title">
+                <h2 id="analysis-results-title">Ranking analizy</h2>
+                <p class="analysis-results__boundary">
+                    Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+                </p>
+                <ol class="analysis-results__list">
+                    @foreach (var rankedCard in Model.RankedCards)
+                    {
+                        <partial name="_InsightCard" model="rankedCard" />
+                    }
+                </ol>
+            </section>
+        </div>
+    </section>
+}
+else
+{
 <section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
     <div class="analysis-page__header">
-        <p class="eyebrow">Testing only</p>
-        <h1 id="ui-state-fixture-title">Analysis UI state fixture</h1>
+        <p class="eyebrow">Tylko testy</p>
+        <h1 id="ui-state-fixture-title">Stany interfejsu analizy</h1>
         <p class="analysis-page__lede">
-            Review the shared analysis surfaces and interaction states before
-            changing the production flow.
+            Sprawdź wspólne elementy analizy i stany interakcji przed zmianą
+            przepływu produkcyjnego.
         </p>
     </div>
 
     <div class="ui-state-fixture__grid">
         <section class="ui-state-fixture__state" aria-labelledby="state-default">
-            <h2 id="state-default">Default</h2>
+            <h2 id="state-default">Domyślny</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -29,10 +74,10 @@
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>AAPL</strong>
-                                <small>Equity</small>
+                                <small>Akcje</small>
                             </span>
                         </label>
-                        <button class="button" type="button">Rozpocznij analizę</button>
+                        <button class="button" type="button">Generuj ranking</button>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
@@ -46,7 +91,7 @@
                             </header>
                             <dl class="analysis-result-card__metrics">
                                 <div class="analysis-result-card__metric">
-                                    <dt>Score</dt>
+                                    <dt>Wynik</dt>
                                     <dd>82/100</dd>
                                 </div>
                             </dl>
@@ -57,7 +102,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-hover">
-            <h2 id="state-hover">Hover</h2>
+            <h2 id="state-hover">Najechanie</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -69,7 +114,7 @@
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>MSFT</strong>
-                                <small>Equity</small>
+                                <small>Akcje</small>
                             </span>
                         </label>
                     </div>
@@ -87,7 +132,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-focus">
-            <h2 id="state-focus">Focus-visible</h2>
+            <h2 id="state-focus">Fokus klawiatury</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -101,7 +146,7 @@
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>BTC-USD</strong>
-                                <small>Crypto</small>
+                                <small>Krypto</small>
                             </span>
                         </label>
                     </div>
@@ -119,7 +164,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
-            <h2 id="state-disabled">Disabled</h2>
+            <h2 id="state-disabled">Wyłączony</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -142,7 +187,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-error">
-            <h2 id="state-error">Error</h2>
+            <h2 id="state-error">Błąd</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -154,7 +199,7 @@
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>ETH-USD</strong>
-                                <small>Crypto</small>
+                                <small>Krypto</small>
                             </span>
                         </label>
                     </div>
@@ -171,7 +216,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-empty">
-            <h2 id="state-empty">Empty</h2>
+            <h2 id="state-empty">Brak danych</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
@@ -179,7 +224,7 @@
                             <h3>Brak skonfigurowanych aktywów</h3>
                             <p>Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.</p>
                         </div>
-                        <button class="button" type="button" disabled>Rozpocznij analizę</button>
+                        <button class="button" type="button" disabled>Generuj ranking</button>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
@@ -194,7 +239,7 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-loading">
-            <h2 id="state-loading">Loading</h2>
+            <h2 id="state-loading">Ładowanie</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <form method="post"
@@ -232,7 +277,7 @@
                             </header>
                             <dl class="analysis-result-card__metrics" aria-label="Ładowanie metryk">
                                 <div class="analysis-result-card__metric" aria-hidden="true">
-                                    <dt>Score</dt>
+                                    <dt>Wynik</dt>
                                     <dd>...</dd>
                                 </div>
                                 <div class="analysis-result-card__metric" aria-hidden="true">
@@ -248,68 +293,22 @@
     </div>
 
     <section class="ui-state-fixture__state" aria-labelledby="result-surface-states">
-        <h2 id="result-surface-states">Analysis result states</h2>
+        <h2 id="result-surface-states">Stany wyników analizy</h2>
         <div class="ui-state-fixture__grid">
-            <article class="analysis-result-card analysis-result-card--success">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Completed</p>
-                        <h3>AAPL</h3>
-                        <p class="analysis-result-card__score">Score 82/100</p>
-                    </header>
-                    <dl class="analysis-result-card__metrics">
-                        <div class="analysis-result-card__metric">
-                            <dt>Jakość danych</dt>
-                            <dd>Complete</dd>
-                        </div>
-                    </dl>
-                    <p class="analysis-result-card__summary">
-                        Wynik ukończony na podstawie wyświetlonych danych.
-                    </p>
+            @foreach (var state in Model.ResultStates)
+            {
+                <div class="ui-state-fixture__result-state">
+                    <h3>@state.Heading</h3>
+                    @if (state.Note is not null)
+                    {
+                        <p role="status">@state.Note</p>
+                    }
+                    <ol class="analysis-results__list analysis-results__list--single">
+                        <partial name="_InsightCard" model="state.Card" />
+                    </ol>
                 </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--success">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Partial result</p>
-                        <h3>MSFT</h3>
-                        <p class="analysis-result-card__status" role="status">
-                            Częściowe wyniki — część aktywów nie ma pełnych danych.
-                        </p>
-                    </header>
-                    <p class="analysis-result-card__state" role="status">Dane niepełne</p>
-                </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--success analysis-result-card--stale">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Stale data</p>
-                        <h3>BTC-USD</h3>
-                        <p class="analysis-result-card__score">Score 64/100</p>
-                    </header>
-                    <dl class="analysis-result-card__metrics">
-                        <div class="analysis-result-card__metric">
-                            <dt>Świeżość danych</dt>
-                            <dd>stale</dd>
-                        </div>
-                    </dl>
-                    <p class="analysis-result-card__state" role="status">Dane nieaktualne</p>
-                </div>
-            </article>
-
-            <article class="analysis-result-card analysis-result-card--insufficient-evidence">
-                <div class="analysis-result-card__body">
-                    <header class="analysis-result-card__header">
-                        <p class="analysis-result-card__rank">Insufficient evidence</p>
-                        <h3>ETH-USD</h3>
-                        <p class="analysis-result-card__status" role="status">
-                            Niewystarczające dane do wyliczenia score.
-                        </p>
-                    </header>
-                </div>
-            </article>
+            }
         </div>
     </section>
 </section>
+}

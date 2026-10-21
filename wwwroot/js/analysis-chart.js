@@ -13,7 +13,7 @@
         "3M": 92,
         "6M": 183,
         "1Y": 365,
-        "Max": null
+        "Maks.": null
     };
 
     // .NET "O" round-trip timestamps can carry up to 7 fractional-second
@@ -51,7 +51,7 @@
     }
 
     function selectPoints(points, range) {
-        if (range === "Max" || points.length === 0) {
+        if (range === "Maks." || points.length === 0) {
             return points;
         }
 

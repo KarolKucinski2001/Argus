@@ -1,23 +1,25 @@
 @page "/analysis"
-@using System.Globalization
 @using _bootstrap_scaffold.Analysis
 @using _bootstrap_scaffold.MarketData
+@using _bootstrap_scaffold.Pages.Analysis
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Start analizy";
+    var scoreById = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
+    if (Model.HasResults)
+    {
+        foreach (var analyzed in Model.AnalysisResults!.Results)
+        {
+            scoreById[analyzed.Asset.Id] = analyzed.Score;
+        }
+    }
 }
 
 <section class="analysis-workspace" aria-labelledby="analysis-title">
     <aside class="analysis-workspace__sidebar">
         <div class="analysis-page__header">
-            <p class="eyebrow">Nowa analiza</p>
-            <h1 id="analysis-title">Wybierz aktywa do sprawdzenia</h1>
-            <p class="analysis-page__lede">
-                Wybierz od jednego do @Model.MaximumSelectedAssets aktywów. Argus pobierze
-                dzienną historię z ostatnich 12 miesięcy i przygotuje punkt wyjścia
-                do dalszej analizy.
-            </p>
+            <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
         </div>
 
         <form method="post" class="analysis-form" data-analysis-form>
@@ -38,17 +40,11 @@
             {
                 var isSelected = Model.SelectedAssetIds.Any(id =>
                     string.Equals(id, asset.Id, StringComparison.OrdinalIgnoreCase));
-                <label class="asset-option">
-                    <input class="asset-option__input"
-                           type="checkbox"
-                           name="SelectedAssetIds"
-                           value="@asset.Id"
-                           checked="@(isSelected ? "checked" : null)" />
-                    <span class="asset-option__copy">
-                        <strong>@asset.Id</strong>
-                        <small>@asset.AssetClass</small>
-                    </span>
-                </label>
+                var option = new AssetOptionModel(
+                    asset.Id,
+                    isSelected,
+                    scoreById.TryGetValue(asset.Id, out var optionScore) ? optionScore : null);
+                <partial name="_AssetOption" model="option" />
             }
         </div>
 
@@ -91,7 +87,7 @@
                 type="submit"
                 data-submit-button
                 disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
-            Rozpocznij analizę
+            Generuj ranking
         </button>
         </form>
 
@@ -103,9 +99,11 @@
 
     <div class="analysis-workspace__content">
         <header class="analysis-workspace__header">
-            <p class="eyebrow">Market intelligence</p>
             <h2>Dashboard analizy</h2>
-            <p>Rankingi, kontekst rynkowy i czynniki wyjaśniające dla wybranych aktywów.</p>
+            @if (Model.HasResults)
+            {
+                <partial name="_SummaryStrip" model="AnalysisSummaryStripPresenter.Build(Model.AnalysisResults!.Results)" />
+            }
         </header>
 
         <section class="analysis-results" aria-labelledby="analysis-results-title">
@@ -114,7 +112,6 @@
             {
                 <p class="analysis-results__boundary">
                     Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
-                    Argus pokazuje dane i ich wyjaśnienia, ale nie składa spersonalizowanych obietnic dotyczących przyszłości.
                 </p>
                 @if (Model.HasPartialResults)
                 {
@@ -128,292 +125,16 @@
                     @for (var index = 0; index < Model.AnalysisResults!.Results.Count; index++)
                     {
                         var result = Model.AnalysisResults.Results[index];
-                        var hasQuote = Model.CurrentQuotes.TryGetValue(result.Asset.Id, out var quote);
-                        var cardStateClass = result.Error is not null
-                            ? "analysis-result-card--error"
-                            : result.Score.HasValue
-                                ? result.Freshness.IsStale
-                                    ? "analysis-result-card--success analysis-result-card--stale"
-                                    : "analysis-result-card--success"
-                                : "analysis-result-card--insufficient-evidence";
-
-                        <li class="analysis-result-card @cardStateClass">
-                            <article class="analysis-result-card__body" aria-labelledby="analysis-result-@result.Asset.Id" tabindex="0">
-                                <header class="analysis-result-card__header">
-                                    <p class="analysis-result-card__rank">@(result.Score.HasValue ? $"Miejsce {index + 1}" : "Wynik nierankingowy")</p>
-                                    <h3 id="analysis-result-@result.Asset.Id">@result.Asset.Id</h3>
-                                    @if (result.Score.HasValue)
-                                    {
-                                        <p class="analysis-result-card__score">Score @FormatDecimal(result.Score.Value)/100</p>
-                                    }
-                                    else if (result.Error is null)
-                                    {
-                                        <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
-                                    }
-                                </header>
-
-                                @if (result.Error is not null)
-                                {
-                                    <p class="analysis-result-card__status" role="status">@Model.MapAssetErrorMessage(result.Error.Category)</p>
-                                }
-                                else
-                                {
-                                    <dl class="analysis-result-card__metrics">
-                                        <div class="analysis-result-card__metric">
-                                            <dt>Cena aktualna</dt>
-                                            <dd>@(hasQuote ? $"{FormatDecimal(quote!.Value)} {quote.Currency}" : "niedostępna")</dd>
-                                        </div>
-                                        <div class="analysis-result-card__metric">
-                                            <dt>24 godziny</dt>
-                                            <dd>@FormatMetric(result.Performance.Change24Hours)</dd>
-                                        </div>
-                                        <div class="analysis-result-card__metric">
-                                            <dt>7 dni</dt>
-                                            <dd>@FormatMetric(result.Performance.Change7Days)</dd>
-                                        </div>
-                                        <div class="analysis-result-card__metric">
-                                            <dt>30 dni</dt>
-                                            <dd>@FormatMetric(result.Performance.Change30Days)</dd>
-                                        </div>
-                                        <div class="analysis-result-card__metric">
-                                            <dt>Jakość danych</dt>
-                                            <dd>@result.Quality</dd>
-                                        </div>
-                                        <div class="analysis-result-card__metric">
-                                            <dt>Świeżość danych</dt>
-                                            <dd>@(result.Freshness.IsStale ? "stale" : "current")</dd>
-                                        </div>
-                                    </dl>
-
-                                    @if (result.IsDelayed || result.Warnings.Any(warning =>
-                                        warning.Category == MarketDataWarningCategory.DelayedData))
-                                    {
-                                        <p class="analysis-result-card__state" role="status">Dane opóźnione</p>
-                                    }
-
-                                    @if (result.Quality != MarketDataQuality.Complete)
-                                    {
-                                        <p class="analysis-result-card__state" role="status">
-                                            @FormatQuality(result.Quality)
-                                        </p>
-                                    }
-
-                                    @if (result.Warnings.Count > 0)
-                                    {
-                                        <section class="analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
-                                            <h4>Ostrzeżenia</h4>
-                                            <ul>
-                                                @foreach (var warning in result.Warnings.Select(warning => FormatWarning(warning.Category)).Distinct())
-                                                {
-                                                    <li>@warning</li>
-                                                }
-                                            </ul>
-                                        </section>
-                                    }
-
-                                    <section class="analysis-result-card__factors" aria-label="Czynniki dla @result.Asset.Id">
-                                        <h4>Czynniki</h4>
-                                        <ul class="analysis-result-card__factor-list">
-                                            @foreach (var factor in result.Factors)
-                                            {
-                                                <li class="analysis-result-card__factor">
-                                                    <strong>@factor.Label</strong>:
-                                                    @if (factor.IsAvailable)
-                                                    {
-                                                        <span>@FormatNullablePercent(factor.Percentage)</span>
-                                                        <span class="analysis-result-card__factor-weight">weight @FormatWeight(factor.Weight)</span>
-                                                        <span class="analysis-result-card__factor-contribution">contribution @FormatNullableDecimal(factor.Contribution)</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>niedostępny</span>
-                                                        <span class="analysis-result-card__factor-weight">weight @FormatWeight(factor.Weight)</span>
-                                                    }
-                                                    <span>@factor.Explanation</span>
-                                                </li>
-                                            }
-                                        </ul>
-                                    </section>
-
-                                        var chartPoints = result.ChartPoints.OrderBy(point => point.Timestamp).ToArray();
-                                        var chartId = $"analysis-chart-{result.Asset.Id}";
-                                        var chartTitleId = $"{chartId}-title";
-                                        var chartDescriptionId = $"{chartId}-description";
-                                        var chartTooltipId = $"{chartId}-tooltip";
-                                        const decimal chartWidth = 640m;
-                                        const decimal chartHeight = 240m;
-                                        const decimal chartLeft = 48m;
-                                        const decimal chartRight = 16m;
-                                        const decimal chartTop = 16m;
-                                        const decimal chartBottom = 32m;
-                                        var plotWidth = chartWidth - chartLeft - chartRight;
-                                        var plotHeight = chartHeight - chartTop - chartBottom;
-                                        var minimumClose = chartPoints.Length > 0 ? chartPoints.Min(point => point.Close) : 0m;
-                                        var maximumClose = chartPoints.Length > 0 ? chartPoints.Max(point => point.Close) : 0m;
-                                        var closeRange = maximumClose - minimumClose;
-                                        var pathData = string.Join(
-                                            " ",
-                                            chartPoints.Select((point, index) =>
-                                            {
-                                                var x = chartPoints.Length == 1
-                                                    ? chartLeft + plotWidth / 2m
-                                                    : chartLeft + index * plotWidth / (chartPoints.Length - 1);
-                                                var normalizedClose = closeRange == 0m
-                                                    ? 0.5m
-                                                    : (point.Close - minimumClose) / closeRange;
-                                                var y = chartTop + (1m - normalizedClose) * plotHeight;
-                                                return $"{(index == 0 ? "M" : "L")}{x.ToString("0.##", CultureInfo.InvariantCulture)},{y.ToString("0.##", CultureInfo.InvariantCulture)}";
-                                            }));
-
-                                    <section id="@chartId"
-                                             class="analysis-result-card__chart"
-                                             data-chart-container
-                                             aria-labelledby="@chartTitleId">
-                                        <h4 id="@chartTitleId">Historia cenowa</h4>
-                                        @if (chartPoints.Length > 0)
-                                        {
-                                            <p id="@chartDescriptionId" class="analysis-result-card__chart-description">
-                                                Historyczne obserwacje ceny zamknięcia dla @result.Asset.Id.
-                                            </p>
-                                            <div class="analysis-result-card__chart-range"
-                                                 role="group"
-                                                 aria-label="Zakres historii cenowej"
-                                                 data-chart-range>
-                                                @foreach (var range in new[] { "1M", "3M", "6M", "1Y", "Max" })
-                                                {
-                                                    <button class="analysis-result-card__chart-range-button"
-                                                            type="button"
-                                                            data-chart-range-option="@range"
-                                                            aria-pressed="@(range == "1Y" ? "true" : "false")">
-                                                        @range
-                                                    </button>
-                                                }
-                                            </div>
-                                            <svg class="analysis-result-card__chart-svg"
-                                                 viewBox="0 0 640 240"
-                                                 preserveAspectRatio="xMidYMid meet"
-                                                 role="img"
-                                                 aria-labelledby="@chartTitleId @chartDescriptionId"
-                                                 data-chart-svg
-                                                 data-chart-width="640"
-                                                 data-chart-height="240"
-                                                 data-chart-left="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                 data-chart-right="@chartRight.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                 data-chart-top="@chartTop.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                 data-chart-bottom="@chartBottom.ToString("0.##", CultureInfo.InvariantCulture)">
-                                                <g class="analysis-result-card__chart-axis" aria-hidden="true">
-                                                    <line x1="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          y1="@chartTop.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          x2="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          y2="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))" />
-                                                    <line x1="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          y1="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))"
-                                                          x2="@((chartWidth - chartRight).ToString("0.##", CultureInfo.InvariantCulture))"
-                                                          y2="@((chartHeight - chartBottom).ToString("0.##", CultureInfo.InvariantCulture))" />
-                                                    <text class="analysis-result-card__chart-axis-label"
-                                                          x="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          y="12">Cena zamknięcia</text>
-                                                    <text class="analysis-result-card__chart-axis-label"
-                                                          x="@chartLeft.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                          y="232">Data obserwacji</text>
-                                                </g>
-                                                @if (chartPoints.Length > 1)
-                                                {
-                                                    <path class="analysis-result-card__chart-line"
-                                                          d="@pathData"
-                                                          data-chart-line
-                                                          aria-hidden="true" />
-                                                }
-                                                @foreach (var point in chartPoints.Select((point, index) => new { point, index }))
-                                                {
-                                                    var x = chartPoints.Length == 1
-                                                        ? chartLeft + plotWidth / 2m
-                                                        : chartLeft + point.index * plotWidth / (chartPoints.Length - 1);
-                                                    var normalizedClose = closeRange == 0m
-                                                        ? 0.5m
-                                                        : (point.point.Close - minimumClose) / closeRange;
-                                                    var y = chartTop + (1m - normalizedClose) * plotHeight;
-                                                    var timestamp = point.point.Timestamp.ToString("O", CultureInfo.InvariantCulture);
-                                                    var close = FormatDecimal(point.point.Close);
-                                                    var label = $"{result.Asset.Id} — obserwacja historyczna {point.point.Timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}, cena zamknięcia {close}";
-                                                    <circle class="analysis-result-card__chart-point"
-                                                            cx="@x.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                            cy="@y.ToString("0.##", CultureInfo.InvariantCulture)"
-                                                            r="5"
-                                                            tabindex="0"
-                                                            role="img"
-                                                            aria-label="@label"
-                                                            data-chart-point
-                                                            data-chart-asset="@result.Asset.Id"
-                                                            data-chart-timestamp="@timestamp"
-                                                            data-chart-close="@close" />
-                                                }
-                                            </svg>
-                                            <div class="analysis-result-card__chart-tooltip"
-                                                 id="@chartTooltipId"
-                                                 data-chart-tooltip
-                                                 role="status"
-                                                 aria-live="polite"
-                                                 hidden></div>
-                                            @if (chartPoints.Length < 2)
-                                            {
-                                                <p class="analysis-result-card__chart-state" role="status">Dostępna jest jedna historyczna obserwacja.</p>
-                                            }
-                                            <ul class="analysis-result-card__chart-points">
-                                                @foreach (var point in chartPoints)
-                                                {
-                                                    <li class="analysis-result-card__chart-point"
-                                                        data-chart-asset="@result.Asset.Id"
-                                                        data-chart-timestamp="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)"
-                                                        data-chart-close="@FormatDecimal(point.Close)">
-                                                        <time datetime="@point.Timestamp.ToString("O", CultureInfo.InvariantCulture)">
-                                                            @point.Timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
-                                                        </time>
-                                                        <span>@FormatDecimal(point.Close)</span>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        }
-                                        else
-                                        {
-                                            <p class="analysis-result-card__chart-state" role="status">Brak historycznych obserwacji do wyświetlenia.</p>
-                                        }
-                                    </section>
-
-                                    <section class="analysis-result-card__summary"
-                                             aria-label="Podsumowanie analizy dla @result.Asset.Id">
-                                        @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
-                                        {
-                                            <h4>Podsumowanie</h4>
-                                            <p>@generatedSummary.Text</p>
-                                        }
-                                        else if (result.SummaryResult is { Status: var summaryStatus })
-                                        {
-                                            <p class="analysis-result-card__summary--status" role="status">
-                                                <strong>Podsumowanie:</strong>
-                                                @Model.MapSummaryStatusMessage(summaryStatus)
-                                                @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
-                                                {
-                                                    <span class="visually-hidden">Insufficient evidence</span>
-                                                }
-                                            </p>
-                                        }
-                                        else if (result.Summary is not null)
-                                        {
-                                            <h4>Podsumowanie</h4>
-                                            <p>@result.Summary</p>
-                                        }
-                                        else
-                                        {
-                                            <p class="analysis-result-card__summary--status" role="status">
-                                                <strong>Podsumowanie:</strong>
-                                                @Model.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
-                                            </p>
-                                        }
-                                    </section>
-                                }
-                            </article>
-                        </li>
+                        var quote = Model.CurrentQuotes.TryGetValue(result.Asset.Id, out var currentQuote)
+                            ? currentQuote
+                            : null;
+                        var card = new InsightCardModel(
+                            result,
+                            index,
+                            quote,
+                            result.Error is null ? null : IndexModel.MapAssetErrorMessage(result.Error.Category),
+                            IndexModel.MapSummaryStatusMessage(result.SummaryResult?.Status ?? AnalysisSummaryStatus.Unavailable));
+                        <partial name="_InsightCard" model="card" />
                     }
                 }
                 </ol>
@@ -424,48 +145,4 @@
 @section Scripts {
     <script src="~/js/analysis-chart.js" asp-append-version="true"></script>
     <script src="~/js/analysis-form.js" asp-append-version="true"></script>
-}
-
-@functions {
-    private static string FormatMetric(_bootstrap_scaffold.Analysis.PerformanceMetric metric) =>
-        metric.IsAvailable && metric.Percentage.HasValue
-            ? FormatSignedPercent(metric.Percentage.Value)
-            : "niedostępne";
-
-    private static string FormatNullablePercent(decimal? value) =>
-        value.HasValue ? FormatSignedPercent(value.Value) : "niedostępne";
-
-    private static string FormatSignedPercent(decimal value) =>
-        string.Create(CultureInfo.InvariantCulture, $"{value:+0.##;-0.##;0}%");
-
-    private static string FormatNullableDecimal(decimal? value) =>
-        value.HasValue ? FormatDecimal(value.Value) : "niedostępne";
-
-    private static string FormatWeight(decimal value) =>
-        $"{(Math.Clamp(value, 0m, 1m) * 100m).ToString("0.##", CultureInfo.InvariantCulture)}%";
-
-    private static string FormatQuality(MarketDataQuality quality) =>
-        quality switch
-        {
-            MarketDataQuality.Incomplete => "Dane niepełne",
-            MarketDataQuality.Stale => "Dane nieaktualne",
-            MarketDataQuality.Unavailable => "Dane niedostępne",
-            _ => "Dane kompletne"
-        };
-
-    private static string FormatWarning(MarketDataWarningCategory category) =>
-        category switch
-        {
-            MarketDataWarningCategory.MissingCurrentQuote => "Brak bieżącej ceny",
-            MarketDataWarningCategory.MissingHistory => "Brak historii",
-            MarketDataWarningCategory.IncompleteHistory => "Historia niepełna",
-            MarketDataWarningCategory.StaleData => "Dane nieaktualne",
-            MarketDataWarningCategory.DelayedData => "Dane opóźnione",
-            MarketDataWarningCategory.ProviderQuota => "Ograniczona dostępność danych",
-            MarketDataWarningCategory.UpstreamUnavailable => "Źródło danych chwilowo niedostępne",
-            _ => "Ograniczona jakość danych"
-        };
-
-    private static string FormatDecimal(decimal value) =>
-        value.ToString("0.##", CultureInfo.InvariantCulture);
 }

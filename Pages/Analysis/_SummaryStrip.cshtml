@@ -1,0 +1,46 @@
+@using _bootstrap_scaffold.Analysis
+@using _bootstrap_scaffold.Pages.Analysis
+@model AnalysisSummaryStripView
+@{
+    var performers = new (string Label, SummaryPerformer? Performer)[]
+    {
+        ("Najlepszy wynik 7d", Model.Best),
+        ("Najsłabszy wynik 7d", Model.Worst)
+    };
+}
+<section class="analysis-summary-strip" aria-label="Podsumowanie rankingu">
+    <dl class="analysis-summary-strip__list">
+        <div class="analysis-summary-strip__item">
+            <dt>Przeanalizowane aktywa</dt>
+            <dd class="analysis-summary-strip__value">@Model.AnalyzedCount</dd>
+        </div>
+        @foreach (var (label, performer) in performers)
+        {
+            <div class="analysis-summary-strip__item">
+                <dt>@label</dt>
+                @if (performer is not null)
+                {
+                    <dd class="analysis-summary-strip__value">
+                        <span class="analysis-summary-strip__name">@performer.Name</span>
+                        <span class="analysis-summary-strip__change analysis-summary-strip__change--@AnalysisInsightPresenter.ToneFor(performer.Change).ToString().ToLowerInvariant()">@AnalysisFormatting.SignedPercent(performer.Change)</span>
+                    </dd>
+                }
+                else
+                {
+                    <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">n/d</dd>
+                }
+            </div>
+        }
+        <div class="analysis-summary-strip__item">
+            <dt>Średni score</dt>
+            @if (Model.AverageScore is { } average)
+            {
+                <dd class="analysis-summary-strip__value">@AnalysisFormatting.Decimal(average)</dd>
+            }
+            else
+            {
+                <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">n/d</dd>
+            }
+        </div>
+    </dl>
+</section>
