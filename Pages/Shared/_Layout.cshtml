@@ -13,8 +13,17 @@
             <span>Argus</span>
         </a>
         <nav class="site-nav" aria-label="Nawigacja główna">
-            <a class="text-link" asp-page="/Index" asp-fragment="how-it-works">Jak to działa</a>
-                        <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a class="text-link" asp-page="/Analysis">Analiza</a>
+                <a class="text-link" asp-page="/Account">Konto</a>
+                <a class="text-link" asp-page="/Account/SignOut">Wyloguj się</a>
+            }
+            else
+            {
+                <a class="text-link" asp-page="/Index" asp-fragment="how-it-works">Jak to działa</a>
+                <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
+            }
         </nav>
     </header>
     <main class="landing-main">
