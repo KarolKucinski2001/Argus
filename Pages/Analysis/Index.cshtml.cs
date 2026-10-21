@@ -86,7 +86,10 @@ public sealed class IndexModel(
         CurrentQuotes = result.Response!.Results
             .Where(item => item.CurrentQuote is not null)
             .ToDictionary(item => item.Asset.Id, item => item.CurrentQuote!, StringComparer.OrdinalIgnoreCase);
-        AnalysisResults = analysisService.Analyze(result.Response, DateTimeOffset.UtcNow);
+        AnalysisResults = await analysisService.AnalyzeAsync(
+            result.Response,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
         HasStarted = true;
         StartedMessage = AnalysisResults.Results.Any(item => item.Error is not null)
             ? "Częściowe wyniki są gotowe. Aktywa z brakującymi danymi pokazują bezpieczny stan."
@@ -144,6 +147,17 @@ public sealed class IndexModel(
                 "Nie udało się przeanalizować tego aktywa. Aktywo nie jest teraz obsługiwane.",
             _ =>
                 "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
+        };
+
+    public string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
+        status switch
+        {
+            AnalysisSummaryStatus.InsufficientEvidence =>
+                "Niewystarczające dane do przygotowania podsumowania.",
+            AnalysisSummaryStatus.Unavailable =>
+                "Podsumowanie analizy jest chwilowo niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+            _ =>
+                "Podsumowanie analizy."
         };
 
     private static string MapProviderMessage(MarketDataErrorCategory? category) =>

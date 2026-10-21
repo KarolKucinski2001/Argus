@@ -11,6 +11,14 @@
     --color-on-accent: #09201d;
     --color-shadow: rgb(0 0 0 / 22%);
     --color-divider: rgb(169 189 215 / 16%);
+    --color-action: var(--color-accent);
+    --color-action-hover: var(--color-accent-strong);
+    --color-focus: var(--color-accent);
+    --color-disabled: var(--color-muted);
+    --color-disabled-surface: var(--color-bg);
+    --color-feedback-surface: var(--color-warning-surface);
+    --color-secondary-surface: var(--color-surface-raised);
+    --color-secondary-border: var(--color-divider);
     --space-1: 0.5rem;
     --space-2: 0.75rem;
     --space-3: 1rem;
@@ -30,6 +38,10 @@
     --radius-lg: 1.25rem;
     --brand-mark-size: 1.5rem;
     --content-width: 72rem;
+    --workspace-sidebar-width: 20rem;
+    --workspace-content-min: 0;
+    --workspace-card-min: 28rem;
+    --workspace-gap: var(--space-4);
     --result-chart-max-height: 18rem;
     --result-metric-min: 12rem;
     color-scheme: dark;
@@ -57,7 +69,7 @@ a {
 
 a:focus-visible,
 button:focus-visible {
-    outline: 0.1875rem solid var(--color-accent);
+    outline: 0.1875rem solid var(--color-focus);
     outline-offset: 0.25rem;
 }
 
@@ -160,7 +172,7 @@ button:focus-visible {
     padding: 0.75rem 1.125rem;
     border: 0.0625rem solid transparent;
     border-radius: 999px;
-    background: var(--color-accent);
+    background: var(--color-action);
     color: var(--color-on-accent);
     font-weight: 800;
     text-decoration: none;
@@ -168,7 +180,7 @@ button:focus-visible {
 }
 
 .button:hover {
-    background: var(--color-accent-strong);
+    background: var(--color-action-hover);
     transform: translateY(-0.125rem);
 }
 
@@ -386,6 +398,19 @@ button:focus-visible {
     margin-bottom: 0;
 }
 
+.analysis-form__pending {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.button:disabled {
+    border-color: var(--color-secondary-border);
+    background: var(--color-disabled-surface);
+    color: var(--color-disabled);
+    cursor: not-allowed;
+    transform: none;
+}
+
 .asset-list {
     display: grid;
     gap: var(--space-2);
@@ -398,22 +423,27 @@ button:focus-visible {
     padding: var(--space-3);
     border: 0.0625rem solid var(--color-border);
     border-radius: var(--radius-md);
-    background: var(--color-surface-raised);
+    background: var(--color-secondary-surface);
     cursor: pointer;
 }
 
+.asset-option:hover {
+    border-color: var(--color-action);
+    background: var(--color-surface);
+}
+
 .asset-option:has(.asset-option__input:checked) {
-    border-color: var(--color-accent);
+    border-color: var(--color-action);
 }
 
 .asset-option__input {
     width: 1.25rem;
     height: 1.25rem;
-    accent-color: var(--color-accent);
+    accent-color: var(--color-action);
 }
 
 .asset-option__input:focus-visible {
-    outline: 0.1875rem solid var(--color-accent);
+    outline: 0.1875rem solid var(--color-focus);
     outline-offset: 0.25rem;
 }
 
@@ -434,8 +464,8 @@ button:focus-visible {
 
 .validation-message,
 .status-card--error {
-    border: 0.0625rem solid var(--color-border);
-    background: var(--color-warning-surface);
+    border: 0.0625rem solid var(--color-secondary-border);
+    background: var(--color-feedback-surface);
 }
 
 .validation-message {
@@ -453,8 +483,100 @@ button:focus-visible {
     padding-inline-start: var(--space-4);
 }
 
+.ui-state-fixture {
+    display: grid;
+    gap: var(--space-5);
+    padding-block: var(--space-6);
+}
+
+.ui-state-fixture__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+.ui-state-fixture__state {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    min-width: 0;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+}
+
+.ui-state-fixture__state h2,
+.ui-state-fixture__state h3 {
+    margin: 0;
+}
+
+.ui-state-fixture .analysis-workspace {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.ui-state-fixture .analysis-workspace__sidebar {
+    position: static;
+}
+
+.ui-state-fixture .analysis-form {
+    max-width: none;
+}
+
+.ui-state-fixture .analysis-result-card__body {
+    padding: var(--space-3);
+}
+
+.ui-state-fixture__focus-target:focus-visible,
+.ui-state-fixture__focus-target[data-focus-visible-example] {
+    outline: 0.1875rem solid var(--color-focus);
+    outline-offset: 0.25rem;
+}
+
+.ui-state-fixture__loading-card {
+    border-color: var(--color-secondary-border);
+    background: var(--color-surface);
+}
+
 .analysis-page__boundary {
     margin: 0;
+}
+
+.analysis-workspace {
+    display: grid;
+    grid-template-columns: minmax(16rem, var(--workspace-sidebar-width)) minmax(var(--workspace-content-min), 1fr);
+    gap: var(--workspace-gap);
+    width: min(100%, var(--content-width));
+    margin-inline: auto;
+    padding-block: var(--space-5);
+}
+
+.analysis-workspace__sidebar {
+    align-self: start;
+    position: sticky;
+    top: var(--space-4);
+}
+
+.analysis-workspace__content {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+}
+
+.analysis-workspace__header {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.analysis-workspace__header h2,
+.analysis-workspace__header p {
+    margin: 0;
+}
+
+.analysis-workspace__header p {
+    color: var(--color-muted);
 }
 
 .analysis-results {
@@ -463,12 +585,22 @@ button:focus-visible {
 }
 
 .analysis-results h2,
-.analysis-results p {
+.analysis-results > p {
     margin: 0;
+}
+
+.analysis-results__boundary {
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-warning-surface);
+    color: var(--color-muted);
 }
 
 .analysis-results__list {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    inline-size: min(100%, calc((var(--workspace-card-min) * 2) + var(--workspace-gap)));
     gap: var(--space-4);
     margin: 0;
     padding: 0;
@@ -497,7 +629,7 @@ button:focus-visible {
 }
 
 .analysis-result-card__body:focus-visible {
-    outline: 0.1875rem solid var(--color-accent);
+    outline: 0.1875rem solid var(--color-focus);
     outline-offset: 0.25rem;
 }
 
@@ -514,6 +646,7 @@ button:focus-visible {
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
 }
 
 .analysis-result-card__rank,
@@ -533,17 +666,18 @@ button:focus-visible {
 .analysis-result-card__score {
     margin: 0;
     padding: var(--space-1) var(--space-2);
-    border: 0.0625rem solid var(--color-accent);
+    border: 0.0625rem solid var(--color-action);
     border-radius: 999px;
-    background: var(--color-bg);
-    color: var(--color-accent);
+    background: var(--color-action);
+    color: var(--color-on-accent);
+    font-size: 1.125rem;
     font-weight: 800;
     white-space: nowrap;
 }
 
 .analysis-result-card__metrics {
     display: grid;
-    grid-template-columns: repeat(3, minmax(var(--result-metric-min), 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
     margin: 0;
 }
@@ -553,9 +687,9 @@ button:focus-visible {
     gap: var(--space-1);
     min-width: 0;
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-divider);
+    border: 0.0625rem solid var(--color-secondary-border);
     border-radius: var(--radius-md);
-    background: var(--color-surface-raised);
+    background: var(--color-secondary-surface);
 }
 
 .analysis-result-card__metric dt {
@@ -594,10 +728,8 @@ button:focus-visible {
     display: grid;
     gap: var(--space-1);
     min-width: 0;
-    padding: var(--space-3);
-    border: 0.0625rem solid var(--color-divider);
-    border-radius: var(--radius-md);
-    background: var(--color-bg);
+    padding: var(--space-2) 0;
+    border-top: 0.0625rem solid var(--color-secondary-border);
     color: var(--color-muted);
 }
 
@@ -722,7 +854,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     max-block-size: var(--result-chart-max-height);
     overflow: auto;
     padding: var(--space-3);
-    border: 0.0625rem solid var(--color-divider);
+    border: 0.0625rem solid var(--color-secondary-border);
     border-radius: var(--radius-md);
     background: var(--color-bg);
 }
@@ -749,8 +881,39 @@ circle.analysis-result-card__chart-point:focus-visible {
 }
 
 .analysis-result-card__summary {
+    display: grid;
+    gap: var(--space-2);
     margin: 0;
+    padding: var(--space-3);
+    border: 0.0625rem solid var(--color-secondary-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
     color: var(--color-muted);
+}
+
+.analysis-result-card__summary h4,
+.analysis-result-card__summary p {
+    margin: 0;
+}
+
+.analysis-result-card__summary h4 {
+    color: var(--color-text);
+}
+
+.analysis-result-card__summary--status {
+    display: block;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .analysis-result-card--success {
@@ -778,6 +941,20 @@ circle.analysis-result-card__chart-point:focus-visible {
 @media (min-width: 64rem) {
     .landing-hero {
         grid-template-columns: minmax(0, 1.1fr) minmax(var(--preview-column-min), 0.85fr);
+    }
+}
+
+@media (max-width: 64rem) {
+    .analysis-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-workspace__sidebar {
+        position: static;
+    }
+
+    .analysis-results__list {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -842,7 +1019,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     }
 
     .analysis-result-card__metrics {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .analysis-result-card__chart-points .analysis-result-card__chart-point {
@@ -864,6 +1041,10 @@ circle.analysis-result-card__chart-point:focus-visible {
 
     .analysis-result-card__chart-tooltip {
         max-width: calc(100% - var(--space-4));
+    }
+
+    .ui-state-fixture__grid {
+        grid-template-columns: 1fr;
     }
 }
 

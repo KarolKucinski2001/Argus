@@ -32,8 +32,9 @@ starts an explicit OpenID Connect challenge; it does not change the API's
 default challenge behavior.
 
 After a successful provider callback at `/signin-oidc`, the user is sent to
-`/account`. The account page displays available subject, display-name, and
-email claims and is the stable entry point for future analysis navigation. It
+`/account`. The authenticated shell exposes `/analysis` as the primary
+destination and `/account` as the account surface. The account page displays
+available subject, display-name, and email claims and links to analysis. It
 does not create or update a local profile. `/account` also explicitly starts
 the provider challenge when no local session exists.
 

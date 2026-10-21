@@ -2,8 +2,8 @@
 
 Argus is an early ASP.NET Core application targeting .NET 10. The runnable
 application combines the minimal API in `Program.cs` with the account-access
-Razor Pages under `Pages/`; the investment-analysis product described in
-`@context/foundation/prd.md` is not implemented yet.
+and authenticated analysis Razor Pages under `Pages/`; the broader investment
+product described in `@context/foundation/prd.md` remains under development.
 
 ## Critical repository rules
 
@@ -25,6 +25,7 @@ Razor Pages under `Pages/`; the investment-analysis product described in
 - The project remains `.bootstrap-scaffold.csproj` with root namespace `_bootstrap_scaffold`; do not infer production namespaces or feature boundaries from it.
 - Future domain work should follow the PRD flow: authenticated users select assets, market data is analyzed, scores are ranked with explaining factors, and AI summaries remain grounded in displayed data with an educational-not-advice boundary.
 - For landing-page UI changes, keep visual tokens in `@wwwroot/css/site.css`, static brand assets in `@wwwroot/`, and views free of literal colors or arbitrary layout values; use the existing landing-page contract and evidence under `@context/changes/landing-page-ui-refinement/`.
+- For analysis UI changes, use semantic tokens from `@wwwroot/css/site.css`; do not add literal colors or arbitrary layout values to Razor views. Check the existing analysis classes before creating new primitives, and use `@Pages/Analysis/UiStateFixture.cshtml` to verify the seven required interaction states. Keep `/analysis` structured as a token-backed split workspace: the asset picker belongs in the sidebar and result cards belong in the content grid; keep mobile stacking in CSS rather than duplicating views.
 
 ## Build, test, and run
 

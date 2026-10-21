@@ -52,9 +52,9 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
             errors.Add($"{nameof(ApplicationRequestBudget)} must be greater than zero.");
         }
 
-        if (options.AllowedAssets is null || options.AllowedAssets.Count == 0)
+        if (options.AllowedAssets is null)
         {
-            errors.Add($"{nameof(AllowedAssets)} must contain at least one asset.");
+            errors.Add($"{nameof(AllowedAssets)} is required.");
         }
 
         if (options.PublicDisplayApproved && string.IsNullOrWhiteSpace(options.ProviderId))

@@ -38,6 +38,7 @@ public sealed record AssetAnalysis(
     IReadOnlyList<AnalysisFactor> Factors,
     IReadOnlyList<AnalysisChartPoint> ChartPoints,
     string? Summary,
+    AnalysisSummaryResult? SummaryResult,
     MarketDataQuality Quality,
     MarketDataFreshness Freshness,
     bool IsDelayed,

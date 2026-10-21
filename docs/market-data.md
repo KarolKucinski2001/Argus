@@ -84,12 +84,15 @@ provider is registered; production must not present fake results.
 
 ## S-03 handoff
 
-S-03 product metrics, scoring, chart projection, and deterministic
-explanations must derive only from the normalized `MarketDataResponse` evidence
-already produced by this provider-neutral contract. That evidence boundary must
-preserve source metadata, freshness, quality, stable warnings, and per-asset
-errors all the way into ranking and result rendering, so missing or partial
-evidence remains distinguishable from a zero score.
+S-03 product metrics, scoring, chart projection, and grounded AI summaries must
+derive only from the normalized `MarketDataResponse` evidence already produced
+by this provider-neutral contract. Only evidence that is normalized and
+displayed by the result page may enter an AI summary request; raw provider
+payloads, provider identifiers, credentials, and hidden fields are excluded.
+The evidence boundary must preserve source metadata, freshness, quality, stable
+warnings, and per-asset errors all the way into ranking, summary generation,
+and result rendering, so missing or partial evidence remains distinguishable
+from a zero score.
 
 S-03 must not add a provider-specific request or response contract to implement
 ranking, factors, charts, or grounded AI summaries. Review the handoff by
@@ -101,8 +104,11 @@ confirming that:
   of coercing missing evidence to zero;
 - chart data is projected from normalized historical points without introducing
   provider fields; and
-- result views carry bounded warning/error states forward without rendering raw
-  provider identifiers or messages.
+- grounded summary generation is invoked once per asset only when at least two
+  factors are available, and unavailable, timeout, cancellation, or malformed
+  output preserves the calculated analysis; and
+- result views carry bounded warning/error and summary states forward without
+  rendering raw provider identifiers or messages.
 
 ## Operational boundary
 
@@ -116,5 +122,6 @@ and must never be committed to `appsettings*.json`, source code, tests, or
 workflow files.
 
 Argus displays educational analysis, not financial advice. Provider
-attribution and evidence-quality warnings must remain available to the future
-UI and explanation layers.
+activation decisions, AI Copilot/chat, and follow-up questions are outside S-03.
+Provider attribution and evidence-quality warnings must remain available to the
+analysis UI and summary layers.

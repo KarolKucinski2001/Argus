@@ -58,4 +58,24 @@ public sealed class MarketDataOptionsTests
 
         Assert.False(options.Validate(Options.DefaultName, options).Succeeded);
     }
+
+    [Fact]
+    public void Empty_allowed_assets_are_valid_for_the_explanatory_analysis_state()
+    {
+        var options = new MarketDataOptions();
+        options.AllowedAssets.Clear();
+
+        Assert.True(options.Validate(Options.DefaultName, options).Succeeded);
+    }
+
+    [Fact]
+    public void Null_allowed_assets_are_rejected()
+    {
+        var options = new MarketDataOptions
+        {
+            AllowedAssets = null!
+        };
+
+        Assert.False(options.Validate(Options.DefaultName, options).Succeeded);
+    }
 }

@@ -3,7 +3,7 @@ project: "Argus"
 version: 1
 status: draft
 created: 2026-09-30
-updated: 2026-10-16
+updated: 2026-10-20
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -45,7 +45,9 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | done |
 | S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
 | S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | done |
-| S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02 | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | proposed |
+| S-02A | authenticated-analysis-workspace | enter an analysis-first authenticated workspace after login | S-01, S-02 | FR-002, FR-003, FR-014, FR-016 | done |
+| S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02A | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | done |
+| S-04 | visual-market-history-chart | view the selected asset's historical data as an accessible visual line chart with exact-value fallback | S-03 | FR-010, US-01 | in-progress |
 
 ## Streams
 
@@ -53,7 +55,7 @@ Navigation aid — groups items that share a prerequisites chain. Canonical orde
 
 | Stream | Theme | Chain | Note |
 | --- | --- | --- | --- |
-| A | Account and protected workflow | `F-01` → `S-01` → `S-02` → `S-03` | The strict path to the first user-visible value supports the speed goal. |
+| A | Account and protected workflow | `F-01` → `S-01` → `S-02` → `S-02A` → `S-03` → `S-04` | The strict path to the first user-visible value supports the speed goal. |
 | B | Market evidence contract | `F-02` → `S-02` | Joins Stream A at `S-02`; resolving the data-source decision unlocks the north star's evidence path. |
 
 ## Baseline
@@ -123,18 +125,46 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Risk:** This slice exposes the external-data dependency early; postponing it would allow UI work that cannot produce trustworthy results.
 - **Status:** done
 
+### S-02A: Authenticated analysis workspace
+
+- **Outcome:** after successful login, the user enters a reusable authenticated
+  shell with Analysis as the primary destination and Account as the only
+  secondary destination.
+- **Change ID:** authenticated-analysis-workspace
+- **PRD refs:** FR-002, FR-003, FR-014, FR-016
+- **Prerequisites:** S-01, S-02
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:** —
+- **Risk:** adding future navigation too early could distract from the first
+  analysis flow or create empty product areas.
+- **Status:** done
+
 ### S-03: Explained market ranking
 
 - **Outcome:** user can view each selected asset's score, ranking, current and historical context, contributing factors, chart, grounded AI summary, and educational-not-advice boundary.
 - **Change ID:** explained-market-ranking
 - **PRD refs:** FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01
-- **Prerequisites:** S-02
+- **Prerequisites:** S-02A
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
   - How should the product represent insufficient evidence when fewer than two reliable factors are available? Owner: team. Block: no.
 - **Risk:** This is the north star, so it is sequenced immediately after selection and data access; the main risk is that score explanations appear more certain than the available evidence.
-- **Status:** proposed
+- **Status:** done
+
+### S-04: Visual market history chart
+
+- **Outcome:** user can view selected asset history as a readable, accessible line chart and inspect exact date/close values without losing the text fallback.
+- **Change ID:** visual-market-history-chart
+- **PRD refs:** FR-010, US-01
+- **Prerequisites:** S-03
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:**
+  - —
+- **Risk:** A visual chart can imply more certainty than the illustrative data supports, so it must remain a faithful projection of existing points with bounded interaction and no predictive language.
+- **Status:** in-progress
 
 ## Backlog Handoff
 
@@ -144,7 +174,9 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 | F-02 | market-data-access-contract | Resolve and verify MVP market-data access | [#4](https://github.com/KarolKucinski2001/Argus/issues/4) | yes | Contract verified; keep real-provider activation behind the licensing gate. |
 | S-01 | account-access-flow | Deliver account access and Argus purpose screen | [#5](https://github.com/KarolKucinski2001/Argus/issues/5) | no | Requires F-01 to be completed. |
 | S-02 | select-and-start-analysis | Let users select assets and start analysis | [#6](https://github.com/KarolKucinski2001/Argus/issues/6) | yes | Requires S-01 and F-02; start with the protected contract and fake provider. |
-| S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | [#7](https://github.com/KarolKucinski2001/Argus/issues/7) | no | North star; requires S-02. |
+| S-02A | authenticated-analysis-workspace | Add the analysis-first authenticated workspace shell | — | yes | Redirect successful login to `/analysis`; keep only Analysis and Account in navigation. |
+| S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | [#7](https://github.com/KarolKucinski2001/Argus/issues/7) | no | North star; requires S-02A. |
+| S-04 | visual-market-history-chart | Add an accessible visual history chart | — | yes | Requires S-03; uses existing normalized chart points and preserves the text fallback. |
 
 ## Open Roadmap Questions
 
