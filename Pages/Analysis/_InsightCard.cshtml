@@ -6,6 +6,7 @@
     var result = Model.Result;
     var insight = AnalysisInsightPresenter.Present(result, Model.Rank);
     var toneClass = $"insight-card--{insight.Tone.ToString().ToLowerInvariant()}";
+    var accentClass = AssetIdentityCatalog.AccentClass(insight.Identity.Accent);
     var cardStateClass = result.Error is not null
         ? "analysis-result-card--error"
         : result.Score.HasValue
@@ -21,11 +22,11 @@
 }
 
 <li class="analysis-result-card @cardStateClass">
-    <article class="analysis-result-card__body insight-card @toneClass"
+    <article class="analysis-result-card__body insight-card @toneClass @accentClass"
              aria-labelledby="analysis-result-@result.Asset.Id"
              tabindex="0">
         <header class="analysis-result-card__header">
-            <span class="insight-card__monogram" aria-hidden="true">@insight.Identity.Monogram</span>
+            <span class="insight-card__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="@result.Asset.Id" /></span>
             <div class="insight-card__identity">
                 <h3 id="analysis-result-@result.Asset.Id">@insight.Identity.Name</h3>
                 <p class="insight-card__ticker">@result.Asset.Id</p>

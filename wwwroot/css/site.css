@@ -47,6 +47,12 @@
     --color-positive: #4ade80;
     --color-negative: #f87171;
     --color-warning: #fbbf24;
+    --color-asset-equity: #60a5fa;
+    --color-asset-bitcoin: #f7931a;
+    --color-asset-ethereum: #a78bfa;
+    --color-on-asset: var(--color-bg);
+    --insight-accent-bar-size: 0.1875rem;
+    --asset-glyph-svg-size: 62%;
     --insight-monogram-size: 2.5rem;
     --insight-card-min-width: 28rem;
     --insight-card-narrow-width: 22rem;
@@ -955,6 +961,7 @@ circle.analysis-result-card__chart-point:focus-visible {
     display: grid;
     gap: var(--space-3);
     container-type: inline-size;
+    box-shadow: inset 0 var(--insight-accent-bar-size) 0 var(--asset-accent, transparent);
 }
 
 .insight-card--positive {
@@ -998,6 +1005,40 @@ circle.analysis-result-card__chart-point:focus-visible {
     background: var(--color-surface-raised);
     color: var(--color-accent);
     font-weight: 700;
+    overflow: hidden;
+}
+
+.asset-accent--equity {
+    --asset-accent: var(--color-asset-equity);
+}
+
+.asset-accent--bitcoin {
+    --asset-accent: var(--color-asset-bitcoin);
+}
+
+.asset-accent--ethereum {
+    --asset-accent: var(--color-asset-ethereum);
+}
+
+.asset-glyph {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    background: var(--asset-accent, var(--color-surface-raised));
+    color: var(--color-on-asset);
+    line-height: 1;
+}
+
+.asset-glyph.asset-accent--neutral {
+    background: var(--color-surface-raised);
+    color: var(--color-accent);
+}
+
+.asset-glyph__svg {
+    inline-size: var(--asset-glyph-svg-size);
+    block-size: var(--asset-glyph-svg-size);
+    fill: currentColor;
 }
 
 .insight-card__identity {

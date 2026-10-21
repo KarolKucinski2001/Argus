@@ -83,6 +83,39 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
+    public async Task Ui_state_fixture_renders_own_asset_glyphs_and_accents()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis/ui-state-fixture");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"AAPL\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"MSFT\">\\s*<svg class=\"asset-glyph__svg\"",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--bitcoin\" data-asset-glyph=\"BTC-USD\">\\s*<span class=\"asset-glyph__monogram\">₿</span>",
+            html);
+        Assert.Matches(
+            "<span class=\"asset-glyph asset-accent--equity\" data-asset-glyph=\"NVDA\">\\s*<span class=\"asset-glyph__monogram\">N</span>",
+            html);
+        Assert.Matches(
+            "<article class=\"analysis-result-card__body insight-card insight-card--[a-z]+ asset-accent--ethereum\"",
+            html);
+        Assert.Matches("<span class=\"insight-card__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", html);
+        Assert.DoesNotMatch("<svg class=\"asset-glyph__svg\"[^>]*(fill|stroke)=", html);
+    }
+
+    [Fact]
     public async Task Ui_state_fixture_is_not_available_outside_testing()
     {
         await using var factory = new DevelopmentUiStateFixtureFactory();
