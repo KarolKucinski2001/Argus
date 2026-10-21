@@ -1,3 +1,4 @@
+@using System.Globalization
 @using _bootstrap_scaffold.Analysis
 @using _bootstrap_scaffold.Pages.Analysis
 @model AnalysisSummaryStripView
@@ -9,6 +10,14 @@
     };
 }
 <section class="analysis-summary-strip" aria-label="Podsumowanie rankingu">
+    <p class="analysis-workspace__subline">
+        <span>@AnalysisSummaryStripPresenter.AssetCountLabel(Model.AnalyzedCount)</span>
+        @if (Model.DataAsOf is { } dataAsOf)
+        {
+            <span aria-hidden="true">•</span>
+            <span>Dane z @dataAsOf.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)</span>
+        }
+    </p>
     <dl class="analysis-summary-strip__list">
         <div class="analysis-summary-strip__item">
             <dt>Przeanalizowane aktywa</dt>
@@ -29,6 +38,16 @@
                 {
                     <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">n/d</dd>
                 }
+            </div>
+        }
+        @if (Model.StrongestTrend is { } strongestTrend)
+        {
+            <div class="analysis-summary-strip__item">
+                <dt>Najsilniejszy trend 30d</dt>
+                <dd class="analysis-summary-strip__value">
+                    <span class="analysis-summary-strip__name">@strongestTrend.Name</span>
+                    <span class="analysis-summary-strip__change analysis-summary-strip__change--positive">@AnalysisFormatting.SignedPercent(strongestTrend.Change)</span>
+                </dd>
             </div>
         }
         <div class="analysis-summary-strip__item">

@@ -81,7 +81,8 @@ public sealed class AnalysisAccessContractTests
         Assert.All(unavailableBars, bar => Assert.Matches("<meter[^>]*aria-hidden=\"true\"", bar));
         Assert.All(factorBars.Except(unavailableBars), bar => Assert.DoesNotContain("aria-hidden=\"true\"", bar));
         Assert.Contains("Wniosek z danych", html);
-        Assert.Contains("<details class=\"insight-card__details\"", html);
+        Assert.Contains("class=\"insight-card__why\"", html);
+        Assert.DoesNotContain("<details", html);
         Assert.DoesNotContain("chwilowo niedostępne", html);
         Assert.Contains("Generuj ranking", html);
         Assert.DoesNotContain("Rozpocznij analizę", html);
@@ -357,7 +358,8 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Ranking analizy", html);
+        Assert.Contains("<h2 id=\"analysis-results-title\" class=\"visually-hidden\">Ranking analizy</h2>", html);
+        Assert.Matches("<p class=\"analysis-workspace__subline\">\\s*<span>2 aktywa</span>", html);
         var rankingHtml = html[html.IndexOf("Ranking analizy", StringComparison.Ordinal)..];
         Assert.True(rankingHtml.IndexOf("MSFT", StringComparison.Ordinal) < rankingHtml.IndexOf("AAPL", StringComparison.Ordinal));
         Assert.Contains("Miejsce 1", html);
@@ -388,7 +390,7 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
-    public async Task Analysis_results_render_factors_summary_and_chart_data()
+    public async Task Analysis_results_render_price_badge_trend_and_why_without_methodology()
     {
         var provider = new FakeMarketDataProvider();
         provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
@@ -403,23 +405,25 @@ public sealed class AnalysisAccessContractTests
         using var response = await PostAnalysisAsync(client, token, "AAPL");
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Czynniki", html);
-        Assert.Contains("<strong>Momentum 24h</strong>", html);
-        Assert.Contains("<strong>Momentum 7d</strong>", html);
-        Assert.Contains("<strong>Trend 30d</strong>", html);
-        Assert.Contains("wkład ", html);
-        Assert.Contains("waga 25%", html);
-        Assert.Contains("waga 35%", html);
-        Assert.Contains("waga 40%", html);
-        Assert.Contains("Score ", html);
-        Assert.Contains("analysis-result-card__header", html);
-        Assert.Contains("analysis-result-card__score", html);
-        Assert.Contains("analysis-result-card__metrics", html);
-        Assert.Contains("analysis-result-card__chart", html);
+        Assert.Contains("<span class=\"insight-card__badge\">Akcje</span>", html);
+        Assert.Matches(
+            "<dt>Najsilniejszy trend 30d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
+            "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+50%</span>",
+            html);
+        Assert.Matches("<p class=\"insight-card__price analysis-result-card__price\">\\s*<span class=\"visually-hidden\">Cena aktualna:</span>", html);
+        Assert.Contains("<p class=\"insight-card__trend insight-card__trend--rising\">Trend wzrostowy</p>", html);
+        Assert.Contains("<h4 id=\"analysis-why-AAPL\" class=\"insight-card__why-heading\">Dlaczego miejsce #1?</h4>", html);
+        Assert.Matches("<ul class=\"insight-card__why-list\">\\s*<li>", html);
         Assert.Contains("analysis-result-card__summary", html);
-        Assert.Contains("Historia cenowa", html);
-        Assert.Contains("data-chart-asset=\"AAPL\"", html);
-        Assert.Contains("data-chart-close=\"80", html);
+        Assert.DoesNotContain("<details", html);
+        Assert.DoesNotContain("Szczegóły i metodologia", html);
+        Assert.DoesNotContain("waga ", html);
+        Assert.DoesNotContain("wkład ", html);
+        Assert.DoesNotContain("Historia cenowa", html);
+        Assert.DoesNotContain("data-chart-", html);
+        Assert.DoesNotContain("analysis-chart.js", html);
+        Assert.DoesNotContain("analysis-result-card__factor-list", html);
     }
 
     [Fact]
@@ -438,41 +442,35 @@ public sealed class AnalysisAccessContractTests
         using var response = await PostAnalysisAsync(client, token, "AAPL");
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
         var card = html[html.IndexOf("class=\"analysis-results__list\"", StringComparison.Ordinal)..];
-        var details = card.IndexOf("<details class=\"insight-card__details\"", StringComparison.Ordinal);
+        int At(string marker)
+        {
+            var index = card.IndexOf(marker, StringComparison.Ordinal);
+            Assert.True(index > 0, $"Missing card marker: {marker}");
+            return index;
+        }
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.True(details > 0, "The card must contain a collapsed details element.");
-        Assert.DoesNotContain("<details class=\"insight-card__details\" open", card);
-        Assert.Contains(">Apple</h3>", card[..details]);
-        Assert.Contains("class=\"insight-card__monogram\"", card[..details]);
-        Assert.Contains("+25%", card[..details]);
-        Assert.Contains("data-sparkline", card[..details]);
-        Assert.Equal(3, Regex.Matches(card[..details], "data-factor-bar=").Count);
-        Assert.Contains("Wniosek z danych", card[..details]);
-        Assert.Contains("Cena wzrosła o 50% w ciągu 30 dni — najwyżej oceniane aktywo w tej analizie.", card[..details]);
+        Assert.Contains("class=\"insight-card__monogram\"", card);
+        Assert.Contains("+25%", card);
+        Assert.Equal(3, Regex.Matches(card, "data-factor-bar=").Count);
+        Assert.Contains("Cena wzrosła o 50% w ciągu 30 dni — najwyżej oceniane aktywo w tej analizie.", card);
         Assert.Matches(
             "<div class=\"insight-card__score-block insight-card__score-block--strong\">\\s*" +
             "<p class=\"analysis-result-card__rank\"><span aria-hidden=\"true\">#1</span><span class=\"visually-hidden\">Miejsce 1</span></p>\\s*" +
             "<p class=\"analysis-result-card__score\"><span class=\"visually-hidden\">Score 100/100</span><span class=\"insight-card__score-value\" aria-hidden=\"true\">100</span></p>\\s*" +
             "<p class=\"insight-card__band\">Silny</p>",
-            card[..details]);
-        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--rising\">Rosnący</span>", card[..details]);
-        Assert.Contains("<span class=\"insight-card__bar-value\">+20%</span>", card[..details]);
-        Assert.Contains("analysis-result-card__metrics", card[details..]);
-        Assert.Contains("analysis-result-card__factor-list", card[details..]);
-        var detailsHtml = card[details..];
-        Assert.Contains("<strong>Momentum 24h</strong>", detailsHtml);
-        Assert.Contains("<strong>Trend 30d</strong>", detailsHtml);
-        Assert.Contains("waga ", detailsHtml);
-        Assert.Contains("wkład ", detailsHtml);
-        Assert.Contains("Dane kompletne", detailsHtml);
-        Assert.Contains("<dd>Aktualne</dd>", detailsHtml);
-        Assert.DoesNotMatch("(?<![-_])\\b(weight|contribution)\\b", detailsHtml);
-        Assert.DoesNotContain("</strong>:", detailsHtml);
-        Assert.DoesNotContain(">stale<", detailsHtml);
-        Assert.DoesNotContain(">current<", detailsHtml);
-        Assert.Contains("data-chart-svg", card[details..]);
-        Assert.Contains("Podsumowanie", card[details..]);
+            card);
+        Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--rising\">Rosnący</span>", card);
+        Assert.Contains("<span class=\"insight-card__bar-value\">+20%</span>", card);
+        Assert.True(At(">Apple</h3>") < At("class=\"insight-card__badge\""));
+        Assert.True(At("class=\"insight-card__badge\"") < At("data-sparkline"));
+        Assert.True(At("data-sparkline") < At("data-factor-bar="));
+        Assert.True(At("data-factor-bar=") < At("Wniosek z danych"));
+        Assert.True(At("Wniosek z danych") < At("class=\"insight-card__why\""));
+        Assert.DoesNotContain("<details", card);
+        Assert.DoesNotMatch("(?<![-_])\\b(weight|contribution)\\b", card);
+        Assert.DoesNotContain(">stale<", card);
+        Assert.DoesNotContain(">current<", card);
         Assert.DoesNotContain("chwilowo niedostępne", html);
     }
 
@@ -499,7 +497,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("analysis-result-card--stale", html);
         Assert.Single(Regex.Matches(html, "role=\"status\">Dane nieaktualne"));
-        Assert.Contains("<dd>Nieaktualne</dd>", html);
+        Assert.DoesNotContain("<dd>Nieaktualne</dd>", html);
     }
 
     [Fact]
@@ -602,7 +600,7 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
-    public async Task Analysis_results_render_accessible_svg_geometry_and_text_fallback()
+    public async Task Analysis_results_render_accessible_sparkline_without_price_history_chart()
     {
         var provider = new FakeMarketDataProvider();
         provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
@@ -618,33 +616,15 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("id=\"analysis-chart-AAPL\"", html);
-        Assert.Contains("data-chart-container", html);
-        Assert.Contains("data-chart-svg", html);
-        Assert.Contains("class=\"analysis-result-card__chart-axis\"", html);
-        Assert.Contains("class=\"analysis-result-card__chart-line\"", html);
-        Assert.Contains("aria-label=\"AAPL — obserwacja historyczna", html);
+        Assert.Matches("<svg class=\"insight-card__sparkline\"[^>]*role=\"img\"[^>]*aria-label=\"Trend ceny: Apple\"", html);
         Assert.Contains("tabindex=\"0\"", html);
-        Assert.Equal(3, Regex.Matches(html, "data-chart-point").Count);
-        Assert.Equal(3, Regex.Matches(html, "data-chart-point[^>]*data-chart-timestamp=\"[^\"]+\"").Count);
-        Assert.Equal(3, Regex.Matches(html, "data-chart-point[^>]*data-chart-close=\"[^\"]+\"").Count);
-        Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
-        Assert.Contains("data-chart-tooltip", html);
-        Assert.Contains("role=\"status\"", html);
-        Assert.DoesNotContain("analysis-result-card__chart-points", html);
+        Assert.DoesNotContain("id=\"analysis-chart-AAPL\"", html);
+        Assert.DoesNotContain("data-chart-", html);
+        Assert.DoesNotContain("analysis-result-card__chart", html);
+        Assert.DoesNotContain("Historyczne obserwacje ceny zamknięcia", html);
+        Assert.DoesNotContain("Zakres historii cenowej", html);
         Assert.DoesNotContain("<time datetime=", html);
-        Assert.Contains("Historyczne obserwacje ceny zamknięcia", html);
         Assert.DoesNotContain("prognoz", html, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("data-chart-range", html);
-        Assert.Contains("aria-label=\"Zakres historii cenowej\"", html);
-        Assert.Equal(5, Regex.Matches(html, "data-chart-range-option").Count);
-        Assert.Contains("data-chart-range-option=\"1M\"", html);
-        Assert.Contains("data-chart-range-option=\"3M\"", html);
-        Assert.Contains("data-chart-range-option=\"6M\"", html);
-        Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
-        Assert.Matches("data-chart-range-option=\"1Y\"[^>]*aria-pressed=\"true\"", html);
-        Assert.Matches("data-chart-range-option=\"1M\"[^>]*aria-pressed=\"false\"", html);
     }
 
     [Fact]
@@ -664,8 +644,8 @@ public sealed class AnalysisAccessContractTests
         var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Historia cenowa", html);
-        Assert.Contains("Brak historycznych obserwacji do wyświetlenia.", html);
+        Assert.DoesNotContain("Historia cenowa", html);
+        Assert.DoesNotContain("Brak historycznych obserwacji do wyświetlenia.", html);
         Assert.DoesNotContain("data-chart-svg", html);
         Assert.DoesNotContain("data-chart-point", html);
         Assert.DoesNotContain("data-chart-timestamp", html);
@@ -745,14 +725,15 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("class=\"analysis-result-card__header\"", html);
         Assert.Contains("class=\"analysis-result-card__rank\"", html);
         Assert.Contains("class=\"analysis-result-card__score\"", html);
-        Assert.Contains("class=\"analysis-result-card__metrics\"", html);
-        Assert.Contains("class=\"analysis-result-card__metric\"", html);
-        Assert.Contains("class=\"analysis-result-card__factors\"", html);
-        Assert.Contains("class=\"analysis-result-card__factor\"", html);
-        Assert.Contains("class=\"analysis-result-card__factor-contribution\"", html);
-        Assert.Contains("class=\"analysis-result-card__chart\"", html);
-        Assert.Contains("class=\"analysis-result-card__chart-point\"", html);
+        Assert.Contains("class=\"insight-card__meta\"", html);
+        Assert.Contains("class=\"insight-card__badge\"", html);
+        Assert.Contains("class=\"insight-card__price analysis-result-card__price\"", html);
+        Assert.Contains("class=\"insight-card__why\"", html);
+        Assert.Contains("class=\"insight-card__why-list\"", html);
         Assert.Contains("class=\"analysis-result-card__summary\"", html);
+        Assert.DoesNotContain("class=\"analysis-result-card__metrics\"", html);
+        Assert.DoesNotContain("class=\"analysis-result-card__factors\"", html);
+        Assert.DoesNotContain("class=\"analysis-result-card__chart\"", html);
         Assert.Contains("nie stanowią porady inwestycyjnej", html);
     }
 
@@ -859,11 +840,9 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Częściowe wyniki", html);
         Assert.Contains("Nie udało się przeanalizować tego aktywa", html);
         Assert.Contains("Spróbuj ponownie później", html);
-        Assert.Contains("Historia cenowa", html);
-        Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
-        Assert.Contains("data-chart-svg", html);
-        Assert.Contains("analysis-result-card__factor-list", html);
+        Assert.Contains("data-sparkline", html);
+        Assert.Contains("class=\"insight-card__why\"", html);
+        Assert.DoesNotContain("Historia cenowa", html);
         Assert.DoesNotContain("The market data provider returned no result", html);
     }
 

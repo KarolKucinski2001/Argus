@@ -7,6 +7,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Start analizy";
     var scoreById = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
+    var summary = Model.HasResults ? AnalysisSummaryStripPresenter.Build(Model.AnalysisResults!.Results) : null;
     if (Model.HasResults)
     {
         foreach (var analyzed in Model.AnalysisResults!.Results)
@@ -102,12 +103,12 @@
             <h2>Dashboard analizy</h2>
             @if (Model.HasResults)
             {
-                <partial name="_SummaryStrip" model="AnalysisSummaryStripPresenter.Build(Model.AnalysisResults!.Results)" />
+                <partial name="_SummaryStrip" model="summary" />
             }
         </header>
 
         <section class="analysis-results" aria-labelledby="analysis-results-title">
-            <h2 id="analysis-results-title">Ranking analizy</h2>
+            <h2 id="analysis-results-title" class="visually-hidden">Ranking analizy</h2>
             @if (Model.HasResults)
             {
                 <p class="analysis-results__boundary">
@@ -133,7 +134,8 @@
                             index,
                             quote,
                             result.Error is null ? null : IndexModel.MapAssetErrorMessage(result.Error.Category),
-                            IndexModel.MapSummaryStatusMessage(result.SummaryResult?.Status ?? AnalysisSummaryStatus.Unavailable));
+                            IndexModel.MapSummaryStatusMessage(result.SummaryResult?.Status ?? AnalysisSummaryStatus.Unavailable),
+                            summary?.AverageScore);
                         <partial name="_InsightCard" model="card" />
                     }
                 }
@@ -143,6 +145,6 @@
 </section>
 
 @section Scripts {
-    <script src="~/js/analysis-chart.js" asp-append-version="true"></script>
+
     <script src="~/js/analysis-form.js" asp-append-version="true"></script>
 }

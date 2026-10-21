@@ -386,16 +386,16 @@ None — no persisted data or configuration changes.
 
 #### Automated
 
-- [x] 3.1 Build passes
-- [x] 3.2 No literal colors in views
+- [x] 3.1 Build passes — a32b599
+- [x] 3.2 No literal colors in views — a32b599
 
 ### Phase 4: View
 
 #### Automated
 
-- [ ] 4.1 Tests pass
-- [ ] 4.2 Literal scan of Pages/Analysis finds 0 literal colors or px layout values
-- [ ] 4.3 Screenshots captured at 1440/1920/390
+- [x] 4.1 Tests pass
+- [x] 4.2 Literal scan of Pages/Analysis finds 0 literal colors or px layout values
+- [x] 4.3 Screenshots captured at 1440/1920/390
 
 #### Manual
 

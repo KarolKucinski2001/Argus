@@ -19,7 +19,7 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
     public IReadOnlyList<AssetAnalysis> RankedResults { get; } = BuildRankedResults();
 
     public IReadOnlyList<InsightCardModel> RankedCards =>
-        RankedResults.Select((analysis, index) => Card(analysis, index)).ToArray();
+        RankedResults.Select((analysis, index) => Card(analysis, index, RankedSummary.AverageScore)).ToArray();
 
     public AnalysisSummaryStripView RankedSummary => AnalysisSummaryStripPresenter.Build(RankedResults);
 
@@ -105,13 +105,24 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
             IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable));
     }
 
-    private static InsightCardModel Card(AssetAnalysis analysis, int index) =>
+    private static InsightCardModel Card(AssetAnalysis analysis, int index, decimal? averageScore = null) =>
         new(
             analysis,
             index,
+            QuoteFor(analysis),
             null,
-            null,
-            IndexModel.MapSummaryStatusMessage(analysis.SummaryResult?.Status ?? AnalysisSummaryStatus.Unavailable));
+            IndexModel.MapSummaryStatusMessage(analysis.SummaryResult?.Status ?? AnalysisSummaryStatus.Unavailable),
+            averageScore);
+
+    private static MarketQuote? QuoteFor(AssetAnalysis analysis) =>
+        analysis.ChartPoints.Count == 0
+            ? null
+            : new MarketQuote(
+                analysis.ChartPoints[^1].Close,
+                "USD",
+                analysis.Freshness.ObservedAt,
+                analysis.Freshness,
+                analysis.Quality);
 
     private static AssetAnalysis Sample(
         string id,

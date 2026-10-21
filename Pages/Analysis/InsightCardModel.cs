@@ -8,7 +8,8 @@ public sealed record InsightCardModel(
     int Index,
     MarketQuote? Quote,
     string? ErrorMessage,
-    string SummaryStatusMessage)
+    string SummaryStatusMessage,
+    decimal? AverageScore = null)
 {
     public int? Rank => Result.Score.HasValue ? Index + 1 : null;
 }
