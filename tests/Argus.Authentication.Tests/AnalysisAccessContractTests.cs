@@ -602,7 +602,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("data-chart-range-option=\"3M\"", html);
         Assert.Contains("data-chart-range-option=\"6M\"", html);
         Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
         Assert.Matches("data-chart-range-option=\"1Y\"[^>]*aria-pressed=\"true\"", html);
         Assert.Matches("data-chart-range-option=\"1M\"[^>]*aria-pressed=\"false\"", html);
     }
@@ -821,7 +821,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Spróbuj ponownie później", html);
         Assert.Contains("Historia cenowa", html);
         Assert.Contains("data-chart-range-option=\"1Y\"", html);
-        Assert.Contains("data-chart-range-option=\"Max\"", html);
+        Assert.Contains("data-chart-range-option=\"Maks.\"", html);
         Assert.Contains("data-chart-svg", html);
         Assert.Contains("analysis-result-card__factor-list", html);
         Assert.DoesNotContain("The market data provider returned no result", html);

@@ -15,22 +15,40 @@ public sealed class AnalysisExplanationBuilder : IAnalysisExplanationBuilder
             .ToArray();
 
         var evidence = availableFactors.Length < 2 || !assessment.HasSufficientEvidence
-            ? "Insufficient evidence: fewer than two performance factors are available for a meaningful score."
-            : $"Score {FormatDecimal(assessment.Score.GetValueOrDefault())}/100 from {availableFactors.Length} performance factors.";
+            ? "Niewystarczające dane: dostępnych jest mniej niż wymagane dwa czynniki wydajności do obliczenia wyniku."
+            : $"Wynik {FormatDecimal(assessment.Score.GetValueOrDefault())}/100 na podstawie {availableFactors.Length} czynników wydajności.";
 
         var factorText = availableFactors.Length == 0
-            ? "No performance metrics are available."
+            ? "brak dostępnych metryk wydajności"
             : string.Join(
                 "; ",
                 availableFactors.Select(factor =>
-                    $"{factor.Label} {FormatSignedPercentage(factor.Percentage.GetValueOrDefault())}"));
+                    $"{PolishFactorLabel(factor.Key)} {FormatSignedPercentage(factor.Percentage.GetValueOrDefault())}"));
 
         var freshnessText = marketData.Freshness.IsStale
-            ? "freshness stale"
-            : "freshness current";
+            ? "świeżość danych nieaktualna"
+            : "świeżość danych aktualna";
 
-        return $"{evidence} Metrics: {factorText}. Data quality {marketData.Quality}; {freshnessText}.";
+        return $"{evidence} Metryki: {factorText}. Jakość danych: {PolishQualityLabel(marketData.Quality)}; {freshnessText}.";
     }
+
+    private static string PolishFactorLabel(string key) =>
+        key switch
+        {
+            "momentum-24h" => "momentum 24 godziny",
+            "momentum-7d" => "momentum 7 dni",
+            "trend-30d" => "trend 30 dni",
+            _ => "czynnik"
+        };
+
+    private static string PolishQualityLabel(MarketDataQuality quality) =>
+        quality switch
+        {
+            MarketDataQuality.Incomplete => "niepełna",
+            MarketDataQuality.Stale => "nieaktualna",
+            MarketDataQuality.Unavailable => "niedostępna",
+            _ => "kompletna"
+        };
 
     private static string FormatSignedPercentage(decimal value) =>
         string.Create(CultureInfo.InvariantCulture, $"{value:+0.##;-0.##;0}%");

@@ -71,9 +71,9 @@ function invalidPoint(close) {
 
 (function maxRangeReturnsEveryPointUnfiltered() {
     var points = [point("2024-01-01T00:00:00Z", 10), invalidPoint(20)];
-    var selected = selectPoints(points, "Max");
+    var selected = selectPoints(points, "Maks.");
 
-    assert.deepStrictEqual(selected, points, "Max range must bypass filtering entirely");
+    assert.deepStrictEqual(selected, points, "Maks. range must bypass filtering entirely");
 })();
 
 (function shortHistoryFallsBackWhenNothingSatisfiesTheCutoff() {

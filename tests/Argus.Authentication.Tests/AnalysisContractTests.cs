@@ -22,14 +22,14 @@ public sealed class AnalysisContractTests
 
         var summary = builder.Build(marketData, performance, assessment);
 
-        Assert.Contains("57.5", summary);
-        Assert.Contains("24-hour momentum", summary);
+        Assert.Contains("Wynik 57.5/100", summary);
+        Assert.Contains("momentum 24 godziny", summary);
         Assert.Contains("-20", summary);
-        Assert.Contains("7-day momentum", summary);
+        Assert.Contains("momentum 7 dni", summary);
         Assert.Contains("0", summary);
-        Assert.Contains("30-day trend", summary);
+        Assert.Contains("trend 30 dni", summary);
         Assert.Contains("20", summary);
-        Assert.Contains("Complete", summary);
+        Assert.Contains("Jakość danych: kompletna", summary);
         Assert.DoesNotContain("test", summary, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("provider", summary, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Apple", summary, StringComparison.OrdinalIgnoreCase);
@@ -51,9 +51,9 @@ public sealed class AnalysisContractTests
 
         var summary = builder.Build(marketData, performance, assessment);
 
-        Assert.Contains("insufficient", summary, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("fewer than two", summary, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("7-day momentum", summary);
+        Assert.Contains("Niewystarczające dane", summary);
+        Assert.Contains("mniej niż wymagane dwa czynniki", summary);
+        Assert.Contains("momentum 7 dni", summary);
         Assert.Contains("20", summary);
         Assert.DoesNotContain("test", summary, StringComparison.OrdinalIgnoreCase);
     }
@@ -204,7 +204,7 @@ public sealed class AnalysisContractTests
                 Assert.Equal("THIN", result.Asset.Id);
                 Assert.Null(result.Score);
                 Assert.Null(result.Error);
-                Assert.Contains("insufficient", result.Summary!, StringComparison.OrdinalIgnoreCase);
+                Assert.Contains("Niewystarczające dane", result.Summary!);
                 Assert.NotEmpty(result.Factors);
             });
     }
@@ -313,7 +313,7 @@ public sealed class AnalysisContractTests
             var result = Assert.Single(response.Results);
             Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
             Assert.NotNull(result.Summary);
-            Assert.Contains("Score", result.Summary);
+            Assert.Contains("Wynik", result.Summary);
             Assert.NotNull(result.Score);
             Assert.NotEmpty(result.Factors);
     }
@@ -339,7 +339,7 @@ public sealed class AnalysisContractTests
             var result = Assert.Single(response.Results);
             Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
             Assert.NotNull(result.Summary);
-            Assert.Contains("Score", result.Summary);
+            Assert.Contains("Wynik", result.Summary);
     }
 
     [Fact]
@@ -466,7 +466,7 @@ public sealed class AnalysisContractTests
                 var result = Assert.Single(response.Results);
                 Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
                 Assert.NotNull(result.Summary);
-                Assert.Contains("Score", result.Summary);
+                Assert.Contains("Wynik", result.Summary);
             }
     }
 
@@ -491,7 +491,7 @@ public sealed class AnalysisContractTests
             var result = Assert.Single(response.Results);
             Assert.Equal(AnalysisSummaryStatus.Generated, result.SummaryResult?.Status);
             Assert.NotNull(result.Summary);
-            Assert.Contains("Score", result.Summary);
+            Assert.Contains("Wynik", result.Summary);
     }
 
     [Fact]
