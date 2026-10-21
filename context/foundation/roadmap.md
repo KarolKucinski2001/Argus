@@ -45,8 +45,8 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | done |
 | S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
 | S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | done |
-| S-02A | authenticated-analysis-workspace | enter an analysis-first authenticated workspace after login | S-01, S-02 | FR-002, FR-003, FR-014, FR-016 | proposed |
-| S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02 | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | proposed |
+| S-02A | authenticated-analysis-workspace | enter an analysis-first authenticated workspace after login | S-01, S-02 | FR-002, FR-003, FR-014, FR-016 | done |
+| S-03 | explained-market-ranking | view scores, ranking, market context, factors, chart, and a grounded AI explanation for selected assets | S-02A | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | done |
 | S-04 | visual-market-history-chart | view the selected asset's historical data as an accessible visual line chart with exact-value fallback | S-03 | FR-010, US-01 | in-progress |
 
 ## Streams
@@ -138,7 +138,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Unknowns:** —
 - **Risk:** adding future navigation too early could distract from the first
   analysis flow or create empty product areas.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Explained market ranking
 
@@ -151,7 +151,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **Unknowns:**
   - How should the product represent insufficient evidence when fewer than two reliable factors are available? Owner: team. Block: no.
 - **Risk:** This is the north star, so it is sequenced immediately after selection and data access; the main risk is that score explanations appear more certain than the available evidence.
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: Visual market history chart
 

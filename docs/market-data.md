@@ -124,4 +124,4 @@ workflow files.
 Argus displays educational analysis, not financial advice. Provider
 activation decisions, AI Copilot/chat, and follow-up questions are outside S-03.
 Provider attribution and evidence-quality warnings must remain available to the
-future UI and summary layers.
+analysis UI and summary layers.

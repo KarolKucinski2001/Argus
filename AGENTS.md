@@ -2,8 +2,8 @@
 
 Argus is an early ASP.NET Core application targeting .NET 10. The runnable
 application combines the minimal API in `Program.cs` with the account-access
-Razor Pages under `Pages/`; the investment-analysis product described in
-`@context/foundation/prd.md` is not implemented yet.
+and authenticated analysis Razor Pages under `Pages/`; the broader investment
+product described in `@context/foundation/prd.md` remains under development.
 
 ## Critical repository rules
 

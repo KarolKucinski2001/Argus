@@ -13,10 +13,10 @@ last_updated_by: GitHub Copilot CLI
 
 # Research: Audit and refine the existing authenticated `/analysis` view
 
-**Date**: 2026-10-20T15:57:43+02:00  
-**Researcher**: GitHub Copilot CLI  
-**Git Commit**: `59b7ab705c2c5786d235fdf9b0d5674ce1978bd0`  
-**Branch**: `master`  
+**Date**: 2026-10-20T15:57:43+02:00
+**Researcher**: GitHub Copilot CLI
+**Git Commit**: `59b7ab705c2c5786d235fdf9b0d5674ce1978bd0`
+**Branch**: `master`
 **Repository**: `KarolKucinski2001/Argus`
 
 ## Research Question
