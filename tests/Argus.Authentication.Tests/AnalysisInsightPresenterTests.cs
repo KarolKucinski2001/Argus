@@ -386,6 +386,15 @@ public sealed class AnalysisInsightPresenterTests
     }
 
     [Fact]
+    public void Unranked_asset_whose_only_factor_is_the_takeaway_still_gets_the_fallback_bullet()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, -2.4m, 10m, 11m) with { Score = null });
+
+        Assert.Equal("Co wiemy o tym aktywie", view.WhyHeading);
+        Assert.Equal(new[] { "Za mało danych rynkowych, aby uzasadnić pozycję." }, view.WhyBullets);
+    }
+
+    [Fact]
     public void Missing_rank_uses_the_unranked_heading()
     {
         var view = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 10m, 11m));

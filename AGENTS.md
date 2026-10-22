@@ -26,6 +26,7 @@ product described in `@context/foundation/prd.md` remains under development.
 - Future domain work should follow the PRD flow: authenticated users select assets, market data is analyzed, scores are ranked with explaining factors, and AI summaries remain grounded in displayed data with an educational-not-advice boundary.
 - For landing-page UI changes, keep visual tokens in `@wwwroot/css/site.css`, static brand assets in `@wwwroot/`, and views free of literal colors or arbitrary layout values; use the existing landing-page contract and evidence under `@context/changes/landing-page-ui-refinement/`.
 - For analysis UI changes, use semantic tokens from `@wwwroot/css/site.css`; do not add literal colors or arbitrary layout values to Razor views. Check the existing analysis classes before creating new primitives, and use `@Pages/Analysis/UiStateFixture.cshtml` to verify the seven required interaction states. Keep `/analysis` structured as a token-backed split workspace: the asset picker belongs in the sidebar and result cards belong in the content grid; keep mobile stacking in CSS rather than duplicating views.
+- Derive analysis card copy and labels (trend, badges, why-bullets, summary strip) in the presenters under `@Analysis/` (`AnalysisInsightPresenter`, `AnalysisSummaryStripPresenter`) and cover them with unit tests; Razor views only bind the results. Keep wording descriptive of displayed data — never advice, forecasts, or buy/sell language.
 
 ## Build, test, and run
 

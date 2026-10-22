@@ -234,6 +234,11 @@ public static class AnalysisInsightPresenter
             .Select(entry => FactorPhrase(entry.Bar));
 
         bullets.AddRange(remaining.Take(MaximumWhyBullets - bullets.Count));
+        if (bullets.Count == 0)
+        {
+            bullets.Add("Za mało danych rynkowych, aby uzasadnić pozycję.");
+        }
+
         return bullets;
     }
 
