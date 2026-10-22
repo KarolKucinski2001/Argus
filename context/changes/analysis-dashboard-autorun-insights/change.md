@@ -1,9 +1,9 @@
 ---
 change_id: analysis-dashboard-autorun-insights
 title: Autorun analysis dashboard with explained, comparison-first insights
-status: implementing
+status: implemented
 created: 2026-10-21
-updated: 2026-10-21
+updated: 2026-10-22
 archived_at: null
 ---
 

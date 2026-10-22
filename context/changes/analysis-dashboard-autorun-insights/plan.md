@@ -369,7 +369,7 @@ None — no persisted data or configuration changes.
 
 #### Manual
 
-- [x] 1.3 Signed-in GET /analysis shows 4 ranked cards without clicking Generuj ranking
+- [x] 1.3 Signed-in GET /analysis shows 4 ranked cards without clicking Generuj ranking — 5e0b04c
 
 ### Phase 2: Presenter logic
 
@@ -380,7 +380,7 @@ None — no persisted data or configuration changes.
 
 #### Manual
 
-- [x] 2.3 Bullet copy reviewed by the user for tone
+- [x] 2.3 Bullet copy reviewed by the user for tone — 5e0b04c
 
 ### Phase 3: Tokens
 
@@ -399,18 +399,18 @@ None — no persisted data or configuration changes.
 
 #### Manual
 
-- [x] 4.4 At 1440px header, strip and first card row fit above the fold
-- [x] 4.5 Cards no taller than 365px plus about 15%
-- [x] 4.6 User approves the visual result against the reference image
+- [x] 4.4 At 1440px header, strip and first card row fit above the fold — 5e0b04c
+- [x] 4.5 Cards no taller than 365px plus about 15% — 5e0b04c
+- [x] 4.6 User approves the visual result against the reference image — 5e0b04c
 
 ### Phase 5: States and finish
 
 #### Automated
 
-- [x] 5.1 Full tests pass
-- [x] 5.2 Forbidden-string scan finds none
+- [x] 5.1 Full tests pass — 5e0b04c
+- [x] 5.2 Forbidden-string scan finds none — 5e0b04c
 
 #### Manual
 
-- [x] 5.3 At 1440x768 the sticky sidebar keeps Generuj ranking reachable
-- [x] 5.4 Each of the 7 states reviewed and accepted by the user
+- [x] 5.3 At 1440x768 the sticky sidebar keeps Generuj ranking reachable — 5e0b04c
+- [x] 5.4 Each of the 7 states reviewed and accepted by the user — 5e0b04c
