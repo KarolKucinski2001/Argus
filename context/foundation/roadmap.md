@@ -1,180 +1,115 @@
 ---
 project: "Argus"
-version: 1
+version: 2
 status: draft
 created: 2026-09-30
 updated: 2026-10-23
 prd_version: 1
-main_goal: speed
-top_blocker: time
-milestone_id: first-explained-market-analysis
-milestone_seq: 1
-milestone_status: done
+main_goal: low-complexity
+top_blocker: decisions
+milestone_id: dashboard-and-watchlist
+milestone_seq: 2
+milestone_status: open
 ---
 
 # Roadmap: Argus
 
-> Derived from `context/foundation/prd.md` + auto-researched and user-confirmed codebase baseline.
+> Derived from `context/foundation/prd.md` (v1, next tranche) + auto-researched and user-confirmed codebase baseline.
 > Edit-in-place; archive when superseded.
 > Slices below are listed in dependency order. The "At a glance" table is the index.
 
 ## Milestone
 
-**M-1: First explained market analysis** — Status: done
+**M-2: Dashboard and watchlist** — Status: open
 
-- **Intent:** Deliver the first complete Argus workflow in which an authenticated beginner selects assets and receives a ranked analysis with visible data, contributing factors, grounded explanation, and the educational boundary.
+- **Intent:** Let a signed-in user keep a personal watchlist of assets and monitor it from a Dashboard tab that reuses the explained analysis from M-1, inside a tabbed workspace (Dashboard / Analysis / Watchlist).
 - **Source materials:** `context/foundation/prd.md` (v1)
-- **Done when:** every F-NN and S-NN below is `done`.
-- **Scope anchors:** US-01, FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, FR-015, FR-016.
+- **Done when:** every S-NN below is `done`.
+- **Scope anchors:** FR-017 (primary), reusing FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 for the Dashboard view.
 
 ## Vision recap
 
-Argus helps beginners or prospective first-time investors understand how selected assets may change without forcing them to assemble information from many pages, charts, and comparisons. The product combines selected market data, transparent scoring factors, and grounded AI summaries while remaining an educational analysis tool rather than personalized investment advice.
+Argus helps beginners or prospective first-time investors understand how selected assets may change without assembling information from many pages, charts, and comparisons. It combines selected market data, transparent scoring factors, and grounded AI summaries while remaining an educational analysis tool rather than personalized investment advice.
 
 ## North star
 
-**S-03: User can view a grounded, explained ranking for selected assets** — this is the smallest complete value flow that validates the primary success criterion while keeping the launch path focused on speed.
+**S-04: User can save assets to a personal watchlist** — the smallest end-to-end flow that turns a one-off analysis into something the user comes back to, and the per-user storage it introduces is what the Dashboard builds on.
 
-> Here, "north star" means the smallest end-to-end slice whose successful delivery proves the product works; it is placed as early as its prerequisites allow.
+> Here, "north star" means the smallest end-to-end slice whose successful delivery proves this milestone works; it is placed as early as its prerequisites allow.
 
 ## At a glance
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
-| F-01 | minimal-auth-foundation | (foundation) authenticate users with the minimum protected-route contract needed by the MVP | — | Access Control, FR-015, FR-016 | done |
-| F-02 | market-data-access-contract | (foundation) verify the minimum market-data access and evidence contract needed for analysis | — | FR-004, NFR | done |
-| S-01 | account-access-flow | create an account, log in, and understand Argus's educational purpose | F-01 | FR-001, FR-014, FR-015, FR-016 | done |
-| S-02 | select-and-start-analysis | select one or more assets and start an analysis | S-01, F-02 | FR-002, FR-003, FR-004 | done |
-| S-02A | authenticated-analysis-workspace | enter an analysis-first authenticated workspace after login | S-01, S-02 | FR-002, FR-003, FR-014, FR-016 | done |
-| S-03 | explained-market-ranking | view scores, ranking, market context, factors, compact historical trend visualization, and a grounded AI explanation for selected assets | S-02A | FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01 | done |
-
-## Streams
-
-Navigation aid — groups items that share a prerequisites chain. Canonical ordering still lives in the dependency graph below.
-
-| Stream | Theme | Chain | Note |
-| --- | --- | --- | --- |
-| A | Account and protected workflow | `F-01` → `S-01` → `S-02` → `S-02A` → `S-03` | The strict path to the first user-visible value supports the speed goal. |
-| B | Market evidence contract | `F-02` → `S-02` | Joins Stream A at `S-02`; resolving the data-source decision unlocks the north star's evidence path. |
+| S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | ready |
+| S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | proposed |
 
 ## Baseline
 
-What's already in place in the codebase as of `2026-09-30` (auto-researched + user-confirmed). Foundations below assume these are present and do not re-scaffold them.
+What's already in place in the codebase as of `2026-10-23` (auto-researched + user-confirmed). Slices below assume these are present and do not re-scaffold them.
 
-- **Frontend:** absent — no UI project or frontend dependencies are present.
-- **Backend / API:** partial — minimal ASP.NET Core startup in `Program.cs`; only the starter `/weatherforecast` route exists.
-- **Data:** absent — no database driver, ORM, schema, migration, or market-data integration is present.
-- **Auth:** partial — authentication is declared in `tech-stack.md`, but the code has no authentication, authorization, or identity provider integration.
-- **Deploy / infra:** present — `.github/workflows/deploy.yml` builds and deploys the current .NET application to Azure App Service.
-- **Observability:** absent — no dedicated logging, metrics, tracing, or error-monitoring integration is present.
+- **Frontend:** present — Razor Pages under `Pages/` with the token-backed analysis workspace (`Pages/Analysis/`, `wwwroot/css/site.css`).
+- **Backend / API:** present — `Program.cs` plus analysis services in `Analysis/` and market data in `MarketData/`.
+- **Data:** partial — market data is cached in memory only (`MarketData/InMemoryMarketDataCache.cs`); there is no persistent per-user storage.
+- **Market data provider:** partial — only development and unavailable providers exist; the production source is still undecided.
+- **Auth:** present — Entra ID OpenID Connect with cookie sessions in `Program.cs`.
+- **Deploy / infra:** present — `.github/workflows/deploy.yml` deploys to Azure App Service.
+- **Email / background jobs:** absent.
+- **Observability:** absent beyond default ASP.NET Core logging.
 
 ## Foundations
 
-### F-01: Minimum authenticated access
-
-- **Outcome:** (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.
-- **Change ID:** minimal-auth-foundation
-- **PRD refs:** Access Control, FR-015, FR-016
-- **Unlocks:** S-01; protected-workflow verification for US-01.
-- **Prerequisites:** —
-- **Parallel with:** F-02
-- **Blockers:** —
-- **Unknowns:** —
-- **Risk:** The MVP cannot begin its stated user story without authenticated access, but the foundation must stay minimal so it does not consume the analysis path's scope.
-- **Status:** done
-
-### F-02: Minimum market-data access contract
-
-- **Outcome:** (foundation) the analysis path has a verified source and evidence contract for current and historical data without committing the roadmap to a provider-specific implementation.
-- **Change ID:** market-data-access-contract
-- **PRD refs:** FR-004, NFR
-- **Unlocks:** S-02 and the data-verification path for S-03.
-- **Prerequisites:** —
-- **Parallel with:** F-01
-- **Blockers:** —
-- **Unknowns:** Which approved market-data source should be activated for production display? Owner: team. Block: no for contract/UI work; yes for real-provider activation.
-- **Risk:** Choosing a source implicitly without resolving reliability, coverage, and access constraints could make the first ranking unverifiable or exceed the launch scope.
-- **Status:** done
+None. Under the simplicity goal, per-user storage is introduced inside S-04, the first slice that needs it, rather than as a separate up-front layer.
 
 ## Slices
 
-### S-01: Account access and purpose
+### S-04: Save assets to a watchlist
 
-- **Outcome:** user can create an account, log in, and see a short explanation that Argus provides educational analysis rather than investment advice.
-- **Change ID:** account-access-flow
-- **PRD refs:** FR-001, FR-014, FR-015, FR-016
-- **Prerequisites:** F-01
-- **Parallel with:** F-02
-- **Blockers:** —
-- **Unknowns:**
-  - —
-- **Risk:** Delivering this before analysis keeps the protected entry path explicit while avoiding guest-flow rework later.
-- **Status:** done
-
-### S-02: Asset selection and analysis start
-
-- **Outcome:** user can select one or more supported assets and start a market analysis.
-- **Change ID:** select-and-start-analysis
-- **PRD refs:** FR-002, FR-003, FR-004
-- **Prerequisites:** S-01, F-02
+- **Outcome:** user can save assets to a personal watchlist, review and remove them, and start an analysis from the watchlist.
+- **Change ID:** save-assets-to-watchlist
+- **PRD refs:** FR-017, FR-002, FR-003
+- **Prerequisites:** M-1 analysis workflow (closed)
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Which approved market-data source should be activated for production display? Owner: team. Block: no for contract/UI work; yes for real-provider activation.
-- **Risk:** This slice exposes the external-data dependency early; postponing it would allow UI work that cannot produce trustworthy results.
-- **Status:** done
+  - Which persistent store holds per-user watchlists on Azure App Service? — Owner: team. Block: no (decided in `/10x-plan`).
+- **Risk:** First persistent per-user data in Argus; it is sequenced first so the storage choice is proven on the smallest flow before the Dashboard depends on it.
+- **Status:** ready
 
-### S-02A: Authenticated analysis workspace
+### S-05: Watchlist monitoring dashboard
 
-- **Outcome:** after successful login, the user enters a reusable authenticated
-  shell with Analysis as the primary destination and Account as the only
-  secondary destination.
-- **Change ID:** authenticated-analysis-workspace
-- **PRD refs:** FR-002, FR-003, FR-014, FR-016
-- **Prerequisites:** S-01, S-02
-- **Parallel with:** —
-- **Blockers:** —
-- **Unknowns:** —
-- **Risk:** adding future navigation too early could distract from the first
-  analysis flow or create empty product areas.
-- **Status:** done
-
-### S-03: Explained market ranking
-
-- **Outcome:** user can view each selected asset's score, ranking, current and historical context, compact trend visualization, contributing factors, grounded AI summary, and educational-not-advice boundary.
-- **Change ID:** explained-market-ranking
-- **PRD refs:** FR-005, FR-006, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013, FR-014, US-01
-- **Prerequisites:** S-02A
+- **Outcome:** user can land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, and move between Dashboard, Analysis, and Watchlist tabs.
+- **Change ID:** watchlist-monitoring-dashboard
+- **PRD refs:** FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014
+- **Prerequisites:** S-04
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - How should the product represent insufficient evidence when fewer than two reliable factors are available? Owner: team. Block: no.
-- **Risk:** This is the north star, so it is sequenced immediately after selection and data access; the main risk is that score explanations appear more certain than the available evidence.
-- **Status:** done
+  - Should the Dashboard also show a fixed market overview (indices, BTC, ETH) beyond the user's own watchlist, given the "no full-market analysis" non-goal? — Owner: user. Block: no.
+- **Risk:** Monitoring must stay descriptive and educational; "monitoring" must not drift into real-time alerts, which the PRD lists as a non-goal.
+- **Status:** proposed
 
 ## Backlog Handoff
 
 | Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
 | --- | --- | --- | --- | --- | --- |
-| F-01 | minimal-auth-foundation | Establish minimum authenticated access | [#3](https://github.com/KarolKucinski2001/Argus/issues/3) | yes | Run `/10x-plan minimal-auth-foundation`. |
-| F-02 | market-data-access-contract | Resolve and verify MVP market-data access | [#4](https://github.com/KarolKucinski2001/Argus/issues/4) | yes | Contract verified; keep real-provider activation behind the licensing gate. |
-| S-01 | account-access-flow | Deliver account access and Argus purpose screen | [#5](https://github.com/KarolKucinski2001/Argus/issues/5) | no | Requires F-01 to be completed. |
-| S-02 | select-and-start-analysis | Let users select assets and start analysis | [#6](https://github.com/KarolKucinski2001/Argus/issues/6) | yes | Requires S-01 and F-02; start with the protected contract and fake provider. |
-| S-02A | authenticated-analysis-workspace | Add the analysis-first authenticated workspace shell | — | yes | Redirect successful login to `/analysis`; keep only Analysis and Account in navigation. |
-| S-03 | explained-market-ranking | Show grounded scores, factors, and ranking | [#7](https://github.com/KarolKucinski2001/Argus/issues/7) | no | North star; requires S-02A. |
+| S-04 | save-assets-to-watchlist | Let users save assets to a personal watchlist | — | yes | Run `/10x-plan save-assets-to-watchlist`. |
+| S-05 | watchlist-monitoring-dashboard | Add a Dashboard tab that monitors the watchlist | — | no | Requires S-04. |
 
 ## Open Roadmap Questions
 
-1. **Which approved market-data source should be activated for production display?** — Owner: team. Block: real-provider activation only; contract/UI work can proceed. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
-2. **Should AI Copilot be included in the MVP?** — Owner: user. Block: roadmap-wide only if included; otherwise parked as a later capability. GitHub decision issue: [#2](https://github.com/KarolKucinski2001/Argus/issues/2).
+1. **Which approved market-data source should be activated for production display?** — Owner: team. Block: real-provider activation only; S-04 and S-05 can proceed on the development provider. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
+2. **Should AI Copilot be included?** — Owner: user. Block: roadmap-wide only if included. GitHub decision issue: [#2](https://github.com/KarolKucinski2001/Argus/issues/2).
+3. **Should Argus add public strategy profiles (institutional 13F funds, company insiders, congressional disclosures, known public portfolios), a simulated model-portfolio builder, and portfolio analysis?** — Owner: user. Block: M-3. Requires PRD v2 via `/10x-shape` → `/10x-prd`, rewording the "does not manage portfolios or allocate funds" non-goal into an explicit simulation-only, educational boundary, and choosing a public-filings data source.
+4. **Should search trends get their own Trends tab (PRD secondary success criterion) or only feed the score?** — Owner: user. Block: future FR-019 work.
 
 ## Parked
 
-- **AI Copilot conversational questions** — Parked because it is secondary in the PRD and has no retained functional requirement for the first milestone.
-- **Watchlist monitoring** — Parked because FR-017 is explicitly nice-to-have and is not part of the first value flow.
-- **Daily email report** — Parked because FR-018 is explicitly nice-to-have and would add a separate delivery workflow.
-- **Search-trend scoring** — Parked because FR-019 is explicitly nice-to-have and is not required to validate the primary workflow.
-- **News-sentiment scoring** — Parked because FR-020 is explicitly nice-to-have and adds another uncertain evidence source.
+- **Daily email report (FR-018)** — Parked: needs an email service, scheduling, and a production data source; revisit after M-2.
+- **Search-trend scoring (FR-019)** — Parked: needs a trends data source decision; see Open Roadmap Question 4.
+- **News-sentiment scoring (FR-020)** — Parked: needs a news source and sentiment method; adds an uncertain evidence source.
+- **Strategy profiles, model portfolio builder, portfolio analysis** — Parked pending PRD v2 (Open Roadmap Question 3).
+- **AI Copilot conversational questions** — Parked: no retained functional requirement (Open Roadmap Question 2).
 - **Personalized advice, automated trading, portfolio management, full-market analysis, real-time alerts, and guaranteed predictions** — Parked by the PRD Non-Goals.
 
 ## Milestone History
@@ -182,7 +117,6 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 - **M-1: First explained market analysis** (`first-explained-market-analysis`) — closed 2026-10-23. An authenticated beginner selects assets and gets a ranked, explained analysis with market data, factors, a compact trend view, a grounded AI summary, and the educational boundary.
 
 ## Done
-
 - **S-02: user can select one or more supported assets and start a market analysis.** — Archived 2026-10-16 → `context/archive/2026-10-14-select-and-start-analysis/`. Lesson: —.
 - **F-01: (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.** — Archived 2026-10-02 → `context/archive/2026-10-01-minimal-auth-foundation/`. Lesson: —.
 - **S-01: user can create an account, log in, and see a short explanation that Argus provides educational analysis rather than investment advice.** — Archived 2026-10-06 → `context/archive/2026-10-05-account-access-flow/`. Lesson: —.
