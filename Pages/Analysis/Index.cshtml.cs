@@ -13,7 +13,8 @@ namespace _bootstrap_scaffold.Pages.Analysis;
 public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredOptions,
     IMarketDataService marketDataService,
-    IAnalysisService analysisService) : PageModel
+    IAnalysisService analysisService,
+    ILogger<IndexModel> logger) : PageModel
 {
     private readonly MarketDataOptions options = configuredOptions.Value;
 
@@ -50,7 +51,23 @@ public sealed class IndexModel(
             .ToArray();
         if (SelectedAssetIds.Length > 0)
         {
-            await RunAnalysisAsync(cancellationToken);
+            try
+            {
+                await RunAnalysisAsync(cancellationToken);
+                // Autorun is not a user action, so no "Analiza rozpoczęta" status is announced.
+                HasStarted = false;
+                StartedMessage = null;
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                // The landing GET must always render the form, even if the automatic run fails.
+                logger.LogError(exception, "Automatic analysis on GET /analysis failed.");
+                AnalysisResults = null;
+                CurrentQuotes = new Dictionary<string, MarketQuote>(StringComparer.OrdinalIgnoreCase);
+                HasStarted = false;
+                StartedMessage = null;
+                ProviderMessage = MapProviderMessage(null);
+            }
         }
 
         return Page();

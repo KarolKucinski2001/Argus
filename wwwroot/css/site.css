@@ -72,10 +72,10 @@
     --workspace-title-size: 1.25rem;
     --workspace-header-gap: var(--space-2);
     --workspace-sidebar-max-height: calc(100vh - 2 * var(--space-4));
-    --accent-apple: #e5e7eb;
-    --accent-microsoft: #38bdf8;
-    --accent-nvidia: #76b900;
-    --accent-tesla: #e82127;
+    --color-asset-apple: #e5e7eb;
+    --color-asset-microsoft: #38bdf8;
+    --color-asset-nvidia: #76b900;
+    --color-asset-tesla: #e82127;
     --insight-badge-surface: var(--color-surface-raised);
     --insight-badge-text: var(--color-muted);
     --insight-badge-radius: var(--radius-sm);
@@ -960,19 +960,19 @@ button:focus-visible {
 }
 
 .asset-accent--apple {
-    --asset-accent: var(--accent-apple);
+    --asset-accent: var(--color-asset-apple);
 }
 
 .asset-accent--microsoft {
-    --asset-accent: var(--accent-microsoft);
+    --asset-accent: var(--color-asset-microsoft);
 }
 
 .asset-accent--nvidia {
-    --asset-accent: var(--accent-nvidia);
+    --asset-accent: var(--color-asset-nvidia);
 }
 
 .asset-accent--tesla {
-    --asset-accent: var(--accent-tesla);
+    --asset-accent: var(--color-asset-tesla);
 }
 
 .asset-glyph {
@@ -1115,7 +1115,7 @@ button:focus-visible {
     font-size: var(--insight-why-text-size);
 }
 
-.analysis-workspace__subline {
+.analysis-summary-strip__subline {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);

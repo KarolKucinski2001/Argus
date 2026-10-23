@@ -43,15 +43,6 @@ public sealed class MarketDataService(
         }
 
         var validRequest = NormalizeRequest(request!, options);
-        if (!requestBudget.TryAcquire(options.ApplicationRequestBudget, TimeSpan.FromMinutes(1)))
-        {
-            return MarketDataServiceResult.Failure(new MarketDataServiceError(
-                StatusCodes.Status429TooManyRequests,
-                "Market data request budget exceeded",
-                "The application request budget has been exhausted for the current window.",
-                MarketDataErrorCategory.QuotaExceeded,
-                true));
-        }
 
         var results = new List<MarketDataResult>();
         var uncachedAssets = new List<AssetReference>();
@@ -83,6 +74,17 @@ public sealed class MarketDataService(
 
         if (uncachedAssets.Count > 0)
         {
+            // Budget only counts provider fetches, so cached page loads stay free.
+            if (!requestBudget.TryAcquire(options.ApplicationRequestBudget, TimeSpan.FromMinutes(1)))
+            {
+                return MarketDataServiceResult.Failure(new MarketDataServiceError(
+                    StatusCodes.Status429TooManyRequests,
+                    "Market data request budget exceeded",
+                    "The application request budget has been exhausted for the current window.",
+                    MarketDataErrorCategory.QuotaExceeded,
+                    true));
+            }
+
             var providerResults = await GetProviderResultsAsync(
                 validRequest,
                 uncachedAssets,

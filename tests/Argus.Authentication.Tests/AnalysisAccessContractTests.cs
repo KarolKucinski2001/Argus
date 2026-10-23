@@ -253,6 +253,8 @@ public sealed class AnalysisAccessContractTests
         }
 
         Assert.Contains("analysis-summary-strip", decoded);
+        Assert.Matches("<span>4 aktywa</span>\\s*<span aria-hidden=\"true\">•</span>\\s*<span>Dane z \\d{2}\\.\\d{2}\\.\\d{4}</span>", decoded);
+        Assert.DoesNotContain("Analiza rozpoczęta", decoded);
         Assert.Equal(4, Regex.Matches(decoded, "<li class=\"analysis-result-card analysis-result-card--success").Count);
         Assert.Equal(4, Regex.Matches(decoded, "class=\"asset-option__score\"").Count);
     }
@@ -284,6 +286,35 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(["AAPL"], provider.LastRequest!.Assets.Select(asset => asset.Id));
         Assert.Matches("<input[^>]*value=\"AAPL\"[^>]*checked=\"checked\"", html);
         Assert.DoesNotMatch("<input[^>]*value=\"NVDA\"[^>]*checked=\"checked\"", html);
+    }
+
+    [Fact]
+    public async Task Autorun_failure_on_get_still_renders_the_form_with_a_safe_message()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateScoredResult("AAPL", MarketAssetClass.Equity, 120m, 100m, 96m, 80m));
+        await using var factory = new AnalysisProviderFactory(
+            provider,
+            options =>
+            {
+                options.AllowedAssets.Clear();
+                options.AllowedAssets["AAPL"] = MarketAssetClass.Equity;
+            },
+            new ThrowingSummaryGenerator());
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/analysis");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Generuj ranking", html);
+        Assert.Contains("Nie udało się pobrać danych do analizy. Spróbuj ponownie później.", html);
+        Assert.Matches("<input[^>]*value=\"AAPL\"[^>]*checked=\"checked\"", html);
+        Assert.DoesNotContain("unexpected summary failure", html);
     }
 
     [Fact]
@@ -359,7 +390,7 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("<h2 id=\"analysis-results-title\" class=\"visually-hidden\">Ranking analizy</h2>", html);
-        Assert.Matches("<p class=\"analysis-workspace__subline\">\\s*<span>2 aktywa</span>", html);
+        Assert.Matches("<p class=\"analysis-summary-strip__subline\">\\s*<span>2 aktywa</span>", html);
         var rankingHtml = html[html.IndexOf("Ranking analizy", StringComparison.Ordinal)..];
         Assert.True(rankingHtml.IndexOf("MSFT", StringComparison.Ordinal) < rankingHtml.IndexOf("AAPL", StringComparison.Ordinal));
         Assert.Contains("Miejsce 1", html);
@@ -1278,6 +1309,14 @@ internal sealed class AnalysisProviderFactory(
             services.PostConfigure<MarketDataOptions>(configureOptions);
         });
     }
+}
+
+internal sealed class ThrowingSummaryGenerator : IAnalysisSummaryGenerator
+{
+    public Task<AnalysisSummaryResult> GenerateAsync(
+        AnalysisSummaryRequest request,
+        CancellationToken cancellationToken) =>
+        throw new InvalidOperationException("unexpected summary failure");
 }
 
 internal sealed class FixedSummaryGenerator(string text) : IAnalysisSummaryGenerator

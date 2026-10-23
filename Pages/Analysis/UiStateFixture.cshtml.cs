@@ -21,7 +21,9 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
     public IReadOnlyList<InsightCardModel> RankedCards =>
         RankedResults.Select((analysis, index) => Card(analysis, index, RankedSummary.AverageScore)).ToArray();
 
-    public AnalysisSummaryStripView RankedSummary => AnalysisSummaryStripPresenter.Build(RankedResults);
+    private AnalysisSummaryStripView? rankedSummary;
+
+    public AnalysisSummaryStripView RankedSummary => rankedSummary ??= AnalysisSummaryStripPresenter.Build(RankedResults);
 
     public IReadOnlyList<AssetOptionModel> RankedOptions =>
         RankedResults
