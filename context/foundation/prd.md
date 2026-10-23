@@ -59,7 +59,7 @@ Osoba początkująca lub rozważająca pierwszą inwestycję. Sięga po produkt,
 - AC-04: The result contains at least two factors explaining the assigned score.
 - AC-05: The result contains an AI-generated summary for the ranked assets, grounded in the shown data and factors.
 - AC-06: The result page displays current price and 24-hour, 7-day, and 30-day performance metrics.
-- AC-07: The result page displays a historical chart of the selected asset.
+- AC-07: The result page displays a compact historical trend visualization for the selected asset.
 
 ## Functional Requirements
 
@@ -79,8 +79,8 @@ Osoba początkująca lub rozważająca pierwszą inwestycję. Sięga po produkt,
   > Socrates: Counter-argument considered: "Details may overwhelm a beginner." Resolution: kept as written.
 - FR-009: User can view current price and 24-hour, 7-day, and 30-day changes for an asset. Priority: must-have
   > Socrates: Counter-argument considered: "Too many periods can increase cognitive load for a beginner." Resolution: kept as written.
-- FR-010: User can view a historical chart for a selected asset. Priority: must-have
-  > Socrates: Counter-argument considered: "A chart recreates TradingView and may not add unique value." Resolution: kept as a minimal context for the explanation.
+- FR-010: User can view a compact historical trend visualization for a selected asset. Priority: must-have
+  > Socrates: Counter-argument considered: "A chart recreates TradingView and may not add unique value." Resolution: kept as a minimal context for the explanation, presented as a compact sparkline rather than a full chart.
 - FR-011: Argus can generate an understandable explanation of why an asset was flagged as interesting. Priority: must-have
   > Socrates: Counter-argument considered: "AI explanations may sound convincing without reflecting the data." Resolution: kept as written.
 - FR-012: Argus can present at least two concrete factors contributing to an asset's score when sufficient data is available; otherwise it can state that the evidence is insufficient. Priority: must-have
