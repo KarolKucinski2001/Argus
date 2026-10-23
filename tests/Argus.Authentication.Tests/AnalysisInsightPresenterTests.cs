@@ -7,10 +7,10 @@ namespace Argus.Authentication.Tests;
 public sealed class AnalysisInsightPresenterTests
 {
     [Theory]
-    [InlineData("AAPL", "Apple", "A", AssetAccent.Equity)]
-    [InlineData("MSFT", "Microsoft", "M", AssetAccent.Equity)]
-    [InlineData("NVDA", "NVIDIA", "N", AssetAccent.Equity)]
-    [InlineData("TSLA", "Tesla", "T", AssetAccent.Equity)]
+    [InlineData("AAPL", "Apple", "A", AssetAccent.Apple)]
+    [InlineData("MSFT", "Microsoft", "M", AssetAccent.Microsoft)]
+    [InlineData("NVDA", "NVIDIA", "N", AssetAccent.Nvidia)]
+    [InlineData("TSLA", "Tesla", "T", AssetAccent.Tesla)]
     [InlineData("BTC-USD", "Bitcoin", "₿", AssetAccent.Bitcoin)]
     [InlineData("eth-usd", "Ethereum", "Ξ", AssetAccent.Ethereum)]
     public void Known_tickers_map_to_short_name_monogram_and_accent(
@@ -51,6 +51,10 @@ public sealed class AnalysisInsightPresenterTests
 
     [Theory]
     [InlineData(AssetAccent.Equity, "asset-accent--equity")]
+    [InlineData(AssetAccent.Apple, "asset-accent--apple")]
+    [InlineData(AssetAccent.Microsoft, "asset-accent--microsoft")]
+    [InlineData(AssetAccent.Nvidia, "asset-accent--nvidia")]
+    [InlineData(AssetAccent.Tesla, "asset-accent--tesla")]
     [InlineData(AssetAccent.Bitcoin, "asset-accent--bitcoin")]
     [InlineData(AssetAccent.Ethereum, "asset-accent--ethereum")]
     [InlineData(AssetAccent.Neutral, "asset-accent--neutral")]
@@ -271,6 +275,145 @@ public sealed class AnalysisInsightPresenterTests
         var view = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 5m));
 
         Assert.Null(view.Sparkline);
+    }
+
+    [Theory]
+    [InlineData(2.0, 0.0, -2.0, TrendDirection.Mixed)]
+    [InlineData(2.0, 3.0, null, TrendDirection.Rising)]
+    [InlineData(2.0, 3.0, 0.5, TrendDirection.Rising)]
+    [InlineData(2.0, 0.5, -2.0, TrendDirection.Mixed)]
+    [InlineData(-2.0, -3.0, 0.5, TrendDirection.Falling)]
+    public void Trend_label_follows_the_majority_of_available_factors(
+        double change24Hours, double change7Days, double? change30Days, TrendDirection expected)
+    {
+        var view = AnalysisInsightPresenter.Present(
+            Analysis("AAPL", (decimal)change24Hours, (decimal)change7Days, (decimal?)change30Days, 10m, 11m));
+
+        Assert.Equal(expected, view.Trend);
+        Assert.Equal(AnalysisInsightPresenter.TrendLabel(expected), view.TrendLabel);
+    }
+
+    [Fact]
+    public void Two_way_split_is_mixed()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", 2m, null, -2m, 10m, 11m));
+
+        Assert.Equal(TrendDirection.Mixed, view.Trend);
+        Assert.Equal("Trend mieszany", view.TrendLabel);
+    }
+
+    [Fact]
+    public void No_available_factors_have_no_trend_label()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, null));
+
+        Assert.Null(view.Trend);
+        Assert.Null(view.TrendLabel);
+    }
+
+    [Theory]
+    [InlineData(TrendDirection.Rising, "Trend wzrostowy")]
+    [InlineData(TrendDirection.Mixed, "Trend mieszany")]
+    [InlineData(TrendDirection.Falling, "Trend spadkowy")]
+    public void Trend_has_a_polish_label(TrendDirection trend, string expected) =>
+        Assert.Equal(expected, AnalysisInsightPresenter.TrendLabel(trend));
+
+    [Theory]
+    [InlineData(MarketAssetClass.Equity, "Akcje")]
+    [InlineData(MarketAssetClass.Crypto, "Krypto")]
+    public void Asset_class_has_a_polish_badge(MarketAssetClass assetClass, string expected)
+    {
+        var analysis = Analysis("BTC-USD", 1m, 1m, 1m, 10m, 11m);
+        var view = AnalysisInsightPresenter.Present(
+            analysis with { Asset = analysis.Asset with { AssetClass = assetClass } });
+
+        Assert.Equal(expected, view.AssetClassLabel);
+    }
+
+    [Fact]
+    public void Ranked_asset_explains_its_place_against_the_average_without_repeating_the_takeaway_factor()
+    {
+        var analysis = Analysis("AAPL", -1.1m, 3m, 8.2m, 10m, 20m, 15m);
+        var factors = analysis.Factors
+            .Select(factor => factor.Key == "trend-30d" ? factor with { Contribution = 50m } : factor)
+            .ToArray();
+
+        var view = AnalysisInsightPresenter.Present(analysis with { Factors = factors }, 1, 52.5m);
+
+        Assert.Equal("Dlaczego miejsce #1?", view.WhyHeading);
+        Assert.Equal(
+            new[]
+            {
+                "Wynik 60 — o 7.5 pkt powyżej średniej analizy",
+                "Momentum 24h spada (-1.1%)",
+                "Momentum 7d rośnie (+3%)"
+            },
+            view.WhyBullets);
+        Assert.DoesNotContain(view.WhyBullets, bullet => bullet.StartsWith("Trend 30d", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Why_bullets_follow_contribution_order_and_are_capped_at_three()
+    {
+        var analysis = Analysis("AAPL", 0.5m, 2m, 9m, 10m, 11m);
+        var factors = analysis.Factors
+            .Select(factor => factor.Key == "momentum-24h" ? factor with { Contribution = 30m } : factor)
+            .ToArray();
+
+        var view = AnalysisInsightPresenter.Present(analysis with { Factors = factors }, 2, 70m);
+
+        Assert.Equal(3, view.WhyBullets.Count);
+        Assert.Equal("Wynik 60 — o 10 pkt poniżej średniej analizy", view.WhyBullets[0]);
+        Assert.Equal("Momentum 24h bez wyraźnej zmiany (+0.5%)", view.WhyBullets[1]);
+        Assert.Equal("Momentum 7d rośnie (+2%)", view.WhyBullets[2]);
+    }
+
+    [Fact]
+    public void Score_equal_to_the_average_says_so()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, 5m, 10m, 11m), 1, 60m);
+
+        Assert.Equal(new[] { "Wynik 60 — równy średniej analizy" }, view.WhyBullets);
+    }
+
+    [Fact]
+    public void Unranked_asset_without_factors_gets_the_fallback_heading_and_bullet()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, null) with { Score = null }, 1, 50m);
+
+        Assert.Equal("Co wiemy o tym aktywie", view.WhyHeading);
+        Assert.Equal(new[] { "Za mało danych rynkowych, aby uzasadnić pozycję." }, view.WhyBullets);
+    }
+
+    [Fact]
+    public void Unranked_asset_whose_only_factor_is_the_takeaway_still_gets_the_fallback_bullet()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, null, -2.4m, 10m, 11m) with { Score = null });
+
+        Assert.Equal("Co wiemy o tym aktywie", view.WhyHeading);
+        Assert.Equal(new[] { "Za mało danych rynkowych, aby uzasadnić pozycję." }, view.WhyBullets);
+    }
+
+    [Fact]
+    public void Missing_rank_uses_the_unranked_heading()
+    {
+        var view = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 10m, 11m));
+
+        Assert.Equal("Co wiemy o tym aktywie", view.WhyHeading);
+    }
+
+    [Theory]
+    [InlineData(-9.0, 3.0, 8.0, 1)]
+    [InlineData(-9.0, -3.0, -8.0, 4)]
+    [InlineData(null, null, null, 2)]
+    public void Generated_copy_avoids_advice_language(double? change24Hours, double? change7Days, double? change30Days, int rank)
+    {
+        string[] forbidden = ["chwilowo niedostępne", "prognoz", "buy", "guaranteed", "best investment", "top opportunity", "kup", "sprzedaj", "rekomend"];
+        var view = AnalysisInsightPresenter.Present(
+            Analysis("AAPL", (decimal?)change24Hours, (decimal?)change7Days, (decimal?)change30Days, 10m, 11m), rank, 40m);
+        var copy = string.Join(" ", view.WhyBullets.Append(view.WhyHeading).Append(view.Takeaway).Append(view.TrendLabel ?? ""));
+
+        Assert.All(forbidden, word => Assert.DoesNotContain(word, copy, StringComparison.OrdinalIgnoreCase));
     }
 
     private static AssetAnalysis Analysis(

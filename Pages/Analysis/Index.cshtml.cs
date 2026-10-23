@@ -13,7 +13,8 @@ namespace _bootstrap_scaffold.Pages.Analysis;
 public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredOptions,
     IMarketDataService marketDataService,
-    IAnalysisService analysisService) : PageModel
+    IAnalysisService analysisService,
+    ILogger<IndexModel> logger) : PageModel
 {
     private readonly MarketDataOptions options = configuredOptions.Value;
 
@@ -32,7 +33,9 @@ public sealed class IndexModel(
     public IReadOnlyDictionary<string, MarketQuote> CurrentQuotes { get; private set; } =
         new Dictionary<string, MarketQuote>(StringComparer.OrdinalIgnoreCase);
 
-    public IActionResult OnGet()
+    private static readonly string[] DefaultAssetIds = ["AAPL", "MSFT", "BTC-USD", "ETH-USD"];
+
+    public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
         if (!EnsureAuthenticated())
         {
@@ -42,6 +45,31 @@ public sealed class IndexModel(
         }
 
         LoadAssets();
+        SelectedAssetIds = options.AllowedAssets.Keys
+            .Where(id => DefaultAssetIds.Contains(id, StringComparer.OrdinalIgnoreCase))
+            .Take(options.MaximumSelectedAssets)
+            .ToArray();
+        if (SelectedAssetIds.Length > 0)
+        {
+            try
+            {
+                await RunAnalysisAsync(cancellationToken);
+                // Autorun is not a user action, so no "Analiza rozpoczęta" status is announced.
+                HasStarted = false;
+                StartedMessage = null;
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                // The landing GET must always render the form, even if the automatic run fails.
+                logger.LogError(exception, "Automatic analysis on GET /analysis failed.");
+                AnalysisResults = null;
+                CurrentQuotes = new Dictionary<string, MarketQuote>(StringComparer.OrdinalIgnoreCase);
+                HasStarted = false;
+                StartedMessage = null;
+                ProviderMessage = MapProviderMessage(null);
+            }
+        }
+
         return Page();
     }
 
@@ -63,6 +91,12 @@ public sealed class IndexModel(
             return Page();
         }
 
+        await RunAnalysisAsync(cancellationToken);
+        return Page();
+    }
+
+    private async Task RunAnalysisAsync(CancellationToken cancellationToken)
+    {
         var selectedAssets = SelectedAssetIds
             .Select(id => options.AllowedAssets.First(entry =>
                 string.Equals(entry.Key, id, StringComparison.OrdinalIgnoreCase)))
@@ -80,7 +114,7 @@ public sealed class IndexModel(
         if (!result.Succeeded)
         {
             ProviderMessage = MapProviderMessage(result.Error?.Category);
-            return Page();
+            return;
         }
 
         CurrentQuotes = result.Response!.Results
@@ -97,7 +131,6 @@ public sealed class IndexModel(
                 item.Source?.Attribution?.Contains("illustrative", StringComparison.OrdinalIgnoreCase) == true)
                 ? "Analiza została rozpoczęta na podstawie ilustracyjnych danych."
             : "Analiza została rozpoczęta.";
-        return Page();
     }
 
     private void LoadAssets() =>

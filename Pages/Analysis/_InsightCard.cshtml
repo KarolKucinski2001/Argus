@@ -4,7 +4,7 @@
 @model InsightCardModel
 @{
     var result = Model.Result;
-    var insight = AnalysisInsightPresenter.Present(result, Model.Rank);
+    var insight = AnalysisInsightPresenter.Present(result, Model.Rank, Model.AverageScore);
     var toneClass = $"insight-card--{insight.Tone.ToString().ToLowerInvariant()}";
     var accentClass = AssetIdentityCatalog.AccentClass(insight.Identity.Accent);
     var cardStateClass = result.Error is not null
@@ -29,7 +29,14 @@
             <span class="insight-card__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="@result.Asset.Id" /></span>
             <div class="insight-card__identity">
                 <h3 id="analysis-result-@result.Asset.Id">@insight.Identity.Name</h3>
-                <p class="insight-card__ticker">@result.Asset.Id</p>
+                <p class="insight-card__meta">
+                    <span class="insight-card__ticker">@result.Asset.Id</span>
+                    <span class="insight-card__badge">@insight.AssetClassLabel</span>
+                </p>
+                <p class="insight-card__price analysis-result-card__price">
+                    <span class="visually-hidden">Cena aktualna:</span>
+                    @(Model.Quote is { } quote ? $"{AnalysisFormatting.Decimal(quote.Value)} {quote.Currency}" : "Cena niedostępna")
+                </p>
             </div>
             @if (result.Score is { } score && insight.Band is { } band)
             {
@@ -76,6 +83,10 @@
             <div class="insight-card__headline">
                 <p class="insight-card__change@(insight.SevenDayChange.HasValue ? null : " insight-card__change--muted")">@(insight.SevenDayChange.HasValue ? AnalysisFormatting.NullablePercent(insight.SevenDayChange) : "n/d")</p>
                 <p class="insight-card__change-label">7 dni</p>
+                @if (insight.Trend is { } trend)
+                {
+                    <p class="insight-card__trend insight-card__trend--@trend.ToString().ToLowerInvariant()">@insight.TrendLabel</p>
+                }
             </div>
 
             @if (insight.Sparkline is { } sparkline)
@@ -123,106 +134,57 @@
                 @insight.Takeaway
             </p>
 
-            <details class="insight-card__details">
-                <summary>Szczegóły i metodologia</summary>
+            @if (result.Warnings.Count > 0)
+            {
+                <ul class="insight-card__warnings analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
+                    @foreach (var warning in result.Warnings.Select(warning => AnalysisFormatting.Warning(warning.Category)).Distinct())
+                    {
+                        <li>@warning</li>
+                    }
+                </ul>
+            }
 
-                <dl class="analysis-result-card__metrics">
-                    <div class="analysis-result-card__metric">
-                        <dt>Cena aktualna</dt>
-                        <dd>@(Model.Quote is { } quote ? $"{AnalysisFormatting.Decimal(quote.Value)} {quote.Currency}" : "niedostępna")</dd>
-                    </div>
-                    <div class="analysis-result-card__metric">
-                        <dt>24 godziny</dt>
-                        <dd>@AnalysisFormatting.Metric(result.Performance.Change24Hours)</dd>
-                    </div>
-                    <div class="analysis-result-card__metric">
-                        <dt>7 dni</dt>
-                        <dd>@AnalysisFormatting.Metric(result.Performance.Change7Days)</dd>
-                    </div>
-                    <div class="analysis-result-card__metric">
-                        <dt>30 dni</dt>
-                        <dd>@AnalysisFormatting.Metric(result.Performance.Change30Days)</dd>
-                    </div>
-                    <div class="analysis-result-card__metric">
-                        <dt>Jakość danych</dt>
-                        <dd>@AnalysisFormatting.Quality(result.Quality)</dd>
-                    </div>
-                    <div class="analysis-result-card__metric">
-                        <dt>Świeżość danych</dt>
-                        <dd>@AnalysisFormatting.Freshness(result.Freshness.IsStale)</dd>
-                    </div>
-                </dl>
-
-                @if (result.Warnings.Count > 0)
+            <section class="analysis-result-card__summary"
+                     aria-label="Podsumowanie analizy dla @result.Asset.Id">
+                @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
                 {
-                    <section class="analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
-                        <h4>Ostrzeżenia</h4>
-                        <ul>
-                            @foreach (var warning in result.Warnings.Select(warning => AnalysisFormatting.Warning(warning.Category)).Distinct())
-                            {
-                                <li>@warning</li>
-                            }
-                        </ul>
-                    </section>
+                    <h4 class="visually-hidden">Podsumowanie</h4>
+                    <p>@generatedSummary.Text</p>
                 }
-
-                <section class="analysis-result-card__factors" aria-label="Czynniki dla @result.Asset.Id">
-                    <h4>Czynniki</h4>
-                    <ul class="analysis-result-card__factor-list">
-                        @foreach (var factor in result.Factors)
+                else if (result.SummaryResult is { Status: var summaryStatus })
+                {
+                    <p class="analysis-result-card__summary--status" role="status">
+                        <strong>Podsumowanie:</strong>
+                        @Model.SummaryStatusMessage
+                        @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
                         {
-                            <li class="analysis-result-card__factor">
-                                <strong>@AnalysisInsightPresenter.FactorLabel(factor.Key)</strong>
-                                @if (factor.IsAvailable)
-                                {
-                                    <span>@AnalysisFormatting.NullablePercent(factor.Percentage)</span>
-                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
-                                    <span class="analysis-result-card__factor-contribution">wkład @AnalysisFormatting.NullableDecimal(factor.Contribution)</span>
-                                }
-                                else
-                                {
-                                    <span>niedostępny</span>
-                                    <span class="analysis-result-card__factor-weight">waga @AnalysisFormatting.Weight(factor.Weight)</span>
-                                }
-                            </li>
+                            <span class="visually-hidden">Niewystarczające dane</span>
                         }
-                    </ul>
-                </section>
+                    </p>
+                }
+                else if (result.Summary is not null)
+                {
+                    <h4 class="visually-hidden">Podsumowanie</h4>
+                    <p>@result.Summary</p>
+                }
+                else
+                {
+                    <p class="analysis-result-card__summary--status" role="status">
+                        <strong>Podsumowanie:</strong>
+                        @IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
+                    </p>
+                }
+            </section>
 
-                <partial name="_PriceHistoryChart" model="result" />
-
-                <section class="analysis-result-card__summary"
-                         aria-label="Podsumowanie analizy dla @result.Asset.Id">
-                    @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
+            <section class="insight-card__why" aria-labelledby="analysis-why-@result.Asset.Id">
+                <h4 id="analysis-why-@result.Asset.Id" class="insight-card__why-heading">@insight.WhyHeading</h4>
+                <ul class="insight-card__why-list">
+                    @foreach (var bullet in insight.WhyBullets)
                     {
-                        <h4>Podsumowanie</h4>
-                        <p>@generatedSummary.Text</p>
+                        <li>@bullet</li>
                     }
-                    else if (result.SummaryResult is { Status: var summaryStatus })
-                    {
-                        <p class="analysis-result-card__summary--status" role="status">
-                            <strong>Podsumowanie:</strong>
-                            @Model.SummaryStatusMessage
-                            @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
-                            {
-                                <span class="visually-hidden">Niewystarczające dane</span>
-                            }
-                        </p>
-                    }
-                    else if (result.Summary is not null)
-                    {
-                        <h4>Podsumowanie</h4>
-                        <p>@result.Summary</p>
-                    }
-                    else
-                    {
-                        <p class="analysis-result-card__summary--status" role="status">
-                            <strong>Podsumowanie:</strong>
-                            @IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
-                        </p>
-                    }
-                </section>
-            </details>
+                </ul>
+            </section>
         }
     </article>
 </li>

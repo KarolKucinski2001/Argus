@@ -359,6 +359,22 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
+    public async Task Cached_requests_do_not_consume_application_request_budget()
+    {
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(CreateResult("AAPL"));
+        await using var factory = new MarketDataTestFactory(
+            provider,
+            configureOptions: options => options.ApplicationRequestBudget = 1);
+
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await PostAsync(factory, CreateRequest("AAPL"))).StatusCode);
+
+        Assert.Equal(1, provider.CallCount);
+    }
+
+    [Fact]
     public async Task Provider_not_approved_returns_unavailable_problem_without_calling_provider()
     {
         var provider = new FakeMarketDataProvider();

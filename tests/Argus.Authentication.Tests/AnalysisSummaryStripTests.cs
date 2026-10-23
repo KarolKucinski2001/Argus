@@ -91,16 +91,83 @@ public sealed class AnalysisSummaryStripTests
         Assert.Equal(70.7m, view.AverageScore);
     }
 
-    private static AssetAnalysis Result(string id, decimal? score, decimal? change7Days, bool failed = false)
+    [Theory]
+    [InlineData(0, "0 aktywów")]
+    [InlineData(1, "1 aktywo")]
+    [InlineData(2, "2 aktywa")]
+    [InlineData(4, "4 aktywa")]
+    [InlineData(5, "5 aktywów")]
+    [InlineData(12, "12 aktywów")]
+    [InlineData(14, "14 aktywów")]
+    [InlineData(22, "22 aktywa")]
+    [InlineData(25, "25 aktywów")]
+    public void Asset_count_label_uses_polish_plurals(int count, string expected) =>
+        Assert.Equal(expected, AnalysisSummaryStripPresenter.AssetCountLabel(count));
+
+    [Fact]
+    public void Strongest_trend_is_the_highest_thirty_day_rise_above_one_percent()
     {
-        var now = new DateTimeOffset(2026, 10, 21, 0, 0, 0, TimeSpan.Zero);
+        var view = AnalysisSummaryStripPresenter.Build(
+        [
+            Result("AAPL", 60m, 1m, change30Days: 4.2m),
+            Result("BTC-USD", 50m, 1m, change30Days: 9.5m),
+            Result("ETH-USD", null, null, change30Days: 20m, failed: true)
+        ]);
+
+        Assert.Equal(new SummaryPerformer("Bitcoin", 9.5m), view.StrongestTrend);
+    }
+
+    [Fact]
+    public void Thirty_day_moves_at_or_below_one_percent_have_no_strongest_trend()
+    {
+        var view = AnalysisSummaryStripPresenter.Build(
+        [
+            Result("AAPL", 60m, 1m, change30Days: 1m),
+            Result("MSFT", 50m, 1m, change30Days: -6m)
+        ]);
+
+        Assert.Null(view.StrongestTrend);
+    }
+
+    [Fact]
+    public void Data_date_is_the_newest_observation_among_healthy_results()
+    {
+        var view = AnalysisSummaryStripPresenter.Build(
+        [
+            Result("AAPL", 60m, 1m, observedAt: new DateTimeOffset(2026, 10, 20, 23, 30, 0, TimeSpan.FromHours(-4))),
+            Result("MSFT", 50m, 1m, observedAt: new DateTimeOffset(2026, 10, 19, 12, 0, 0, TimeSpan.Zero)),
+            Result("TSLA", null, null, failed: true, observedAt: new DateTimeOffset(2026, 10, 25, 0, 0, 0, TimeSpan.Zero))
+        ]);
+
+        Assert.Equal(new DateOnly(2026, 10, 21), view.DataAsOf);
+    }
+
+    [Fact]
+    public void Only_failed_results_have_no_data_date()
+    {
+        var view = AnalysisSummaryStripPresenter.Build([Result("AAPL", null, null, failed: true)]);
+
+        Assert.Null(view.DataAsOf);
+        Assert.Null(view.StrongestTrend);
+    }
+
+    private static AssetAnalysis Result(
+        string id,
+        decimal? score,
+        decimal? change7Days,
+        bool failed = false,
+        decimal? change30Days = null,
+        DateTimeOffset? observedAt = null)
+    {
+        var now = observedAt ?? new DateTimeOffset(2026, 10, 21, 0, 0, 0, TimeSpan.Zero);
         var sevenDays = new PerformanceMetric("7d", change7Days, change7Days.HasValue);
         var missing = new PerformanceMetric("24h", null, false);
+        var thirtyDays = new PerformanceMetric("30d", change30Days, change30Days.HasValue);
 
         return new AssetAnalysis(
             new AssetReference(id, id, MarketAssetClass.Equity),
             score,
-            new AssetPerformance(missing, sevenDays, missing with { Period = "30d" }, []),
+            new AssetPerformance(missing, sevenDays, thirtyDays, []),
             [],
             [],
             null,
