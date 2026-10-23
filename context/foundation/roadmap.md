@@ -3,13 +3,13 @@ project: "Argus"
 version: 1
 status: draft
 created: 2026-09-30
-updated: 2026-10-20
+updated: 2026-10-23
 prd_version: 1
 main_goal: speed
 top_blocker: time
 milestone_id: first-explained-market-analysis
 milestone_seq: 1
-milestone_status: open
+milestone_status: done
 ---
 
 # Roadmap: Argus
@@ -20,7 +20,7 @@ milestone_status: open
 
 ## Milestone
 
-**M-1: First explained market analysis** — Status: open
+**M-1: First explained market analysis** — Status: done
 
 - **Intent:** Deliver the first complete Argus workflow in which an authenticated beginner selects assets and receives a ranked analysis with visible data, contributing factors, grounded explanation, and the educational boundary.
 - **Source materials:** `context/foundation/prd.md` (v1)
@@ -179,7 +179,7 @@ What's already in place in the codebase as of `2026-09-30` (auto-researched + us
 
 ## Milestone History
 
-(Empty on the first milestone.)
+- **M-1: First explained market analysis** (`first-explained-market-analysis`) — closed 2026-10-23. An authenticated beginner selects assets and gets a ranked, explained analysis with market data, factors, a compact trend view, a grounded AI summary, and the educational boundary.
 
 ## Done
 
