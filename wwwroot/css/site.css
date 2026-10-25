@@ -107,7 +107,9 @@
     --watchlist-table-min-width: 52rem;
     --watchlist-action-height: 2.25rem;
     --watchlist-sparkline-width: 6rem;
-    --shell-sidebar-width: 14rem;
+    --watchlist-skeleton-height: 1rem;
+    --watchlist-skeleton-opacity: 0.5;
+    --watchlist-skeleton-pulse: 1.5s;    --shell-sidebar-width: 14rem;
     --shell-gap: var(--space-4);
     --shell-padding: var(--space-4);
     --topbar-height: 3.5rem;
@@ -853,6 +855,35 @@ button:focus-visible {
 .watchlist-table__remove {
     min-height: var(--watchlist-action-height);
     padding: var(--space-1) var(--space-2);
+}
+
+.watchlist-table tbody tr:hover,
+.watchlist-table__row--hover {
+    background: var(--color-nav-hover-surface);
+}
+
+.watchlist-table__row--unavailable:hover {
+    background: var(--color-feedback-surface);
+}
+
+.watchlist-table__remove--focus-visible {
+    outline: var(--shell-focus-width) solid var(--color-focus);
+    outline-offset: var(--shell-focus-offset);
+}
+
+.watchlist-skeleton {
+    display: block;
+    block-size: var(--watchlist-skeleton-height);
+    border-radius: var(--radius-md);
+    background: var(--color-secondary-surface);
+    opacity: var(--watchlist-skeleton-opacity);
+    animation: watchlist-skeleton-pulse var(--watchlist-skeleton-pulse) ease-in-out infinite alternate;
+}
+
+@keyframes watchlist-skeleton-pulse {
+    to {
+        opacity: var(--watchlist-placeholder-opacity);
+    }
 }
 
 .watchlist-sparkline {

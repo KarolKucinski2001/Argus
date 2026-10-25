@@ -1,0 +1,84 @@
+@page "/watchlist/ui-states"
+@model _bootstrap_scaffold.Pages.Watchlist.UiStateFixtureModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Stany interfejsu listy obserwowanych";
+    var hoverData = new ViewDataDictionary(ViewData) { ["RowModifier"] = "watchlist-table__row--hover" };
+    var focusData = new ViewDataDictionary(ViewData) { ["RemoveModifier"] = "watchlist-table__remove--focus-visible" };
+}
+
+<section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
+    <div class="watchlist-page__header">
+        <div class="watchlist-page__heading">
+            <p class="eyebrow">Tylko testy</p>
+            <h1 id="ui-state-fixture-title">Stany interfejsu listy obserwowanych</h1>
+            <p>Siedem stanów tabeli i kart listy obserwowanych na tych samych częściach widoku co strona produkcyjna.</p>
+        </div>
+    </div>
+
+    <div class="ui-state-fixture__grid">
+        <section class="ui-state-fixture__state" aria-labelledby="state-default">
+            <h2 id="state-default">Domyślny</h2>
+            <div class="watchlist-card">
+                <partial name="_WatchlistTable" model="Model.Rows" />
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-hover">
+            <h2 id="state-hover">Najechanie</h2>
+            <div class="watchlist-card">
+                <partial name="_WatchlistTable" model="Model.Rows.Take(1).ToArray()" view-data="hoverData" />
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-focus">
+            <h2 id="state-focus">Fokus klawiatury</h2>
+            <div class="watchlist-card">
+                <partial name="_WatchlistTable" model="Model.Rows.Take(1).ToArray()" view-data="focusData" />
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
+            <h2 id="state-disabled">Wyłączony</h2>
+            <ul class="watchlist-tabs" aria-label="Zakładki wyłączone">
+                <partial name="_WatchlistTab" model="@("Krypto")" />
+                <partial name="_WatchlistTab" model="@("+ Nowa lista")" />
+            </ul>
+            <p class="watchlist-placeholder">Zakładki przykładowe mają aria-disabled i znacznik „Przykład”.</p>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-error">
+            <h2 id="state-error">Błąd</h2>
+            <div class="status-card status-card--error" role="alert">
+                <p>Nie udało się pobrać listy obserwowanych aktywów.</p>
+            </div>
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-empty">
+            <h2 id="state-empty">Brak danych</h2>
+            <partial name="_WatchlistEmpty" />
+        </section>
+
+        <section class="ui-state-fixture__state" aria-labelledby="state-loading">
+            <h2 id="state-loading">Ładowanie</h2>
+            <div class="watchlist-card" aria-busy="true">
+                <p class="watchlist-placeholder" role="status">Ładowanie listy obserwowanych...</p>
+                <div class="watchlist-table-scroll">
+                    <table class="watchlist-table" aria-hidden="true">
+                        <tbody>
+                            @for (var index = 0; index < 3; index++)
+                            {
+                                <tr>
+                                    <td><span class="watchlist-skeleton"></span></td>
+                                    <td><span class="watchlist-skeleton"></span></td>
+                                    <td><span class="watchlist-skeleton"></span></td>
+                                    <td><span class="watchlist-skeleton"></span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>

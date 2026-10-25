@@ -26,10 +26,7 @@
         </li>
         @foreach (var placeholder in new[] { "Giganci technologiczni", "Krypto", "Energia", "+ Nowa lista" })
         {
-            <li class="watchlist-tab watchlist-tab--placeholder" aria-disabled="true">
-                <strong>@placeholder</strong>
-                <span class="watchlist-badge">Przykład</span>
-            </li>
+            <partial name="_WatchlistTab" model="placeholder" />
         }
     </ul>
 
@@ -43,11 +40,7 @@
 
     @if (Model.Rows.Count == 0 && !Model.IsError)
     {
-        <div class="watchlist-empty status-card" role="status">
-            <h2>Lista obserwowanych jest pusta</h2>
-            <p>Zapisz aktywa na stronie analizy, aby wrócić do nich później.</p>
-            <a class="button" asp-page="/Analysis/Index">Przejdź do analizy</a>
-        </div>
+        <partial name="_WatchlistEmpty" />
     }
     else if (Model.Rows.Count > 0)
     {
@@ -57,74 +50,7 @@
                     <h2 id="watchlist-table-title">Moja lista</h2>
                     <p>@Model.Rows.Count @(Model.Rows.Count == 1 ? "aktywo" : "aktywa")</p>
                 </header>
-                <div class="watchlist-table-scroll">
-                    <table class="watchlist-table">
-                        <thead>
-                            <tr>
-                                <th scope="col"><span class="visually-hidden">Wybierz do analizy</span></th>
-                                <th scope="col">Symbol</th>
-                                <th scope="col">Nazwa</th>
-                                <th scope="col" class="watchlist-table__number">Ostatnia cena</th>
-                                <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
-                                <th scope="col" class="watchlist-table__number">7d</th>
-                                <th scope="col" class="watchlist-table__number">30d</th>
-                                <th scope="col">Trend</th>
-                                <th scope="col" class="watchlist-table__number">Akcje</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var row in Model.Rows)
-                            {
-                                <tr class="@(row.IsAvailable ? null : "watchlist-table__row--unavailable")">
-                                    <td>
-                                        @if (row.IsAvailable)
-                                        {
-                                            <input type="checkbox"
-                                                   name="SelectedAssetIds"
-                                                   value="@row.AssetId"
-                                                   id="watchlist-@row.AssetId"
-                                                   aria-label="Wybierz @row.AssetId do analizy" />
-                                        }
-                                    </td>
-                                    <th scope="row" class="watchlist-table__symbol">
-                                        <partial name="_AssetGlyph" model="row.AssetId" />
-                                        <span>@row.AssetId</span>
-                                        @if (!row.IsAvailable)
-                                        {
-                                            <span class="watchlist-row__status">Niedostępne</span>
-                                        }
-                                    </th>
-                                    <td>@row.Name</td>
-                                    <td class="watchlist-table__number">@row.PriceText</td>
-                                    <td class="watchlist-table__number @Tone(row.Change24Hours.Tone)">@row.Change24Hours.Text</td>
-                                    <td class="watchlist-table__number @Tone(row.Change7Days.Tone)">@row.Change7Days.Text</td>
-                                    <td class="watchlist-table__number @Tone(row.Change30Days.Tone)">@row.Change30Days.Text</td>
-                                    <td>
-                                        @if (row.Sparkline is { } sparkline)
-                                        {
-                                            <span class="watchlist-sparkline @Tone(row.Change24Hours.Tone)">
-                                                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {row.Name}" }' />
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="watchlist-tone--unavailable">brak danych</span>
-                                        }
-                                    </td>
-                                    <td class="watchlist-table__number">
-                                        <button class="button button--secondary watchlist-table__remove"
-                                                type="submit"
-                                                formaction="/watchlist?handler=Remove"
-                                                name="assetId"
-                                                value="@row.AssetId">
-                                            Usuń
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                <partial name="_WatchlistTable" model="Model.Rows" />
                 <footer class="watchlist-card__footer">
                     <button class="button" type="submit">Generuj ranking</button>
                 </footer>

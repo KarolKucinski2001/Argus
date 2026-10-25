@@ -19,13 +19,14 @@ product described in `@context/foundation/prd.md` remains under development.
 - `@Program.cs` owns startup, dependency registration, middleware, and current route mappings using top-level statements.
 - `@Pages/Index.cshtml` is the public landing page. Account browser routes,
   including explicit OIDC challenge, `/account`, logout, and friendly failure
-  handling, live under `@Pages/Account/`.
+  handling, live under `@Pages/Account/`; `/account` renders the signed-in profile and `/watchlist` lives under `@Pages/Watchlist/`.
 - OpenAPI is registered with `AddOpenApi()` and mapped only inside the Development environment guard.
 - HTTPS redirection is global. Development URLs are defined in `@Properties/launchSettings.json`.
 - The project remains `.bootstrap-scaffold.csproj` with root namespace `_bootstrap_scaffold`; do not infer production namespaces or feature boundaries from it.
 - Future domain work should follow the PRD flow: authenticated users select assets, market data is analyzed, scores are ranked with explaining factors, and AI summaries remain grounded in displayed data with an educational-not-advice boundary.
 - For landing-page UI changes, keep visual tokens in `@wwwroot/css/site.css`, static brand assets in `@wwwroot/`, and views free of literal colors or arbitrary layout values; use the existing landing-page contract and evidence under `@context/changes/landing-page-ui-refinement/`.
 - For analysis UI changes, use semantic tokens from `@wwwroot/css/site.css`; do not add literal colors or arbitrary layout values to Razor views. Check the existing analysis classes before creating new primitives, and use `@Pages/Analysis/UiStateFixture.cshtml` to verify the seven required interaction states. Keep `/analysis` structured as a token-backed split workspace: the asset picker belongs in the sidebar and result cards belong in the content grid; keep mobile stacking in CSS rather than duplicating views.
+- For authenticated shell, `/account`, and `/watchlist` UI changes, use semantic tokens from `@wwwroot/css/site.css`; no literal colors or arbitrary values in views. Reuse `watchlist-*` primitives and `@Pages/Shared/` partials (`_AssetGlyph`, `_Sparkline`) and `@Pages/Watchlist/` partials before creating new ones. Derive table and profile copy in `WatchlistTablePresenter` / `AccountProfilePresenter` (unit-tested). Placeholders must carry the "Przykładowe dane" badge and never look like real results. Verify states with `@Pages/Watchlist/UiStateFixture.cshtml` (`/watchlist/ui-states`, Testing environment only).
 - Derive analysis card copy and labels (trend, badges, why-bullets, summary strip) in the presenters under `@Analysis/` (`AnalysisInsightPresenter`, `AnalysisSummaryStripPresenter`) and cover them with unit tests; Razor views only bind the results. Keep wording descriptive of displayed data — never advice, forecasts, or buy/sell language.
 
 ## Build, test, and run

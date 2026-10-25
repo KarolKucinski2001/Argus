@@ -189,7 +189,7 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [x] 3.1 Account contract tests pass, including the placeholder badge assertion
+- [x] 3.1 Account contract tests pass, including the placeholder badge assertion — 03d5bc7
 
 #### Manual
 
@@ -199,8 +199,8 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [ ] 4.1 Full test suites pass and the literal scan on changed views is empty
-- [ ] 4.2 UI rule added to AGENTS.md outside the 10x CLI block
+- [x] 4.1 Full test suites pass and the literal scan on changed views is empty
+- [x] 4.2 UI rule added to AGENTS.md outside the 10x CLI block
 
 #### Manual
 

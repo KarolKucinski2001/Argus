@@ -1,0 +1,60 @@
+@using _bootstrap_scaffold.Watchlist
+@model WatchlistRowView
+@functions {
+    private static string Tone(WatchlistTone tone) => WatchlistTablePresenter.ToneClass(tone);
+}
+
+@{
+    var rowClass = string.Join(' ', new[]
+    {
+        Model.IsAvailable ? null : "watchlist-table__row--unavailable",
+        ViewData["RowModifier"] as string
+    }.Where(value => !string.IsNullOrEmpty(value)));
+}
+
+<tr class="@(rowClass.Length == 0 ? null : rowClass)">
+    <td>
+        @if (Model.IsAvailable)
+        {
+            <input type="checkbox"
+                   name="SelectedAssetIds"
+                   value="@Model.AssetId"
+                   id="watchlist-@Model.AssetId"
+                   aria-label="Wybierz @Model.AssetId do analizy" />
+        }
+    </td>
+    <th scope="row" class="watchlist-table__symbol">
+        <partial name="_AssetGlyph" model="Model.AssetId" />
+        <span>@Model.AssetId</span>
+        @if (!Model.IsAvailable)
+        {
+            <span class="watchlist-row__status">Niedostępne</span>
+        }
+    </th>
+    <td>@Model.Name</td>
+    <td class="watchlist-table__number">@Model.PriceText</td>
+    <td class="watchlist-table__number @Tone(Model.Change24Hours.Tone)">@Model.Change24Hours.Text</td>
+    <td class="watchlist-table__number @Tone(Model.Change7Days.Tone)">@Model.Change7Days.Text</td>
+    <td class="watchlist-table__number @Tone(Model.Change30Days.Tone)">@Model.Change30Days.Text</td>
+    <td>
+        @if (Model.Sparkline is { } sparkline)
+        {
+            <span class="watchlist-sparkline @Tone(Model.Change24Hours.Tone)">
+                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {Model.Name}" }' />
+            </span>
+        }
+        else
+        {
+            <span class="watchlist-tone--unavailable">brak danych</span>
+        }
+    </td>
+    <td class="watchlist-table__number">
+        <button class="@(ViewData["RemoveModifier"] is string modifier ? "button button--secondary watchlist-table__remove " + modifier : "button button--secondary watchlist-table__remove")"
+                type="submit"
+                formaction="/watchlist?handler=Remove"
+                name="assetId"
+                value="@Model.AssetId">
+            Usuń
+        </button>
+    </td>
+</tr>

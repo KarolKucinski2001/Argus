@@ -170,6 +170,54 @@ public sealed class WatchlistContractTests
         Assert.Contains("brak danych", html);
     }
 
+    [Fact]
+    public async Task Testing_ui_state_fixture_renders_all_seven_states()
+    {
+        await using var factory = new AuthenticationTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/watchlist/ui-states");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        foreach (var label in new[]
+        {
+            "Domyślny", "Najechanie", "Fokus klawiatury", "Wyłączony",
+            "Błąd", "Brak danych", "Ładowanie"
+        })
+        {
+            Assert.Contains($">{label}</h2>", html);
+        }
+
+        Assert.Contains("watchlist-table__row--hover", html);
+        Assert.Contains("watchlist-table__remove--focus-visible", html);
+        Assert.Contains("watchlist-tab--placeholder", html);
+        Assert.Contains("aria-disabled=\"true\"", html);
+        Assert.Contains("status-card status-card--error\" role=\"alert\"", html);
+        Assert.Contains("watchlist-empty", html);
+        Assert.Contains("watchlist-skeleton", html);
+        Assert.Contains("aria-busy=\"true\"", html);
+    }
+
+    [Fact]
+    public async Task Ui_state_fixture_is_not_available_outside_testing()
+    {
+        await using var factory = new DevelopmentWatchlistFixtureFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/watchlist/ui-states");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     private static async Task<string> GetAntiforgeryTokenAsync(        HttpClient client,
         string path = "/analysis")
     {
@@ -182,6 +230,15 @@ public sealed class WatchlistContractTests
 
         Assert.True(match.Success, "The analysis page did not render an antiforgery token.");
         return match.Groups[1].Value;
+    }
+}
+
+internal sealed class DevelopmentWatchlistFixtureFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Development");
+        TestEntraConfiguration.Apply(builder);
     }
 }
 

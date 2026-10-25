@@ -1,0 +1,26 @@
+@using _bootstrap_scaffold.Watchlist
+@model IReadOnlyList<WatchlistRowView>
+
+<div class="watchlist-table-scroll">
+    <table class="watchlist-table">
+        <thead>
+            <tr>
+                <th scope="col"><span class="visually-hidden">Wybierz do analizy</span></th>
+                <th scope="col">Symbol</th>
+                <th scope="col">Nazwa</th>
+                <th scope="col" class="watchlist-table__number">Ostatnia cena</th>
+                <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
+                <th scope="col" class="watchlist-table__number">7d</th>
+                <th scope="col" class="watchlist-table__number">30d</th>
+                <th scope="col">Trend</th>
+                <th scope="col" class="watchlist-table__number">Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                <partial name="_WatchlistRow" model="row" />
+            }
+        </tbody>
+    </table>
+</div>
