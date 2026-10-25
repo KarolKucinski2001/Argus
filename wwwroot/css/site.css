@@ -38,7 +38,7 @@
     --radius-lg: 1.25rem;
     --brand-mark-size: 1.5rem;
     --content-width: 72rem;
-    --workspace-sidebar-width: 20rem;
+    --workspace-sidebar-width: 24rem;
     --workspace-content-min: 0;
     --workspace-card-min: 28rem;
     --workspace-gap: var(--space-4);
@@ -623,6 +623,7 @@ button:focus-visible {
 
 .analysis-form {
     display: grid;
+    min-width: 0;
     gap: var(--space-4);
     padding: var(--space-4);
     border: 0.0625rem solid var(--color-border);
@@ -667,6 +668,7 @@ button:focus-visible {
 
 .asset-option {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2);
@@ -1510,11 +1512,14 @@ a.account-quick-action:focus-visible {
 
 .analysis-workspace__sidebar {
     align-self: start;
-    position: sticky;
-    top: var(--space-4);
-    max-height: var(--workspace-sidebar-max-height);
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    min-width: 0;
+}
+
+@media (min-width: 60rem) and (min-height: 55rem) {
+    .analysis-workspace__sidebar {
+        position: sticky;
+        top: var(--space-4);
+    }
 }
 
 .analysis-workspace__sidebar .analysis-page__header {
