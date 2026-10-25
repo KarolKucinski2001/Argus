@@ -1,9 +1,9 @@
 ---
 change_id: save-assets-to-watchlist
 title: Save assets to a personal watchlist
-status: implementing
+status: implemented
 created: 2026-10-23
-updated: 2026-10-23
+updated: 2026-10-25
 archived_at: null
 ---
 

@@ -1,7 +1,7 @@
 ---
 change_id: account-watchlist-dashboard-ui
 title: Account and watchlist dashboard UI per mockup
-status: implementing
+status: implemented
 created: 2026-10-25
 updated: 2026-10-25
 archived_at: null
