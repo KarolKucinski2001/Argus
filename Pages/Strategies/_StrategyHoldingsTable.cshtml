@@ -1,0 +1,42 @@
+@using _bootstrap_scaffold.Strategies
+@model IReadOnlyList<StrategyHoldingView>
+
+<div class="watchlist-table-scroll">
+    <table class="watchlist-table strategy-table">
+        <thead>
+            <tr>
+                <th scope="col">Aktywo</th>
+                <th scope="col">Profil</th>
+                <th scope="col" class="watchlist-table__number">Waga</th>
+                <th scope="col" class="watchlist-table__number">Wartość pozycji</th>
+                <th scope="col">Ostatnia transakcja</th>
+                <th scope="col">Opublikowano</th>
+                <th scope="col">Źródło</th>
+                <th scope="col">Kompletność</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var holding in Model)
+            {
+                <tr>
+                    <th scope="row" class="watchlist-table__symbol">
+                        <partial name="_AssetGlyph" model="holding.AssetId" />
+                        <span>@holding.AssetId <small>@holding.Name</small></span>
+                    </th>
+                    <td>@holding.Profile</td>
+                    <td class="watchlist-table__number">@holding.Weight</td>
+                    <td class="watchlist-table__number">@holding.PositionValue</td>
+                    <td>@holding.LastTransaction</td>
+                    <td>@holding.Published</td>
+                    <td>@holding.Source</td>
+                    <td>
+                        <span class="strategy-meter">
+                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.Completeness" aria-label="Kompletność danych: @holding.AssetId">@holding.Completeness%</meter>
+                            <span>@holding.Completeness%</span>
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

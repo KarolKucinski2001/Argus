@@ -12,6 +12,8 @@
         var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
         string? NavCurrent(bool isActive) => isActive ? "page" : null;
         string NavClass(bool isActive) => isActive ? "app-nav__link app-nav__link--active" : "app-nav__link";
+        var onDashboard = currentPage.StartsWith("/Dashboard", StringComparison.OrdinalIgnoreCase);
+        var onStrategies = currentPage.StartsWith("/Strategies", StringComparison.OrdinalIgnoreCase);
         var onAnalysis = currentPage.StartsWith("/Analysis", StringComparison.OrdinalIgnoreCase);
         var onWatchlist = currentPage.StartsWith("/Watchlist", StringComparison.OrdinalIgnoreCase);
         var onAccount = currentPage.StartsWith("/Account", StringComparison.OrdinalIgnoreCase);
@@ -32,8 +34,9 @@
                     <span>Argus</span>
                 </a>
                 <nav class="app-nav" aria-label="Nawigacja główna">
-                    <a class="@NavClass(false)" asp-page="/Analysis/Index">Dashboard</a>
+                    <a class="@NavClass(onDashboard)" aria-current="@NavCurrent(onDashboard)" asp-page="/Dashboard/Index">Dashboard</a>
                     <a class="@NavClass(onAnalysis)" aria-current="@NavCurrent(onAnalysis)" asp-page="/Analysis/Index">Analiza</a>
+                    <a class="@NavClass(onStrategies)" aria-current="@NavCurrent(onStrategies)" asp-page="/Strategies/Index">Strategy Profiles</a>
                     <a class="@NavClass(onWatchlist)" aria-current="@NavCurrent(onWatchlist)" asp-page="/Watchlist/Index">Obserwowane</a>
                     @{ var accountActive = onAccount && currentPage != "/Account/SignOut"; }
                     <a class="@NavClass(accountActive)" aria-current="@NavCurrent(accountActive)" asp-page="/Account/Index">Konto</a>

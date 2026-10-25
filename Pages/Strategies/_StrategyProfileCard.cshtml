@@ -1,0 +1,21 @@
+@using _bootstrap_scaffold.Strategies
+@model StrategyProfileView
+@{
+    var cardClass = ViewData["CardModifier"] is string cardModifier
+        ? "strategy-card " + cardModifier
+        : "strategy-card";
+    var linkClass = ViewData["LinkModifier"] is string linkModifier
+        ? "strategy-card__link " + linkModifier
+        : "strategy-card__link";
+}
+<li class="@cardClass" data-strategy-profile="@Model.Id">
+    <span class="strategy-icon @StrategyProfileCatalog.AccentClass(Model.AccentIndex)" aria-hidden="true">@Model.Monogram</span>
+    <h3>@Model.Name</h3>
+    <p>@Model.Description</p>
+    <p class="strategy-card__range">@Model.StockRange</p>
+    @if (Model.IsExample)
+    {
+        <span class="watchlist-badge">Przykład</span>
+    }
+    <a class="@linkClass" asp-page="/Strategies/Index" asp-fragment="allocation-builder">Przejdź do alokacji</a>
+</li>

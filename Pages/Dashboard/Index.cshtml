@@ -1,0 +1,125 @@
+@page "/dashboard"
+@model _bootstrap_scaffold.Pages.Dashboard.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Dashboard";
+}
+
+@using _bootstrap_scaffold.Dashboard
+@using _bootstrap_scaffold.Strategies
+@using _bootstrap_scaffold.Watchlist
+
+<section class="watchlist-page" aria-labelledby="dashboard-title">
+    <header class="watchlist-page__header">
+        <div class="watchlist-page__heading">
+            <h1 id="dashboard-title">@Model.Greeting</h1>
+            <p>Przeglądaj dane rynkowe, poznaj profile strategii i zbuduj wirtualny portfel.</p>
+        </div>
+    </header>
+
+    <section class="watchlist-card watchlist-card--padded dashboard-welcome" aria-labelledby="dashboard-welcome-title">
+        <div>
+            <h2 id="dashboard-welcome-title">Witaj w Argus</h2>
+            <p class="account-note">Argus pomaga uczyć się inwestowania na podstawie publicznie dostępnych danych: zgłoszeń instytucji, osób z wewnątrz spółek i innych źródeł. Możesz zbudować wirtualny portfel i przeglądać dane historyczne — wszystko bez prawdziwych pieniędzy.</p>
+        </div>
+        <a class="button" asp-page="/Strategies/Index">Poznaj profile strategii</a>
+    </section>
+
+    <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-market-title">
+        <header class="watchlist-card__header">
+            <h2 id="dashboard-market-title">Przegląd rynku</h2>
+            <p>Zmiana 24h</p>
+        </header>
+        @if (Model.MarketUnavailable)
+        {
+            <div class="status-card status-card--error" role="status">
+                <p>@DashboardPresenter.UnavailableMessage</p>
+            </div>
+        }
+        <ul class="dashboard-tiles">
+            @foreach (var tile in Model.Tiles)
+            {
+                var tone = WatchlistTablePresenter.ToneClass(tile.Change.Tone);
+                <li class="dashboard-tile" data-market-tile="@tile.AssetId">
+                    <p class="dashboard-tile__name">
+                        <partial name="_AssetGlyph" model="tile.AssetId" />
+                        <span>@tile.AssetId <small>@tile.Name</small></span>
+                    </p>
+                    <p class="dashboard-tile__price">@tile.PriceText</p>
+                    <p class="dashboard-tile__change @tone">@tile.Change.Text</p>
+                    @if (tile.Sparkline is { } sparkline)
+                    {
+                        <span class="watchlist-sparkline @tone">
+                            <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {tile.Name}" }' />
+                        </span>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+
+    <div class="account-grid">
+        <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-portfolio-title">
+            <header class="watchlist-card__header watchlist-card__header--inline">
+                <h2 id="dashboard-portfolio-title">Twój wirtualny portfel</h2>
+                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            </header>
+            <h3 class="dashboard-portfolio__title">Zbuduj pierwszy model portfela</h3>
+            <p class="account-note">Połącz profile strategii, ustaw alokację i zobacz, jak taki portfel zachowywałby się historycznie. Kreator portfela jest niedostępny w tej wersji.</p>
+            <div class="account-actions">
+                <button class="button" type="button" disabled>Utwórz portfel</button>
+            </div>
+        </section>
+
+        <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-insights-title">
+            <header class="watchlist-card__header watchlist-card__header--inline">
+                <h2 id="dashboard-insights-title">Najważniejsze wnioski</h2>
+                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            </header>
+            <ul class="account-list dashboard-insights">
+                @foreach (var insight in DashboardPresenter.SampleInsights)
+                {
+                    <li>
+                        <span class="strategy-icon strategy-accent--1" aria-hidden="true">@insight.Monogram</span>
+                        <span class="dashboard-insights__text">
+                            <strong>@insight.Title</strong>
+                            <small>@insight.Text</small>
+                        </span>
+                        <small>@insight.Age</small>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+
+    <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-strategies-title">
+        <header class="watchlist-card__header watchlist-card__header--inline">
+            <h2 id="dashboard-strategies-title">Poznaj profile strategii</h2>
+            <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+        </header>
+        <ul class="strategy-grid">
+            @foreach (var profile in StrategyProfileCatalog.DashboardProfiles)
+            {
+                <li class="strategy-card" data-strategy-profile="@profile.Id">
+                    <span class="strategy-icon @StrategyProfileCatalog.AccentClass(profile.AccentIndex)" aria-hidden="true">@profile.Monogram</span>
+                    <h3><a class="strategy-card__link" asp-page="/Strategies/Index">@profile.Name</a></h3>
+                    <p>@profile.Description</p>
+                    <p class="strategy-card__range">@profile.StockRange</p>
+                    @if (profile.IsExample)
+                    {
+                        <span class="watchlist-badge">Przykład</span>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section class="status-card" aria-labelledby="dashboard-disclaimer-title">
+        <h2 id="dashboard-disclaimer-title">Narzędzie edukacyjne</h2>
+        <p>Argus służy wyłącznie do nauki i badania danych. Nie dokonuje prawdziwych transakcji i nie stanowi porady inwestycyjnej.</p>
+    </section>
+
+    <p class="watchlist-page__boundary">
+        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+    </p>
+</section>

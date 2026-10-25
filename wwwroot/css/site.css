@@ -141,6 +141,19 @@
     --color-allocation-3: var(--color-warning);
     --color-allocation-4: var(--color-asset-ethereum);
     --account-legend-dot-size: 0.625rem;
+    --strategy-card-min: 11rem;
+    --strategy-icon-size: 2.5rem;
+    --strategy-icon-text-size: 0.875rem;
+    --strategy-bar-height: 0.5rem;
+    --strategy-allocation-label-min: 10rem;
+    --strategy-table-min-width: 56rem;
+    --strategy-meter-width: 5rem;
+    --dashboard-tile-min: 10rem;
+    --strategy-accent-1: var(--color-allocation-1);
+    --strategy-accent-2: var(--color-allocation-2);
+    --strategy-accent-3: var(--color-allocation-3);
+    --strategy-accent-4: var(--color-allocation-4);
+    --strategy-hover-surface: var(--color-nav-hover-surface);
     color-scheme: dark;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -1174,6 +1187,223 @@ a.account-quick-action:focus-visible {
     color: var(--color-muted);
 }
 
+.dashboard-welcome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.dashboard-welcome h2,
+.dashboard-welcome .account-note {
+    margin: 0 0 var(--space-1);
+}
+
+.dashboard-tiles,
+.strategy-grid {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dashboard-tiles {
+    grid-template-columns: repeat(auto-fit, minmax(var(--dashboard-tile-min), 1fr));
+}
+
+.strategy-grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--strategy-card-min), 1fr));
+}
+
+.dashboard-tile,
+.strategy-card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-raised);
+}
+
+.dashboard-tile p,
+.strategy-card p,
+.strategy-card h3 {
+    margin: 0;
+}
+
+.dashboard-tile__name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-muted);
+    font-size: var(--watchlist-small-size);
+}
+
+.dashboard-tile__price {
+    font-size: var(--account-stat-value-size);
+    font-weight: 700;
+}
+
+.dashboard-tile__change {
+    font-weight: 700;
+}
+
+.dashboard-tile small,
+.dashboard-insights small,
+.strategy-card p,
+.strategy-table small {
+    color: var(--color-muted);
+}
+
+.dashboard-portfolio__title {
+    margin: 0 0 var(--space-1);
+}
+
+.dashboard-insights li {
+    align-items: flex-start;
+}
+
+.dashboard-insights__text {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.strategy-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    inline-size: var(--strategy-icon-size);
+    block-size: var(--strategy-icon-size);
+    border-radius: var(--radius-sm);
+    background: var(--accent, var(--color-muted));
+    color: var(--color-on-asset);
+    font-size: var(--strategy-icon-text-size);
+    font-weight: 800;
+}
+
+.strategy-accent--1 {
+    --accent: var(--strategy-accent-1);
+}
+
+.strategy-accent--2 {
+    --accent: var(--strategy-accent-2);
+}
+
+.strategy-accent--3 {
+    --accent: var(--strategy-accent-3);
+}
+
+.strategy-accent--4 {
+    --accent: var(--strategy-accent-4);
+}
+
+.strategy-card:hover,
+.strategy-card--hover {
+    background: var(--strategy-hover-surface);
+}
+
+.strategy-card__range {
+    font-size: var(--watchlist-small-size);
+}
+
+.strategy-card__link {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.strategy-card__link:hover {
+    text-decoration: underline;
+}
+
+.strategy-card__link:focus-visible,
+.strategy-card__link--focus-visible {
+    outline: var(--shell-focus-width) solid var(--color-focus);
+    outline-offset: var(--shell-focus-offset);
+}
+
+.strategy-allocation {
+    display: grid;
+    flex: 1 1 auto;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.strategy-allocation__row {
+    display: grid;
+    grid-template-columns: minmax(var(--strategy-allocation-label-min), auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.strategy-allocation__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.strategy-allocation__bar {
+    display: block;
+    block-size: var(--strategy-bar-height);
+    border-radius: var(--radius-sm);
+    background: var(--color-secondary-surface);
+}
+
+.strategy-allocation__fill {
+    display: block;
+    block-size: 100%;
+    inline-size: var(--weight, 0%);
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+}
+
+.strategy-weight--10 { --weight: 10%; }
+.strategy-weight--20 { --weight: 20%; }
+.strategy-weight--30 { --weight: 30%; }
+.strategy-weight--40 { --weight: 40%; }
+.strategy-weight--50 { --weight: 50%; }
+.strategy-weight--60 { --weight: 60%; }
+.strategy-weight--70 { --weight: 70%; }
+.strategy-weight--80 { --weight: 80%; }
+.strategy-weight--90 { --weight: 90%; }
+.strategy-weight--100 { --weight: 100%; }
+
+.strategy-table {
+    min-width: var(--strategy-table-min-width);
+}
+
+.strategy-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.strategy-meter__bar {
+    inline-size: var(--strategy-meter-width);
+}
+
+.strategy-quality__note {
+    margin: var(--space-2) 0 0;
+    color: var(--color-warning);
+}
+
+.strategy-empty {
+    max-width: 48rem;
+}
+
+.strategy-empty h2,
+.strategy-empty p {
+    margin-top: 0;
+}
+
 .validation-message,
 .status-card {
     padding: var(--space-3);
@@ -2142,6 +2372,15 @@ a.account-quick-action:focus-visible {
 
     .ui-state-fixture__grid {
         grid-template-columns: 1fr;
+    }
+
+    .strategy-allocation__row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .strategy-allocation__bar {
+        grid-column: 1 / -1;
+        grid-row: 2;
     }
 }
 
