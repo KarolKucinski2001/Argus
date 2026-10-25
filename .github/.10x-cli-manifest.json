@@ -2,8 +2,8 @@
   "package": "@przeprogramowani/10x-cli",
   "version": "1.25.1",
   "manifestVersion": 3,
-  "lastApplied": "2026-10-06T12:42:29.500Z",
-  "lessonId": "m4l4",
+  "lastApplied": "2026-10-12T12:17:13.496Z",
+  "lessonId": "m2l5",
   "course": "10xdevs4",
   "tool": "copilot",
   "files": {
@@ -274,6 +274,16 @@
         ],
         "contentHashes": {
           "SKILL.md": "76309143ddb63500ac5e0b75c4a09956f73e9f7441ebab4c857fcb60bfa4f9b4"
+        }
+      },
+      "10x-ui": {
+        "files": [
+          "SKILL.md",
+          "references/ui-quality-checklist.md"
+        ],
+        "contentHashes": {
+          "SKILL.md": "9e214350b9e7f06e63ee50435abfbc2db959cbceb299fad16fea2023932324b6",
+          "references/ui-quality-checklist.md": "de2f830b52f5de2bd480f6b283cb23598190958c9b8f868b0322494188b7e0e4"
         }
       }
     },
@@ -1054,6 +1064,19 @@
         "10x-frame": {
           "files": [
             "SKILL.md"
+          ]
+        }
+      },
+      "prompts": [],
+      "configs": []
+    },
+    "m2l5": {
+      "appliedAt": "2026-10-12T12:17:13.496Z",
+      "skills": {
+        "10x-ui": {
+          "files": [
+            "SKILL.md",
+            "references/ui-quality-checklist.md"
           ]
         }
       },

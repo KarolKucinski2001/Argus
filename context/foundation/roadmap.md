@@ -41,7 +41,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
-| S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | ready |
+| S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | in-progress |
 | S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | proposed |
 
 ## Baseline
@@ -74,7 +74,7 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Unknowns:**
   - Which persistent store holds per-user watchlists on Azure App Service? — Owner: team. Block: no (decided in `/10x-plan`).
 - **Risk:** First persistent per-user data in Argus; it is sequenced first so the storage choice is proven on the smallest flow before the Dashboard depends on it.
-- **Status:** ready
+- **Status:** in-progress
 
 ### S-05: Watchlist monitoring dashboard
 
