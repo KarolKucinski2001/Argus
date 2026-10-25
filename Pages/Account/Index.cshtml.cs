@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using _bootstrap_scaffold.Account;
 
 namespace _bootstrap_scaffold.Pages.Account;
 
@@ -13,6 +14,7 @@ public sealed class IndexModel : PageModel
     public string? SubjectId { get; private set; }
     public string? DisplayName { get; private set; }
     public string? Email { get; private set; }
+    public string Initials { get; private set; } = AccountProfilePresenter.FallbackInitials;
 
     public IActionResult OnGet()
     {
@@ -26,6 +28,7 @@ public sealed class IndexModel : PageModel
         SubjectId = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         DisplayName = User.FindFirstValue("name") ?? User.Identity?.Name;
         Email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
+        Initials = AccountProfilePresenter.Initials(DisplayName, Email);
         return Page();
     }
 }

@@ -177,9 +177,9 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [x] 2.1 Presenter unit tests cover formatting, mover ordering, and missing data
-- [x] 2.2 Watchlist contract tests pass for table data, remove, empty, and handoff
-- [x] 2.3 Focused suite and production project test command pass
+- [x] 2.1 Presenter unit tests cover formatting, mover ordering, and missing data — 8003320
+- [x] 2.2 Watchlist contract tests pass for table data, remove, empty, and handoff — 8003320
+- [x] 2.3 Focused suite and production project test command pass — 8003320
 
 #### Manual
 
@@ -189,7 +189,7 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [ ] 3.1 Account contract tests pass, including the placeholder badge assertion
+- [x] 3.1 Account contract tests pass, including the placeholder badge assertion
 
 #### Manual
 

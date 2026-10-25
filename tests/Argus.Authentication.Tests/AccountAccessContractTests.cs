@@ -141,6 +141,28 @@ public sealed class AccountAccessContractTests
     }
 
     [Fact]
+    public async Task Authenticated_account_marks_placeholder_cards_and_links_quick_actions()
+    {
+        await using var factory = new AuthenticatedAccountFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/account");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Przykładowe dane", html);
+        Assert.Contains("Przykład", html);
+        Assert.Contains("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.", html);
+        Assert.Contains("href=\"/watchlist\"", html);
+        Assert.Contains("Aktywne", html);
+        Assert.Contains("aria-disabled=\"true\"", html);
+    }
+
+    [Fact]
     public async Task Unauthenticated_account_uses_explicit_provider_challenge_instead_of_api_problem_details()
     {
         await using var factory = new AccountAccessFactory();
