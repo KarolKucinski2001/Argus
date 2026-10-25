@@ -46,10 +46,10 @@ public sealed class DashboardAndStrategiesContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Dzień dobry, Test!", html);
-        Assert.Contains("href=\"/dashboard\">Dashboard", html);
-        Assert.Contains("href=\"/strategies\">Strategy Profiles", html);
+        Assert.Matches(@"(?s)href=""/dashboard""><svg.*?</svg>\s*Dashboard", html);
+        Assert.Matches(@"(?s)href=""/strategies""><svg.*?</svg>\s*Strategy Profiles", html);
         Assert.Matches("class=\"app-nav__link app-nav__link--active\" aria-current=\"page\" href=\"/dashboard\"", html);
-        Assert.DoesNotContain("href=\"/analysis\">Dashboard", html);
+        Assert.DoesNotMatch(@"(?s)href=""/analysis""><svg.*?</svg>\s*Dashboard", html);
         Assert.Contains("Przykładowe dane", html);
         Assert.Contains("Przegląd rynku", html);
         Assert.Contains("data-market-tile=\"AAPL\"", html);

@@ -229,8 +229,8 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("BTC-USD", html);
         Assert.Contains("ETH-USD", html);
         Assert.Contains("maksymalnie 5", html);
-        Assert.Contains(">Analiza</a>", html);
-        Assert.Contains(">Konto</a>", html);
+        Assert.Matches(@"(?s)</svg>\s*Analiza</a>", html);
+        Assert.Matches(@"(?s)</svg>\s*Konto</a>", html);
         Assert.Contains("/account/signout", html, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Zaloguj się", html);
         Assert.Contains("class=\"analysis-workspace\"", html);

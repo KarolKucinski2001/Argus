@@ -45,7 +45,7 @@ public sealed class WatchlistContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Lista obserwowanych jest pusta", html);
         Assert.Contains("Przejdź do analizy", html);
-        Assert.Contains("href=\"/watchlist\">Obserwowane", html);
+        Assert.Matches(@"(?s)href=""/watchlist""><svg.*?</svg>\s*Obserwowane", html);
         Assert.Contains("href=\"/analysis\">Przejdź do analizy", html);
     }
 

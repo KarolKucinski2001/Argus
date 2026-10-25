@@ -126,6 +126,7 @@
     --avatar-size: 2rem;
     --avatar-text-size: 0.75rem;
     --nav-link-height: 2.5rem;
+    --nav-icon-size: 1.25rem;
     --shell-focus-width: 0.1875rem;
     --shell-focus-offset: 0.125rem;
     --account-avatar-size: 4.5rem;
@@ -258,6 +259,12 @@ button:focus-visible {
     border-radius: var(--radius-sm);
     color: var(--color-nav-text);
     text-decoration: none;
+}
+
+.app-nav__icon {
+    flex: none;
+    width: var(--nav-icon-size);
+    height: var(--nav-icon-size);
 }
 
 .app-nav__link:hover {
