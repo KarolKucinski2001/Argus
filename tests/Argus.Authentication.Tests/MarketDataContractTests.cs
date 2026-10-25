@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
 using _bootstrap_scaffold.MarketData;
+using _bootstrap_scaffold.Watchlist;
 
 namespace Argus.Authentication.Tests;
 
@@ -608,6 +609,8 @@ internal sealed class MarketDataTestFactory : WebApplicationFactory<Program>
                     .RequireAuthenticatedUser()
                     .Build();
             });
+            services.RemoveAll<IWatchlistStore>();
+            services.AddSingleton<IWatchlistStore, InMemoryWatchlistStore>();
 
             services.RemoveAll<IMarketDataProvider>();
             services.AddSingleton<IMarketDataProvider>(

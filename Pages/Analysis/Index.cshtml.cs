@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
+using _bootstrap_scaffold.Watchlist;
 
 namespace _bootstrap_scaffold.Pages.Analysis;
 
@@ -14,6 +16,7 @@ public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredOptions,
     IMarketDataService marketDataService,
     IAnalysisService analysisService,
+    IWatchlistStore watchlistStore,
     ILogger<IndexModel> logger) : PageModel
 {
     private readonly MarketDataOptions options = configuredOptions.Value;
@@ -29,6 +32,11 @@ public sealed class IndexModel(
                                      AnalysisResults.Results.Any(result => result.Error is null) == true;
     public string? StartedMessage { get; private set; }
     public string? ProviderMessage { get; private set; }
+    public string? WatchlistMessage { get; private set; }
+    public bool WatchlistSaveSucceeded { get; private set; }
+    public bool WatchlistSaveAttempted { get; private set; }
+    public IReadOnlySet<string> SavedAssetIds { get; private set; } =
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     public AnalysisResponse? AnalysisResults { get; private set; }
     public IReadOnlyDictionary<string, MarketQuote> CurrentQuotes { get; private set; } =
         new Dictionary<string, MarketQuote>(StringComparer.OrdinalIgnoreCase);
@@ -45,8 +53,21 @@ public sealed class IndexModel(
         }
 
         LoadAssets();
+        await LoadSavedAssetsAsync(cancellationToken);
+        var defaults = DefaultAssetIds;
+        if (TempData["WatchlistMessage"] is string savedMessage)
+        {
+            WatchlistMessage = savedMessage;
+            WatchlistSaveAttempted = true;
+            WatchlistSaveSucceeded = true;
+            if (TempData["WatchlistSelection"] is string selection && selection.Length > 0)
+            {
+                defaults = selection.Split(',');
+            }
+        }
+
         SelectedAssetIds = options.AllowedAssets.Keys
-            .Where(id => DefaultAssetIds.Contains(id, StringComparer.OrdinalIgnoreCase))
+            .Where(id => defaults.Contains(id, StringComparer.OrdinalIgnoreCase))
             .Take(options.MaximumSelectedAssets)
             .ToArray();
         if (SelectedAssetIds.Length > 0)
@@ -73,7 +94,10 @@ public sealed class IndexModel(
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
+    public Task<IActionResult> OnPostAsync(CancellationToken cancellationToken) =>
+        OnPostAnalyzeAsync(cancellationToken);
+
+    public async Task<IActionResult> OnPostAnalyzeAsync(CancellationToken cancellationToken)
     {
         if (!EnsureAuthenticated())
         {
@@ -83,6 +107,7 @@ public sealed class IndexModel(
         }
 
         LoadAssets();
+        await LoadSavedAssetsAsync(cancellationToken);
 
         var validationError = ValidateSelection();
         if (validationError is not null)
@@ -93,6 +118,45 @@ public sealed class IndexModel(
 
         await RunAnalysisAsync(cancellationToken);
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostSaveAsync(CancellationToken cancellationToken)
+    {
+        if (!EnsureAuthenticated())
+        {
+            return Challenge(
+                new AuthenticationProperties { RedirectUri = "/analysis" },
+                OpenIdConnectDefaults.AuthenticationScheme);
+        }
+
+        LoadAssets();
+        await LoadSavedAssetsAsync(cancellationToken);
+
+        var validationError = ValidateSelection();
+        if (validationError is not null)
+        {
+            ModelState.AddModelError(nameof(SelectedAssetIds), validationError);
+            return Page();
+        }
+
+        WatchlistSaveAttempted = true;
+        var result = await watchlistStore.SaveAsync(
+            GetSubjectId(),
+            SelectedAssetIds,
+            cancellationToken);
+        if (!result.Succeeded)
+        {
+            WatchlistMessage = result.HasStorageFailure
+                ? "Nie udało się zapisać aktywów. Spróbuj ponownie później."
+                : result.Items.Any(item => item.Status == WatchlistSaveStatus.CapacityExceeded)
+                    ? $"Lista obserwowanych może zawierać maksymalnie {WatchlistConstants.MaximumEntries} aktywów."
+                    : "Nie udało się zapisać wybranych aktywów.";
+            return Page();
+        }
+
+        TempData["WatchlistMessage"] = "Wybrane aktywa zapisano na liście obserwowanych.";
+        TempData["WatchlistSelection"] = string.Join(',', SelectedAssetIds);
+        return RedirectToPage();
     }
 
     private async Task RunAnalysisAsync(CancellationToken cancellationToken)
@@ -137,6 +201,26 @@ public sealed class IndexModel(
         Assets = options.AllowedAssets
             .Select(entry => new SelectableAsset(entry.Key, entry.Value.ToString()))
             .ToArray();
+
+    private async Task LoadSavedAssetsAsync(CancellationToken cancellationToken)
+    {
+        var result = await watchlistStore.ListAsync(GetSubjectId(), cancellationToken);
+        if (result.Succeeded)
+        {
+            SavedAssetIds = result.Entries
+                .Select(entry => entry.AssetId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+        else
+        {
+            WatchlistMessage = "Nie udało się pobrać listy obserwowanych aktywów.";
+        }
+    }
+
+    private string GetSubjectId() =>
+        User.FindFirstValue("sub") ??
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+        throw new InvalidOperationException("Authenticated subject unavailable.");
 
     private string? ValidateSelection()
     {

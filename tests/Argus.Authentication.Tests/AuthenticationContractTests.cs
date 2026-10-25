@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
+using _bootstrap_scaffold.Watchlist;
 
 namespace Argus.Authentication.Tests;
 
@@ -81,7 +83,11 @@ internal static class TestEntraConfiguration
                 ["Entra:TenantId"] = "test-tenant",
                 ["Entra:ClientId"] = "test-client",
                 ["Entra:ClientSecret"] = "test-secret",
-                ["Entra:CallbackPath"] = "/signin-oidc"
+                ["Entra:CallbackPath"] = "/signin-oidc",
+                ["Watchlist:ConnectionString"] =
+                    "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
+                    "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ7;" +
+                    "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
             });
         });
 }
@@ -126,6 +132,8 @@ internal sealed class AuthenticationTestFactory : WebApplicationFactory<Program>
                     .RequireAuthenticatedUser()
                     .Build();
             });
+            services.RemoveAll<IWatchlistStore>();
+            services.AddSingleton<IWatchlistStore, InMemoryWatchlistStore>();
         });
     }
 }

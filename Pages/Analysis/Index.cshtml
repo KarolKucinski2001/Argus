@@ -44,7 +44,8 @@
                 var option = new AssetOptionModel(
                     asset.Id,
                     isSelected,
-                    scoreById.TryGetValue(asset.Id, out var optionScore) ? optionScore : null);
+                    scoreById.TryGetValue(asset.Id, out var optionScore) ? optionScore : null,
+                    Model.SavedAssetIds.Contains(asset.Id));
                 <partial name="_AssetOption" model="option" />
             }
         </div>
@@ -67,6 +68,19 @@
             </div>
         }
 
+        @if (Model.WatchlistMessage is not null)
+        {
+            <div class="status-card @(Model.WatchlistSaveSucceeded ? "status-card--success" : "status-card--error")"
+                 role="@(Model.WatchlistSaveSucceeded ? "status" : "alert")">
+                <h2>@(Model.WatchlistSaveSucceeded
+                    ? "Lista obserwowanych"
+                    : Model.WatchlistSaveAttempted
+                        ? "Nie udało się zapisać aktywów"
+                        : "Nie udało się pobrać listy obserwowanych")</h2>
+                <p>@Model.WatchlistMessage</p>
+            </div>
+        }
+
         @if (Model.HasStarted)
         {
             <div class="status-card status-card--success" role="status">
@@ -84,12 +98,21 @@
         <p class="analysis-form__pending" data-pending-status role="status" hidden>
             Analiza jest przygotowywana. Nie zamykaj tej strony.
         </p>
+        <div class="analysis-form__actions">
         <button class="button"
                 type="submit"
+                asp-page-handler="Analyze"
                 data-submit-button
                 disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
             Generuj ranking
         </button>
+        <button class="button button--secondary"
+                type="submit"
+                asp-page-handler="Save"
+                disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
+            Zapisz na liście
+        </button>
+        </div>
         </form>
 
         <p class="analysis-page__boundary">

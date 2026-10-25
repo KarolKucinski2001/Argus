@@ -1,0 +1,84 @@
+@page "/watchlist"
+@model _bootstrap_scaffold.Pages.Watchlist.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Lista obserwowanych";
+}
+
+<section class="watchlist-page" aria-labelledby="watchlist-title">
+    <header class="watchlist-page__header">
+        <p class="eyebrow">Twoje aktywa</p>
+        <h1 id="watchlist-title">Lista obserwowanych</h1>
+        <p>Przeglądaj zapisane aktywa i uruchamiaj analizę na podstawie wybranych danych.</p>
+    </header>
+
+    @if (Model.Message is not null)
+    {
+        <div class="status-card @(Model.IsError ? "status-card--error" : "status-card--success")"
+             role="@(Model.IsError ? "alert" : "status")">
+            <p>@Model.Message</p>
+        </div>
+    }
+
+    @if (Model.Rows.Count == 0 && !Model.IsError)
+    {
+        <div class="watchlist-empty status-card" role="status">
+            <h2>Lista obserwowanych jest pusta</h2>
+            <p>Zapisz aktywa na stronie analizy, aby wrócić do nich później.</p>
+            <a class="button" asp-page="/Analysis/Index">Przejdź do analizy</a>
+        </div>
+    }
+    else
+    {
+        <form method="post" asp-page="/Analysis/Index" asp-page-handler="Analyze" class="watchlist-form">
+            <div class="watchlist-list">
+                @foreach (var row in Model.Rows)
+                {
+                    <article class="watchlist-row @(row.IsAvailable ? null : "watchlist-row--unavailable")">
+                        <div class="watchlist-row__selection">
+                            @if (row.IsAvailable)
+                            {
+                                <input type="checkbox"
+                                       name="SelectedAssetIds"
+                                       value="@row.AssetId"
+                                       id="watchlist-@row.AssetId" />
+                            }
+                            <div>
+                                @if (row.IsAvailable)
+                                {
+                                    <label for="watchlist-@row.AssetId"><strong>@row.Name</strong></label>
+                                }
+                                else
+                                {
+                                    <strong>@row.Name</strong>
+                                }
+                                <span>@row.AssetId · @row.AssetClass</span>
+                            </div>
+                        </div>
+                        <div class="watchlist-row__meta">
+                            @if (!row.IsAvailable)
+                            {
+                                <span class="watchlist-row__status">Niedostępne</span>
+                            }
+                            <time datetime="@row.SavedAtUtc.ToString("O")">
+                                @row.SavedAtUtc.ToLocalTime().ToString("g")
+                            </time>
+                            <button class="button button--secondary"
+                                    type="submit"
+                            formaction="/watchlist?handler=Remove"
+                                    name="assetId"
+                                    value="@row.AssetId">
+                                Usuń
+                            </button>
+                        </div>
+                    </article>
+                }
+            </div>
+            <button class="button" type="submit">Generuj ranking</button>
+        </form>
+    }
+
+    <p class="watchlist-page__boundary">
+        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+    </p>
+</section>

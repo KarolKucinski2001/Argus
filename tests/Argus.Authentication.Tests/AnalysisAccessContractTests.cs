@@ -10,6 +10,7 @@ using Xunit;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Pages.Analysis;
+using _bootstrap_scaffold.Watchlist;
 
 namespace Argus.Authentication.Tests;
 
@@ -1299,6 +1300,8 @@ internal sealed class AnalysisProviderFactory(
                     .RequireAuthenticatedUser()
                     .Build();
             });
+            services.RemoveAll<IWatchlistStore>();
+            services.AddSingleton<IWatchlistStore, InMemoryWatchlistStore>();
             services.RemoveAll<IMarketDataProvider>();
             services.AddSingleton(provider);
             if (summaryGenerator is not null)

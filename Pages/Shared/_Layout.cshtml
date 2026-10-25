@@ -15,8 +15,9 @@
         <nav class="site-nav" aria-label="Nawigacja główna">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <a class="text-link" asp-page="/Analysis">Analiza</a>
-                <a class="text-link" asp-page="/Account">Konto</a>
+                <a class="text-link" asp-page="/Analysis/Index">Analiza</a>
+                <a class="text-link" asp-page="/Watchlist/Index">Obserwowane</a>
+                <a class="text-link" asp-page="/Account/Index">Konto</a>
                 <a class="text-link" asp-page="/Account/SignOut">Wyloguj się</a>
             }
             else

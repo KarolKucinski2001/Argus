@@ -19,4 +19,8 @@
     {
         <span class="asset-option__score"><span class="visually-hidden">Score </span>@AnalysisFormatting.Decimal(score)</span>
     }
+    @if (Model.IsSaved)
+    {
+        <span class="asset-option__saved" aria-label="Na liście obserwowanych">Zapisane</span>
+    }
 </label>
