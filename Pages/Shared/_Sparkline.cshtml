@@ -1,0 +1,11 @@
+@using _bootstrap_scaffold.Analysis
+@model SparklineView
+<svg class="insight-card__sparkline"
+     viewBox="@Model.ViewBox"
+     preserveAspectRatio="none"
+     role="img"
+     aria-label="@ViewData["SparklineLabel"]"
+     data-sparkline>
+    <path class="insight-card__sparkline-area" d="@Model.AreaPath" />
+    <polyline class="insight-card__sparkline-line" points="@Model.LinePoints" />
+</svg>

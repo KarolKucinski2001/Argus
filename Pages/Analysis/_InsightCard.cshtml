@@ -91,15 +91,7 @@
 
             @if (insight.Sparkline is { } sparkline)
             {
-                <svg class="insight-card__sparkline"
-                     viewBox="@sparkline.ViewBox"
-                     preserveAspectRatio="none"
-                     role="img"
-                     aria-label="Trend ceny: @insight.Identity.Name"
-                     data-sparkline>
-                    <path class="insight-card__sparkline-area" d="@sparkline.AreaPath" />
-                    <polyline class="insight-card__sparkline-line" points="@sparkline.LinePoints" />
-                </svg>
+                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {insight.Identity.Name}" }' />
             }
             else
             {

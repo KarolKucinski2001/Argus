@@ -7,29 +7,73 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="site-header">
-        <a class="brand" asp-page="/Index">
-            <img src="~/img/argus-symbol-white.svg" alt="" />
-            <span>Argus</span>
-        </a>
-        <nav class="site-nav" aria-label="Nawigacja główna">
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <a class="text-link" asp-page="/Analysis/Index">Analiza</a>
-                <a class="text-link" asp-page="/Watchlist/Index">Obserwowane</a>
-                <a class="text-link" asp-page="/Account/Index">Konto</a>
-                <a class="text-link" asp-page="/Account/SignOut">Wyloguj się</a>
-            }
-            else
-            {
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? string.Empty;
+        string? NavCurrent(bool isActive) => isActive ? "page" : null;
+        string NavClass(bool isActive) => isActive ? "app-nav__link app-nav__link--active" : "app-nav__link";
+        var onAnalysis = currentPage.StartsWith("/Analysis", StringComparison.OrdinalIgnoreCase);
+        var onWatchlist = currentPage.StartsWith("/Watchlist", StringComparison.OrdinalIgnoreCase);
+        var onAccount = currentPage.StartsWith("/Account", StringComparison.OrdinalIgnoreCase);
+        var displayName = User.FindFirst("name")?.Value;
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            displayName = User.Identity?.Name;
+        }
+        displayName = string.IsNullOrWhiteSpace(displayName) ? "Użytkownik" : displayName.Trim();
+        var initials = string.Concat(displayName
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Take(2)
+            .Select(part => char.ToUpperInvariant(part[0])));
+        <div class="app-shell">
+            <aside class="app-shell__sidebar">
+                <a class="brand" asp-page="/Index">
+                    <img src="~/img/argus-symbol-white.svg" alt="" />
+                    <span>Argus</span>
+                </a>
+                <nav class="app-nav" aria-label="Nawigacja główna">
+                    <a class="@NavClass(false)" asp-page="/Analysis/Index">Dashboard</a>
+                    <a class="@NavClass(onAnalysis)" aria-current="@NavCurrent(onAnalysis)" asp-page="/Analysis/Index">Analiza</a>
+                    <a class="@NavClass(onWatchlist)" aria-current="@NavCurrent(onWatchlist)" asp-page="/Watchlist/Index">Obserwowane</a>
+                    @{ var accountActive = onAccount && currentPage != "/Account/SignOut"; }
+                    <a class="@NavClass(accountActive)" aria-current="@NavCurrent(accountActive)" asp-page="/Account/Index">Konto</a>
+                    <a class="@NavClass(false) app-nav__link--signout" asp-page="/Account/SignOut">Wyloguj się</a>
+                </nav>
+            </aside>
+            <div class="app-shell__body">
+                <div class="app-topbar">
+                    <input class="app-topbar__search"
+                           type="search"
+                           placeholder="Szukaj aktywów, strategii…"
+                           aria-label="Szukaj aktywów, strategii (wkrótce)"
+                           disabled />
+                    <p class="app-user-chip">
+                        <span class="app-user-chip__avatar" aria-hidden="true">@initials</span>
+                        <span class="app-user-chip__name">@displayName</span>
+                    </p>
+                </div>
+                <main class="app-shell__main">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    }
+    else
+    {
+        <header class="site-header">
+            <a class="brand" asp-page="/Index">
+                <img src="~/img/argus-symbol-white.svg" alt="" />
+                <span>Argus</span>
+            </a>
+            <nav class="site-nav" aria-label="Nawigacja główna">
                 <a class="text-link" asp-page="/Index" asp-fragment="how-it-works">Jak to działa</a>
                 <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
-            }
-        </nav>
-    </header>
-    <main class="landing-main">
-        @RenderBody()
-    </main>
+            </nav>
+        </header>
+        <main class="landing-main">
+            @RenderBody()
+        </main>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
