@@ -395,32 +395,32 @@ than creating a process-local substitute.
 
 #### Automated
 
-- [x] 1.1 The project restores and builds with the Azure Tables dependency
-- [x] 1.2 Focused store tests verify key normalization, idempotent saves, ordering, the 50-entry cap, and explicit storage failures
+- [x] 1.1 The project restores and builds with the Azure Tables dependency — e19c098
+- [x] 1.2 Focused store tests verify key normalization, idempotent saves, ordering, the 50-entry cap, and explicit storage failures — e19c098
 
 #### Manual
 
-- [x] 1.3 A local emulator or configured Azure Table endpoint completes a smoke create/read/remove without tracked credentials
-- [x] 1.4 Configuration review confirms missing or invalid storage cannot report a successful save
+- [x] 1.3 A local emulator or configured Azure Table endpoint completes a smoke create/read/remove without tracked credentials — e19c098
+- [x] 1.4 Configuration review confirms missing or invalid storage cannot report a successful save — e19c098
 
 ### Phase 2: Add save, review, remove, and analyze flows
 
 #### Automated
 
-- [x] 2.1 Contract tests cover authenticated save/list/remove, unauthenticated challenge, duplicate idempotency, cap, unavailable assets, and cross-subject isolation
-- [x] 2.2 Watchlist analysis contract tests accept at most five available assets and preserve existing analysis contracts
+- [x] 2.1 Contract tests cover authenticated save/list/remove, unauthenticated challenge, duplicate idempotency, cap, unavailable assets, and cross-subject isolation — e19c098
+- [x] 2.2 Watchlist analysis contract tests accept at most five available assets and preserve existing analysis contracts — e19c098
 
 #### Manual
 
-- [x] 2.3 The browser flow saves selected assets, preserves selection on failure, lists and removes entries, and renders the empty/unavailable states
-- [x] 2.4 The browser flow starts the existing analysis from one to five available watchlist assets without changing result presentation or disclaimer wording
+- [x] 2.3 The browser flow saves selected assets, preserves selection on failure, lists and removes entries, and renders the empty/unavailable states — e19c098
+- [x] 2.4 The browser flow starts the existing analysis from one to five available watchlist assets without changing result presentation or disclaimer wording — e19c098
 
 ### Phase 3: Verification, configuration documentation, and regression protection
 
 #### Automated
 
-- [ ] 3.1 The focused authentication and watchlist suite passes without production credentials or network access
-- [ ] 3.2 The production project test command passes and repository checks find no tracked watchlist secrets
+- [x] 3.1 The focused authentication and watchlist suite passes without production credentials or network access
+- [x] 3.2 The production project test command passes and repository checks find no tracked watchlist secrets
 
 #### Manual
 

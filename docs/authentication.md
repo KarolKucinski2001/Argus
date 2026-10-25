@@ -130,7 +130,8 @@ In **Configuration → Application settings**, add the same five names:
 `Entra__Authority`, `Entra__TenantId`, `Entra__ClientId`,
 `Entra__ClientSecret`, and `Entra__CallbackPath`. Keep the secret restricted
 according to the deployment policy, then save and restart the app. Do not put
-the secret in workflow files or shared scripts.
+the secret in workflow files or shared scripts. Watchlist storage settings are
+documented in `docs/watchlist.md`.
 
 For the default App Service hostname, register:
 
