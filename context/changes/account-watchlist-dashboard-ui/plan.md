@@ -199,8 +199,8 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [x] 4.1 Full test suites pass and the literal scan on changed views is empty
-- [x] 4.2 UI rule added to AGENTS.md outside the 10x CLI block
+- [x] 4.1 Full test suites pass and the literal scan on changed views is empty — 354be2d
+- [x] 4.2 UI rule added to AGENTS.md outside the 10x CLI block — 354be2d
 
 #### Manual
 
