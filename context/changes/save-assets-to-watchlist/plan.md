@@ -419,8 +419,8 @@ than creating a process-local substitute.
 
 #### Automated
 
-- [x] 3.1 The focused authentication and watchlist suite passes without production credentials or network access
-- [x] 3.2 The production project test command passes and repository checks find no tracked watchlist secrets
+- [x] 3.1 The focused authentication and watchlist suite passes without production credentials or network access — 42d4ae2
+- [x] 3.2 The production project test command passes and repository checks find no tracked watchlist secrets — 42d4ae2
 
 #### Manual
 
