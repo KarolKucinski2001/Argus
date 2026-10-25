@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
+using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Watchlist;
 
 namespace Argus.Authentication.Tests;
@@ -130,8 +131,46 @@ public sealed class WatchlistContractTests
         Assert.Empty((await factory.Store.ListAsync("test-subject")).Entries);
     }
 
-    private static async Task<string> GetAntiforgeryTokenAsync(
-        HttpClient client,
+    [Fact]
+    public async Task Watchlist_renders_saved_asset_with_signed_change_from_market_data()
+    {
+        await using var factory = new WatchlistTestFactory(new StaticMarketDataService());
+        await factory.Store.SaveAsync("test-subject", ["AAPL"]);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/watchlist");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("AAPL", html);
+        Assert.Matches("watchlist-tone--positive\">(\\+|&#x2B;)[0-9]+,[0-9]{2}%", html);
+        Assert.Matches("name=\"SelectedAssetIds\"\\s+value=\"AAPL\"", html);
+    }
+
+    [Fact]
+    public async Task Watchlist_still_renders_rows_when_market_data_fails()
+    {
+        await using var factory = new WatchlistTestFactory(new ThrowingMarketDataService());
+        await factory.Store.SaveAsync("test-subject", ["AAPL"]);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        using var response = await client.GetAsync("/watchlist");
+        var html = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("AAPL", html);
+        Assert.Contains("brak danych", html);
+    }
+
+    private static async Task<string> GetAntiforgeryTokenAsync(        HttpClient client,
         string path = "/analysis")
     {
         using var response = await client.GetAsync(path);
@@ -163,7 +202,8 @@ internal sealed class UnauthenticatedWatchlistFactory : WebApplicationFactory<Pr
     }
 }
 
-internal sealed class WatchlistTestFactory : WebApplicationFactory<Program>
+internal sealed class WatchlistTestFactory(IMarketDataService? marketDataService = null)
+    : WebApplicationFactory<Program>
 {
     public InMemoryWatchlistStore Store { get; } = new();
 
@@ -193,6 +233,11 @@ internal sealed class WatchlistTestFactory : WebApplicationFactory<Program>
             });
             services.RemoveAll<IWatchlistStore>();
             services.AddSingleton<IWatchlistStore>(Store);
+            if (marketDataService is not null)
+            {
+                services.RemoveAll<IMarketDataService>();
+                services.AddSingleton(marketDataService);
+            }
         });
     }
 }
@@ -260,5 +305,41 @@ internal sealed class InMemoryWatchlistStore : IWatchlistStore
         return Task.FromResult(new WatchlistRemoveResult(
             normalized,
             WatchlistRemoveStatus.Removed));
+    }
+}
+
+internal sealed class ThrowingMarketDataService : IMarketDataService
+{
+    public Task<MarketDataServiceResult> GetAsync(
+        MarketDataRequest? request,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("market data unavailable");
+}
+
+internal sealed class StaticMarketDataService : IMarketDataService
+{
+    public Task<MarketDataServiceResult> GetAsync(
+        MarketDataRequest? request,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var results = request!.Assets.Select(asset => new MarketDataResult(
+            asset,
+            request.History,
+            new MarketQuote(
+                110m,
+                "USD",
+                now,
+                new MarketDataFreshness(now, now, now.AddHours(1), false),
+                MarketDataQuality.Complete),
+            Enumerable.Range(1, 45)
+                .Select(day => new HistoricalPricePoint(
+                    now.AddDays(-day), null, null, null, 100m, null, "USD", false))
+                .ToArray(),
+            new MarketDataSource("test", null, false, null),
+            new MarketDataFreshness(now, now, now.AddHours(1), false),
+            MarketDataQuality.Complete,
+            [])).ToArray();
+        return Task.FromResult(MarketDataServiceResult.Success(new MarketDataResponse(results)));
     }
 }

@@ -14,14 +14,18 @@ namespace _bootstrap_scaffold.Pages.Watchlist;
 [AllowAnonymous]
 public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredMarketData,
-    IWatchlistStore watchlistStore) : PageModel
+    IWatchlistStore watchlistStore,
+    IMarketDataService marketDataService,
+    IAnalysisService analysisService,
+    ILogger<IndexModel> logger) : PageModel
 {
     private readonly MarketDataOptions marketData = configuredMarketData.Value;
 
     [BindProperty]
     public string[] SelectedAssetIds { get; set; } = [];
 
-    public IReadOnlyList<WatchlistRow> Rows { get; private set; } = [];
+    public IReadOnlyList<WatchlistRowView> Rows { get; private set; } = [];
+    public WatchlistMoversView Movers { get; private set; } = new([], []);
     public string? Message { get; private set; }
     public bool IsError { get; private set; }
 
@@ -86,19 +90,88 @@ public sealed class IndexModel(
             return;
         }
 
-        Rows = WatchlistPolicy.OrderEntries(result.Entries).Select(entry =>
+        var entries = WatchlistPolicy.OrderEntries(result.Entries).ToArray();
+        var snapshots = await LoadSnapshotsAsync(
+            entries.Where(entry => marketData.AllowedAssets.ContainsKey(entry.AssetId)),
+            cancellationToken);
+
+        Rows = entries.Select(entry =>
         {
             var isAvailable = marketData.AllowedAssets.TryGetValue(entry.AssetId, out var assetClass);
             var identity = AssetIdentityCatalog.For(entry.AssetId);
-            return new WatchlistRow(
+            snapshots.TryGetValue(entry.AssetId, out var snapshot);
+            return WatchlistTablePresenter.BuildRow(
                 entry.AssetId,
                 identity.Name,
                 isAvailable ? assetClass.ToString() : "Niedostępne",
                 entry.SavedAtUtc,
-                isAvailable);
+                isAvailable,
+                snapshot);
         }).ToArray();
+        Movers = WatchlistTablePresenter.BuildMovers(Rows);
     }
 
+    private async Task<IReadOnlyDictionary<string, WatchlistMarketSnapshot>> LoadSnapshotsAsync(
+        IEnumerable<WatchlistEntry> availableEntries,
+        CancellationToken cancellationToken)
+    {
+        var snapshots = new Dictionary<string, WatchlistMarketSnapshot>(StringComparer.OrdinalIgnoreCase);
+        var assets = availableEntries
+            .Select(entry => new AssetReference(
+                entry.AssetId,
+                entry.AssetId,
+                marketData.AllowedAssets[entry.AssetId]))
+            .ToArray();
+        if (assets.Length == 0)
+        {
+            return snapshots;
+        }
+
+        try
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var request = new MarketDataRequest(
+                assets,
+                new MarketDataHistoryRequest(
+                    today.AddMonths(-MarketDataOptions.RequiredHistoryMonths),
+                    today,
+                    MarketDataGranularity.Daily));
+            var response = await marketDataService.GetAsync(request, cancellationToken);
+            if (!response.Succeeded)
+            {
+                return snapshots;
+            }
+
+            var quotes = response.Response!.Results
+                .Where(item => item.CurrentQuote is not null)
+                .ToDictionary(item => item.Asset.Id, item => item.CurrentQuote!, StringComparer.OrdinalIgnoreCase);
+            var analysis = analysisService.Analyze(
+                response.Response,
+                DateTimeOffset.UtcNow);
+            foreach (var item in analysis.Results.Where(item => item.Error is null))
+            {
+                quotes.TryGetValue(item.Asset.Id, out var quote);
+                snapshots[item.Asset.Id] = new WatchlistMarketSnapshot(
+                    quote?.Value,
+                    quote?.Currency,
+                    Available(item.Performance.Change24Hours),
+                    Available(item.Performance.Change7Days),
+                    Available(item.Performance.Change30Days),
+                    AnalysisInsightPresenter.Present(item).Sparkline);
+            }
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // Market data is decoration here; the saved list must still render.
+            logger.LogWarning(exception, "Market data for the watchlist table failed.");
+            snapshots.Clear();
+        }
+
+        return snapshots;
+    }
+
+    private static decimal? Available(PerformanceMetric metric) =>
+        metric.IsAvailable ? metric.Percentage : null;
     private bool EnsureAuthenticated() => User.Identity?.IsAuthenticated ?? false;
 
     private string GetSubjectId() =>
@@ -106,10 +179,3 @@ public sealed class IndexModel(
         User.FindFirstValue(ClaimTypes.NameIdentifier) ??
         throw new InvalidOperationException("Authenticated subject unavailable.");
 }
-
-public sealed record WatchlistRow(
-    string AssetId,
-    string Name,
-    string AssetClass,
-    DateTimeOffset SavedAtUtc,
-    bool IsAvailable);

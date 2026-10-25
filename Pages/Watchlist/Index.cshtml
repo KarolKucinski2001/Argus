@@ -5,12 +5,33 @@
     ViewData["Title"] = "Lista obserwowanych";
 }
 
+@using _bootstrap_scaffold.Watchlist
+@functions {
+    private static string Tone(WatchlistTone tone) => WatchlistTablePresenter.ToneClass(tone);
+}
+
 <section class="watchlist-page" aria-labelledby="watchlist-title">
     <header class="watchlist-page__header">
-        <p class="eyebrow">Twoje aktywa</p>
-        <h1 id="watchlist-title">Lista obserwowanych</h1>
-        <p>Przeglądaj zapisane aktywa i uruchamiaj analizę na podstawie wybranych danych.</p>
+        <div class="watchlist-page__heading">
+            <h1 id="watchlist-title">Lista obserwowanych</h1>
+            <p>Śledź wybrane aktywa i uruchamiaj analizę na podstawie danych rynkowych.</p>
+        </div>
+        <a class="button" asp-page="/Analysis/Index">Dodaj aktywo</a>
     </header>
+
+    <ul class="watchlist-tabs" aria-label="Listy obserwowanych">
+        <li class="watchlist-tab watchlist-tab--active" aria-current="true">
+            <strong>Moja lista</strong>
+            <span>@Model.Rows.Count @(Model.Rows.Count == 1 ? "aktywo" : "aktywa")</span>
+        </li>
+        @foreach (var placeholder in new[] { "Giganci technologiczni", "Krypto", "Energia", "+ Nowa lista" })
+        {
+            <li class="watchlist-tab watchlist-tab--placeholder" aria-disabled="true">
+                <strong>@placeholder</strong>
+                <span class="watchlist-badge">Przykład</span>
+            </li>
+        }
+    </ul>
 
     @if (Model.Message is not null)
     {
@@ -28,54 +49,139 @@
             <a class="button" asp-page="/Analysis/Index">Przejdź do analizy</a>
         </div>
     }
-    else
+    else if (Model.Rows.Count > 0)
     {
         <form method="post" asp-page="/Analysis/Index" asp-page-handler="Analyze" class="watchlist-form">
-            <div class="watchlist-list">
-                @foreach (var row in Model.Rows)
-                {
-                    <article class="watchlist-row @(row.IsAvailable ? null : "watchlist-row--unavailable")">
-                        <div class="watchlist-row__selection">
-                            @if (row.IsAvailable)
+            <section class="watchlist-card" aria-labelledby="watchlist-table-title">
+                <header class="watchlist-card__header">
+                    <h2 id="watchlist-table-title">Moja lista</h2>
+                    <p>@Model.Rows.Count @(Model.Rows.Count == 1 ? "aktywo" : "aktywa")</p>
+                </header>
+                <div class="watchlist-table-scroll">
+                    <table class="watchlist-table">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="visually-hidden">Wybierz do analizy</span></th>
+                                <th scope="col">Symbol</th>
+                                <th scope="col">Nazwa</th>
+                                <th scope="col" class="watchlist-table__number">Ostatnia cena</th>
+                                <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
+                                <th scope="col" class="watchlist-table__number">7d</th>
+                                <th scope="col" class="watchlist-table__number">30d</th>
+                                <th scope="col">Trend</th>
+                                <th scope="col" class="watchlist-table__number">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Rows)
                             {
-                                <input type="checkbox"
-                                       name="SelectedAssetIds"
-                                       value="@row.AssetId"
-                                       id="watchlist-@row.AssetId" />
+                                <tr class="@(row.IsAvailable ? null : "watchlist-table__row--unavailable")">
+                                    <td>
+                                        @if (row.IsAvailable)
+                                        {
+                                            <input type="checkbox"
+                                                   name="SelectedAssetIds"
+                                                   value="@row.AssetId"
+                                                   id="watchlist-@row.AssetId"
+                                                   aria-label="Wybierz @row.AssetId do analizy" />
+                                        }
+                                    </td>
+                                    <th scope="row" class="watchlist-table__symbol">
+                                        <partial name="_AssetGlyph" model="row.AssetId" />
+                                        <span>@row.AssetId</span>
+                                        @if (!row.IsAvailable)
+                                        {
+                                            <span class="watchlist-row__status">Niedostępne</span>
+                                        }
+                                    </th>
+                                    <td>@row.Name</td>
+                                    <td class="watchlist-table__number">@row.PriceText</td>
+                                    <td class="watchlist-table__number @Tone(row.Change24Hours.Tone)">@row.Change24Hours.Text</td>
+                                    <td class="watchlist-table__number @Tone(row.Change7Days.Tone)">@row.Change7Days.Text</td>
+                                    <td class="watchlist-table__number @Tone(row.Change30Days.Tone)">@row.Change30Days.Text</td>
+                                    <td>
+                                        @if (row.Sparkline is { } sparkline)
+                                        {
+                                            <span class="watchlist-sparkline @Tone(row.Change24Hours.Tone)">
+                                                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {row.Name}" }' />
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="watchlist-tone--unavailable">brak danych</span>
+                                        }
+                                    </td>
+                                    <td class="watchlist-table__number">
+                                        <button class="button button--secondary watchlist-table__remove"
+                                                type="submit"
+                                                formaction="/watchlist?handler=Remove"
+                                                name="assetId"
+                                                value="@row.AssetId">
+                                            Usuń
+                                        </button>
+                                    </td>
+                                </tr>
                             }
-                            <div>
-                                @if (row.IsAvailable)
-                                {
-                                    <label for="watchlist-@row.AssetId"><strong>@row.Name</strong></label>
-                                }
-                                else
-                                {
-                                    <strong>@row.Name</strong>
-                                }
-                                <span>@row.AssetId · @row.AssetClass</span>
-                            </div>
-                        </div>
-                        <div class="watchlist-row__meta">
-                            @if (!row.IsAvailable)
-                            {
-                                <span class="watchlist-row__status">Niedostępne</span>
-                            }
-                            <time datetime="@row.SavedAtUtc.ToString("O")">
-                                @row.SavedAtUtc.ToLocalTime().ToString("g")
-                            </time>
-                            <button class="button button--secondary"
-                                    type="submit"
-                            formaction="/watchlist?handler=Remove"
-                                    name="assetId"
-                                    value="@row.AssetId">
-                                Usuń
-                            </button>
-                        </div>
-                    </article>
-                }
-            </div>
-            <button class="button" type="submit">Generuj ranking</button>
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="watchlist-card__footer">
+                    <button class="button" type="submit">Generuj ranking</button>
+                </footer>
+            </section>
         </form>
+
+        <div class="watchlist-panels">
+            <section class="watchlist-card watchlist-card--padded" aria-labelledby="watchlist-performance-title">
+                <header class="watchlist-card__header watchlist-card__header--inline">
+                    <h2 id="watchlist-performance-title">Wyniki listy</h2>
+                    <span class="watchlist-badge">Przykładowe dane</span>
+                </header>
+                <p class="watchlist-legend">
+                    <span>Moja lista</span>
+                    <span>S&amp;P 500</span>
+                </p>
+                <p class="watchlist-placeholder" role="note">
+                    Wykres porównujący listę z indeksem S&amp;P 500 nie jest jeszcze dostępny. Nie pokazujemy wymyślonych wartości.
+                </p>
+            </section>
+
+            <section class="watchlist-card watchlist-card--padded" aria-labelledby="watchlist-movers-title">
+                <header class="watchlist-card__header">
+                    <h2 id="watchlist-movers-title">Najwięksi ruszyciele</h2>
+                    <p>Zmiana 24h</p>
+                </header>
+                <div class="watchlist-movers">
+                    @foreach (var group in new[]
+                    {
+                        (Title: "Zyskujące", Items: Model.Movers.Gainers),
+                        (Title: "Tracące", Items: Model.Movers.Losers)
+                    })
+                    {
+                        <div class="watchlist-movers__group">
+                            <h3>@group.Title</h3>
+                            @if (group.Items.Count == 0)
+                            {
+                                <p class="watchlist-placeholder">brak danych</p>
+                            }
+                            else
+                            {
+                                <ol class="watchlist-movers__list">
+                                    @foreach (var mover in group.Items)
+                                    {
+                                        <li>
+                                            <partial name="_AssetGlyph" model="mover.AssetId" />
+                                            <span>@mover.AssetId</span>
+                                            <span class="@Tone(mover.Tone)">@mover.ChangeText</span>
+                                        </li>
+                                    }
+                                </ol>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
     }
 
     <p class="watchlist-page__boundary">

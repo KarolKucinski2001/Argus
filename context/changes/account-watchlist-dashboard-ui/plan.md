@@ -166,8 +166,8 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [x] 1.1 Build and focused tests pass with the new shell and relocated partials
-- [x] 1.2 Hard-coded value scan on layout and partials finds no literals
+- [x] 1.1 Build and focused tests pass with the new shell and relocated partials — d5b0d33
+- [x] 1.2 Hard-coded value scan on layout and partials finds no literals — d5b0d33
 
 #### Manual
 
@@ -177,9 +177,9 @@ changed views shows 0 hits.
 
 #### Automated
 
-- [ ] 2.1 Presenter unit tests cover formatting, mover ordering, and missing data
-- [ ] 2.2 Watchlist contract tests pass for table data, remove, empty, and handoff
-- [ ] 2.3 Focused suite and production project test command pass
+- [x] 2.1 Presenter unit tests cover formatting, mover ordering, and missing data
+- [x] 2.2 Watchlist contract tests pass for table data, remove, empty, and handoff
+- [x] 2.3 Focused suite and production project test command pass
 
 #### Manual
 
