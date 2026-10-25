@@ -94,6 +94,8 @@
     --color-selected-surface: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
     --asset-option-selected-bar: 0.25rem;
     --asset-option-glyph-size: 2rem;
+    --asset-glyph-size: 2rem;
+    --asset-glyph-radius: var(--radius-sm);
     --asset-option-ticker-size: 0.75rem;
     --summary-strip-item-min: 9rem;
     --summary-strip-label-size: 0.8125rem;
@@ -1890,6 +1892,15 @@ a.account-quick-action:focus-visible {
     inline-size: var(--asset-glyph-svg-size);
     block-size: var(--asset-glyph-svg-size);
     fill: currentColor;
+}
+
+.dashboard-tile__name > .asset-glyph,
+.watchlist-table__symbol > .asset-glyph,
+.watchlist-movers__list > li > .asset-glyph {
+    flex: none;
+    inline-size: var(--asset-glyph-size);
+    block-size: var(--asset-glyph-size);
+    border-radius: var(--asset-glyph-radius);
 }
 
 .asset-option__monogram {

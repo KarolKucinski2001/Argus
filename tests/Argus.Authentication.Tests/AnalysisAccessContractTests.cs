@@ -111,7 +111,7 @@ public sealed class AnalysisAccessContractTests
             "<span class=\"asset-glyph asset-accent--microsoft\" data-asset-glyph=\"MSFT\">\\s*<svg class=\"asset-glyph__svg\"",
             html);
         Assert.Matches(
-            "<span class=\"asset-glyph asset-accent--bitcoin\" data-asset-glyph=\"BTC-USD\">\\s*<span class=\"asset-glyph__monogram\">₿</span>",
+            "<span class=\"asset-glyph asset-accent--bitcoin\" data-asset-glyph=\"BTC-USD\">\\s*<svg class=\"asset-glyph__svg\"",
             html);
         Assert.Matches(
             "<span class=\"asset-glyph asset-accent--nvidia\" data-asset-glyph=\"NVDA\">\\s*<svg class=\"asset-glyph__svg\"[^>]*aria-hidden=\"true\"",
@@ -121,7 +121,7 @@ public sealed class AnalysisAccessContractTests
             html);
         Assert.Matches("<span class=\"insight-card__monogram\" aria-hidden=\"true\">\\s*<span class=\"asset-glyph", html);
         Assert.Matches(
-            "<span class=\"asset-glyph asset-accent--ethereum\" data-asset-glyph=\"ETH-USD\">\\s*<span class=\"asset-glyph__monogram\">Ξ</span>",
+            "<span class=\"asset-glyph asset-accent--ethereum\" data-asset-glyph=\"ETH-USD\">\\s*<svg class=\"asset-glyph__svg\"",
             html);
         Assert.DoesNotMatch("<svg class=\"asset-glyph__svg\"[^>]*(fill|stroke)=", html);
     }
