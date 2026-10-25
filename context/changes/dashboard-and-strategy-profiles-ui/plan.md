@@ -84,8 +84,8 @@ and `/strategies`; full test suites.
 ### Phase 1: Navigation and /dashboard
 
 #### Automated
-- [x] 1.1 Contract and presenter tests pass for nav and /dashboard
-- [x] 1.2 Literal scan on changed views is empty
+- [x] 1.1 Contract and presenter tests pass for nav and /dashboard — 74b4680
+- [x] 1.2 Literal scan on changed views is empty — 74b4680
 
 #### Manual
 - [ ] 1.3 /dashboard matches the mockup at desktop and one mobile width
@@ -93,8 +93,8 @@ and `/strategies`; full test suites.
 ### Phase 2: /strategies
 
 #### Automated
-- [x] 2.1 Catalog and contract tests pass
-- [x] 2.2 Literal scan on changed views is empty
+- [x] 2.1 Catalog and contract tests pass — 74b4680
+- [x] 2.2 Literal scan on changed views is empty — 74b4680
 
 #### Manual
 - [ ] 2.3 /strategies matches the mockup at desktop and one mobile width
@@ -102,8 +102,8 @@ and `/strategies`; full test suites.
 ### Phase 3: States and guardrails
 
 #### Automated
-- [x] 3.1 State fixture tests and full suites pass
-- [x] 3.2 AGENTS.md UI rule extended
+- [x] 3.1 State fixture tests and full suites pass — 74b4680
+- [x] 3.2 AGENTS.md UI rule extended — 74b4680
 
 #### Manual
 - [ ] 3.3 Final visual review of both views
