@@ -224,8 +224,8 @@ None; no stored data changes.
 
 #### Automated
 
-- [x] 1.1 Solution builds: `dotnet build .bootstrap-scaffold.csproj --no-restore`
-- [x] 1.2 Presenter unit tests (ordering, limits, tie-break, missing data) pass
+- [x] 1.1 Solution builds: `dotnet build .bootstrap-scaffold.csproj --no-restore` — 5c80324
+- [x] 1.2 Presenter unit tests (ordering, limits, tie-break, missing data) pass — 5c80324
 
 #### Manual
 
@@ -235,9 +235,9 @@ None; no stored data changes.
 
 #### Automated
 
-- [x] 2.1 Literal scan of `Pages/Dashboard/Index.cshtml` finds no colors or arbitrary sizes
-- [x] 2.2 Contract tests for rows, empty state, storage failure, market failure and unavailable assets pass
-- [x] 2.3 Whole auth test project passes in Release
+- [x] 2.1 Literal scan of `Pages/Dashboard/Index.cshtml` finds no colors or arbitrary sizes — 5c80324
+- [x] 2.2 Contract tests for rows, empty state, storage failure, market failure and unavailable assets pass — 5c80324
+- [x] 2.3 Whole auth test project passes in Release — 5c80324
 
 #### Manual
 
@@ -248,8 +248,8 @@ None; no stored data changes.
 
 #### Automated
 
-- [x] 3.1 Wording test (no advice terms) covers new dashboard copy and passes
-- [x] 3.2 Full auth test project passes in Release
+- [x] 3.1 Wording test (no advice terms) covers new dashboard copy and passes — 5c80324
+- [x] 3.2 Full auth test project passes in Release — 5c80324
 
 #### Manual
 
