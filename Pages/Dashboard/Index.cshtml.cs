@@ -15,6 +15,7 @@ namespace _bootstrap_scaffold.Pages.Dashboard;
 [AllowAnonymous]
 public sealed class IndexModel(
     IOptions<MarketDataOptions> configuredMarketData,
+    IWatchlistStore watchlistStore,
     IMarketDataService marketDataService,
     IAnalysisService analysisService,
     ILogger<IndexModel> logger) : PageModel
@@ -24,6 +25,11 @@ public sealed class IndexModel(
     public string Greeting { get; private set; } = DashboardPresenter.Greeting(null);
     public IReadOnlyList<DashboardMarketTile> Tiles { get; private set; } = [];
     public bool MarketUnavailable { get; private set; }
+    public IReadOnlyList<WatchlistRowView> WatchlistRows { get; private set; } = [];
+    public IReadOnlyList<DashboardInsightView> Insights { get; private set; } = [];
+    public bool WatchlistFailed { get; private set; }
+    public bool WatchlistEmpty { get; private set; }
+    public bool WatchlistHasMore { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
@@ -38,22 +44,69 @@ public sealed class IndexModel(
         var email = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email");
         Greeting = DashboardPresenter.Greeting(DashboardPresenter.FirstName(displayName, email));
 
-        var snapshots = await LoadSnapshotsAsync(cancellationToken);
-        Tiles = DashboardPresenter.BuildTiles(marketData.AllowedAssets.Keys, snapshots);
+        var entries = await ListWatchlistAsync(cancellationToken);
+        var availableWatchlistIds = entries
+            .Select(entry => entry.AssetId)
+            .Where(marketData.AllowedAssets.ContainsKey)
+            .ToArray();
+
+        var market = await LoadMarketAsync(availableWatchlistIds, cancellationToken);
+        Tiles = DashboardPresenter.BuildTiles(marketData.AllowedAssets.Keys, market.Snapshots);
         MarketUnavailable = DashboardPresenter.IsMarketUnavailable(Tiles);
+
+        WatchlistEmpty = !WatchlistFailed && entries.Count == 0;
+        WatchlistHasMore = DashboardPresenter.HasMoreRows(entries.Count);
+        WatchlistRows = DashboardPresenter.BuildWatchlistRows(
+            entries, marketData.AllowedAssets.Keys, market.Snapshots);
+        Insights = DashboardPresenter.BuildInsights(
+            market.Insights.Where(insight => availableWatchlistIds.Contains(
+                insight.Identity.Id, StringComparer.OrdinalIgnoreCase)));
         return Page();
     }
 
-    private async Task<IReadOnlyDictionary<string, WatchlistMarketSnapshot>> LoadSnapshotsAsync(
+    private async Task<IReadOnlyList<WatchlistEntry>> ListWatchlistAsync(
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var subjectId = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (subjectId is null)
+            {
+                WatchlistFailed = true;
+                return [];
+            }
+
+            var result = await watchlistStore.ListAsync(subjectId, cancellationToken);
+            if (!result.Succeeded)
+            {
+                WatchlistFailed = true;
+                return [];
+            }
+
+            return WatchlistPolicy.OrderEntries(result.Entries);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            logger.LogWarning(exception, "Watchlist for the dashboard failed.");
+            WatchlistFailed = true;
+            return [];
+        }
+    }
+
+    private async Task<(IReadOnlyDictionary<string, WatchlistMarketSnapshot> Snapshots, IReadOnlyList<AssetInsightView> Insights)> LoadMarketAsync(
+        IEnumerable<string> watchlistAssetIds,
         CancellationToken cancellationToken)
     {
         var snapshots = new Dictionary<string, WatchlistMarketSnapshot>(StringComparer.OrdinalIgnoreCase);
+        var insights = new List<AssetInsightView>();
         var assets = DashboardPresenter.RequestableAssetIds(marketData.AllowedAssets.Keys)
+            .Concat(watchlistAssetIds)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Select(assetId => new AssetReference(assetId, assetId, marketData.AllowedAssets[assetId]))
             .ToArray();
         if (assets.Length == 0)
         {
-            return snapshots;
+            return (snapshots, insights);
         }
 
         try
@@ -68,7 +121,7 @@ public sealed class IndexModel(
             var response = await marketDataService.GetAsync(request, cancellationToken);
             if (!response.Succeeded)
             {
-                return snapshots;
+                return (snapshots, insights);
             }
 
             var quotes = response.Response!.Results
@@ -78,23 +131,26 @@ public sealed class IndexModel(
             foreach (var item in analysis.Results.Where(item => item.Error is null))
             {
                 quotes.TryGetValue(item.Asset.Id, out var quote);
+                var insight = AnalysisInsightPresenter.Present(item);
+                insights.Add(insight);
                 snapshots[item.Asset.Id] = new WatchlistMarketSnapshot(
                     quote?.Value,
                     quote?.Currency,
                     Available(item.Performance.Change24Hours),
                     Available(item.Performance.Change7Days),
                     Available(item.Performance.Change30Days),
-                    AnalysisInsightPresenter.Present(item).Sparkline);
+                    insight.Sparkline);
             }
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            // Market overview is decoration here; the rest of the dashboard must still render.
-            logger.LogWarning(exception, "Market data for the dashboard overview failed.");
+            // Market data is decoration here; the rest of the dashboard must still render.
+            logger.LogWarning(exception, "Market data for the dashboard failed.");
             snapshots.Clear();
+            insights.Clear();
         }
 
-        return snapshots;
+        return (snapshots, insights);
     }
 
     private static decimal? Available(PerformanceMetric metric) =>

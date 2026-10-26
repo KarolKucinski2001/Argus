@@ -11,35 +11,21 @@ public sealed record DashboardMarketTile(
     SparklineView? Sparkline,
     bool HasData);
 
-public sealed record DashboardInsightView(string Title, string Text, string Age, string Monogram);
+public sealed record DashboardInsightView(string AssetId, string Name, string Text, string? TrendLabel);
 
 public static class DashboardPresenter
 {
     public const string UnavailableMessage =
         "Dane rynkowe są obecnie niedostępne. Pozostałe sekcje pulpitu działają normalnie.";
 
+    public const int MaximumWatchlistRows = 5;
+    public const int MaximumInsights = 3;
+    public const string WatchlistFailedMessage =
+        "Nie udało się pobrać listy obserwowanych aktywów. Pozostałe sekcje pulpitu działają normalnie.";
+
     private static readonly string[] MarketAssets = ["AAPL", "MSFT", "NVDA", "BTC-USD", "ETH-USD"];
 
     public static IReadOnlyList<string> MarketAssetIds => MarketAssets;
-
-    public static IReadOnlyList<DashboardInsightView> SampleInsights { get; } =
-    [
-        new(
-            "Zmiany w sektorze technologicznym",
-            "Przykładowy opis: spółki technologiczne w obserwowanym zbiorze zmieniały się w podobnym kierunku.",
-            "2 godz. temu",
-            "T"),
-        new(
-            "Aktywność osób z wewnątrz spółek",
-            "Przykładowy opis: zgłoszenia transakcji zarządów dotyczą kilku spółek w ostatnim miesiącu.",
-            "5 godz. temu",
-            "I"),
-        new(
-            "Ujawnienia członków Kongresu",
-            "Przykładowy opis: opublikowano nowe zgłoszenia dotyczące spółek z sektora technologicznego.",
-            "1 dzień temu",
-            "K")
-    ];
 
     public static string? FirstName(string? displayName, string? email)
     {
@@ -89,6 +75,41 @@ public static class DashboardPresenter
                 snapshot?.LastPrice is not null);
         }).ToArray();
     }
+
+    public static bool HasMoreRows(int totalCount) => totalCount > MaximumWatchlistRows;
+
+    public static IReadOnlyList<WatchlistRowView> BuildWatchlistRows(
+        IEnumerable<WatchlistEntry> orderedEntries,
+        IEnumerable<string> allowedAssetIds,
+        IReadOnlyDictionary<string, WatchlistMarketSnapshot> snapshots)
+    {
+        var allowed = new HashSet<string>(allowedAssetIds, StringComparer.OrdinalIgnoreCase);
+        return orderedEntries.Take(MaximumWatchlistRows).Select(entry =>
+        {
+            var isAvailable = allowed.Contains(entry.AssetId);
+            snapshots.TryGetValue(entry.AssetId, out var snapshot);
+            return WatchlistTablePresenter.BuildRow(
+                entry.AssetId,
+                AssetIdentityCatalog.For(entry.AssetId).Name,
+                isAvailable ? "Dostępne" : "Niedostępne",
+                entry.SavedAtUtc,
+                isAvailable,
+                snapshot);
+        }).ToArray();
+    }
+
+    public static IReadOnlyList<DashboardInsightView> BuildInsights(IEnumerable<AssetInsightView> insights) =>
+        insights
+            .Where(insight => insight.SevenDayChange.HasValue)
+            .OrderByDescending(insight => Math.Abs(insight.SevenDayChange!.Value))
+            .ThenBy(insight => insight.Identity.Id, StringComparer.Ordinal)
+            .Take(MaximumInsights)
+            .Select(insight => new DashboardInsightView(
+                insight.Identity.Id,
+                insight.Identity.Name,
+                insight.WhyBullets.FirstOrDefault() ?? insight.Takeaway,
+                insight.TrendLabel))
+            .ToArray();
 
     public static bool IsMarketUnavailable(IEnumerable<DashboardMarketTile> tiles) =>
         !tiles.Any(tile => tile.HasData);

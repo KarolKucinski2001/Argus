@@ -36,7 +36,7 @@ public sealed class DashboardAndStrategiesContractTests
     }
 
     [Fact]
-    public async Task Dashboard_renders_greeting_sidebar_and_sample_badge()
+    public async Task Dashboard_renders_greeting_sidebar_and_placeholder_badges()
     {
         await using var factory = new WatchlistTestFactory(new StaticMarketDataService());
         using var client = factory.CreateClient(ClientOptions);
@@ -57,12 +57,96 @@ public sealed class DashboardAndStrategiesContractTests
         Assert.Contains("Large Funds", html);
         Assert.DoesNotContain(DashboardPresenter.UnavailableMessage, html);
         Assert.DoesNotMatch(AdviceWording, html);
+
+        var insights = Regex.Match(html, "(?s)<section[^>]*aria-labelledby=\"dashboard-insights-title\".*?</section>").Value;
+        Assert.Contains("Najważniejsze wnioski", insights);
+        Assert.DoesNotContain("Przykładowe dane", insights);
+        Assert.True(
+            html.IndexOf("dashboard-watchlist-title", StringComparison.Ordinal) <
+            html.IndexOf("dashboard-market-title", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Dashboard_renders_watchlist_rows_and_insights_for_saved_assets()
+    {
+        await using var factory = new WatchlistTestFactory(new StaticMarketDataService());
+        await factory.Store.SaveAsync("test-subject", ["AAPL", "MSFT"]);
+        using var client = factory.CreateClient(ClientOptions);
+
+        using var response = await client.GetAsync("/dashboard");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Twoja lista obserwowanych", html);
+        Assert.Contains("data-dashboard-row=\"AAPL\"", html);
+        Assert.Contains("data-dashboard-row=\"MSFT\"", html);
+        Assert.Contains("data-dashboard-insight=\"AAPL\"", html);
+        Assert.Contains("data-dashboard-insight=\"MSFT\"", html);
+        Assert.Contains("+10,00%", html);
+        Assert.Contains("href=\"/watchlist\"", html);
+        Assert.DoesNotContain("Lista obserwowanych jest pusta", html);
+        Assert.DoesNotMatch(AdviceWording, html);
+    }
+
+    [Fact]
+    public async Task Dashboard_shows_empty_state_with_analysis_link()
+    {
+        await using var factory = new WatchlistTestFactory(new StaticMarketDataService());
+        using var client = factory.CreateClient(ClientOptions);
+
+        using var response = await client.GetAsync("/dashboard");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Lista obserwowanych jest pusta", html);
+        Assert.Contains("href=\"/analysis\">Przejdź do analizy", html);
+        Assert.DoesNotContain("data-dashboard-row=", html);
+        Assert.DoesNotContain("data-dashboard-insight=", html);
+    }
+
+    [Fact]
+    public async Task Dashboard_degrades_when_watchlist_store_fails()
+    {
+        await using var factory = new WatchlistTestFactory(
+            new StaticMarketDataService(),
+            new FailingWatchlistStore());
+        using var client = factory.CreateClient(ClientOptions);
+
+        using var response = await client.GetAsync("/dashboard");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(DashboardPresenter.WatchlistFailedMessage, html);
+        Assert.DoesNotContain("Lista obserwowanych jest pusta", html);
+        Assert.Contains("data-market-tile=\"AAPL\"", html);
+        Assert.Contains("Poznaj profile strategii", html);
+    }
+
+    [Fact]
+    public async Task Dashboard_shows_unavailable_saved_asset_without_requesting_it()
+    {
+        var market = new RecordingMarketDataService();
+        await using var factory = new WatchlistTestFactory(market);
+        await factory.Store.SaveAsync("test-subject", ["DELISTED", "AAPL"]);
+        using var client = factory.CreateClient(ClientOptions);
+
+        using var response = await client.GetAsync("/dashboard");
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("data-dashboard-row=\"DELISTED\"", html);
+        Assert.Contains("Niedostępne", html);
+        Assert.DoesNotContain("data-dashboard-insight=\"DELISTED\"", html);
+        Assert.Equal(1, market.Calls);
+        Assert.DoesNotContain("DELISTED", market.RequestedIds);
+        Assert.Contains("AAPL", market.RequestedIds);
     }
 
     [Fact]
     public async Task Dashboard_degrades_when_market_data_fails()
     {
         await using var factory = new WatchlistTestFactory(new ThrowingMarketDataService());
+        await factory.Store.SaveAsync("test-subject", ["AAPL"]);
         using var client = factory.CreateClient(ClientOptions);
 
         using var response = await client.GetAsync("/dashboard");
@@ -70,7 +154,9 @@ public sealed class DashboardAndStrategiesContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains(DashboardPresenter.UnavailableMessage, html);
+        Assert.Contains("data-dashboard-row=\"AAPL\"", html);
         Assert.Contains("brak danych", html);
+        Assert.DoesNotContain("data-dashboard-insight=", html);
         Assert.Contains("Poznaj profile strategii", html);
     }
 
@@ -237,13 +323,101 @@ public sealed class DashboardAndStrategiesContractTests
     [Fact]
     public void Catalog_and_dashboard_copy_has_no_advice_wording()
     {
+        var insights = DashboardPresenter.BuildInsights(
+        [
+            Insight("AAPL", 4m, ["Cena rosła w ostatnim tygodniu."], "Opis danych."),
+            Insight("MSFT", -3m, [], "Cena spadała w ostatnim tygodniu.")
+        ]);
         var texts = StrategyProfileCatalog.Profiles.SelectMany(profile => new[] { profile.Name, profile.Description })
             .Concat(StrategyProfileCatalog.OverviewMetrics.Select(metric => metric.Label))
             .Concat(StrategyProfileCatalog.Holdings.Select(holding => holding.Source))
-            .Concat(DashboardPresenter.SampleInsights.SelectMany(insight => new[] { insight.Title, insight.Text }))
-            .Append(DashboardPresenter.UnavailableMessage);
+            .Concat(insights.SelectMany(insight => new[] { insight.Name, insight.Text }))
+            .Append(DashboardPresenter.UnavailableMessage)
+            .Append(DashboardPresenter.WatchlistFailedMessage);
 
         Assert.All(texts, text => Assert.DoesNotMatch(AdviceWording, text));
+    }
+
+    private static AssetInsightView Insight(
+        string id,
+        decimal? sevenDayChange,
+        string[] bullets,
+        string takeaway = "Opis.",
+        string? trendLabel = "Trend wzrostowy") =>
+        new(
+            new AssetIdentity(id, $"{id} Name", id[..1], AssetAccent.Neutral),
+            InsightTone.Neutral,
+            sevenDayChange,
+            [],
+            takeaway,
+            null,
+            null,
+            null,
+            trendLabel,
+            "Akcje",
+            "Dlaczego",
+            bullets);
+
+    [Fact]
+    public void BuildInsights_limits_orders_by_absolute_change_and_breaks_ties_by_id()
+    {
+        var insights = DashboardPresenter.BuildInsights(
+        [
+            Insight("ZZZ", 5m, ["z"]),
+            Insight("AAA", -5m, ["a"]),
+            Insight("MID", 2m, ["m"]),
+            Insight("BIG", -9m, ["b"]),
+            Insight("LOW", 0.1m, ["l"])
+        ]);
+
+        Assert.Equal(["BIG", "AAA", "ZZZ"], insights.Select(insight => insight.AssetId));
+    }
+
+    [Fact]
+    public void BuildInsights_skips_missing_data_and_falls_back_to_takeaway()
+    {
+        var insights = DashboardPresenter.BuildInsights(
+        [
+            Insight("NONE", null, ["x"]),
+            Insight("AAA", 1m, ["pierwszy", "drugi"]),
+            Insight("BBB", 0.5m, [], "Opis zastępczy.")
+        ]);
+
+        Assert.Equal(["AAA", "BBB"], insights.Select(insight => insight.AssetId));
+        Assert.Equal("pierwszy", insights[0].Text);
+        Assert.Equal("Opis zastępczy.", insights[1].Text);
+        Assert.Equal("Trend wzrostowy", insights[0].TrendLabel);
+        Assert.Empty(DashboardPresenter.BuildInsights([]));
+    }
+
+    [Fact]
+    public void BuildWatchlistRows_limits_rows_flags_unavailable_and_missing_snapshots()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var entries = new[] { "AAPL", "MSFT", "GONE", "NVDA", "BTC-USD", "ETH-USD" }
+            .Select((id, index) => new WatchlistEntry(id, now.AddMinutes(-index)))
+            .ToArray();
+        var snapshots = new Dictionary<string, WatchlistMarketSnapshot>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AAPL"] = new(10m, "USD", 1m, 2m, 3m, null),
+            ["GONE"] = new(10m, "USD", 1m, 2m, 3m, null)
+        };
+
+        var rows = DashboardPresenter.BuildWatchlistRows(
+            entries,
+            ["AAPL", "MSFT", "NVDA", "BTC-USD", "ETH-USD"],
+            snapshots);
+
+        Assert.Equal(DashboardPresenter.MaximumWatchlistRows, rows.Count);
+        Assert.True(DashboardPresenter.HasMoreRows(entries.Length));
+        Assert.False(DashboardPresenter.HasMoreRows(DashboardPresenter.MaximumWatchlistRows));
+        Assert.Equal("+1,00%", rows.Single(row => row.AssetId == "AAPL").Change24Hours.Text);
+        Assert.Equal(
+            WatchlistTablePresenter.MissingDataText,
+            rows.Single(row => row.AssetId == "MSFT").PriceText);
+        var gone = rows.Single(row => row.AssetId == "GONE");
+        Assert.False(gone.IsAvailable);
+        Assert.Equal(WatchlistTablePresenter.MissingDataText, gone.PriceText);
     }
 
     [Fact]

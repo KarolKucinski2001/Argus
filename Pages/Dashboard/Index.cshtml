@@ -25,6 +25,88 @@
         <a class="button" asp-page="/Strategies/Index">Poznaj profile strategii</a>
     </section>
 
+    <section class="watchlist-card" aria-labelledby="dashboard-watchlist-title">
+        <header class="watchlist-card__header watchlist-card__header--inline">
+            <h2 id="dashboard-watchlist-title">Twoja lista obserwowanych</h2>
+            <a asp-page="/Watchlist/Index">Zobacz wszystkie</a>
+        </header>
+        @if (Model.WatchlistFailed)
+        {
+            <div class="status-card status-card--error" role="status">
+                <p>@DashboardPresenter.WatchlistFailedMessage</p>
+            </div>
+        }
+        else if (Model.WatchlistEmpty)
+        {
+            <div class="watchlist-empty status-card" role="status">
+                <h3>Lista obserwowanych jest pusta</h3>
+                <p>Zapisz aktywa na stronie analizy, aby zobaczyć tutaj ich ceny i zmiany.</p>
+                <a class="button" asp-page="/Analysis/Index">Przejdź do analizy</a>
+            </div>
+        }
+        else
+        {
+            <div class="watchlist-table-scroll">
+                <table class="watchlist-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Symbol</th>
+                            <th scope="col">Nazwa</th>
+                            <th scope="col" class="watchlist-table__number">Ostatnia cena</th>
+                            <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
+                            <th scope="col" class="watchlist-table__number">7d</th>
+                            <th scope="col" class="watchlist-table__number">30d</th>
+                            <th scope="col">Trend</th>
+                            <th scope="col" class="watchlist-table__number">Analiza</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.WatchlistRows)
+                        {
+                            var rowTone = WatchlistTablePresenter.ToneClass(row.Change24Hours.Tone);
+                            <tr class="@(row.IsAvailable ? null : "watchlist-table__row--unavailable")" data-dashboard-row="@row.AssetId">
+                                <th scope="row" class="watchlist-table__symbol">
+                                    <partial name="_AssetGlyph" model="row.AssetId" />
+                                    <span>@row.AssetId</span>
+                                    @if (!row.IsAvailable)
+                                    {
+                                        <span class="watchlist-row__status">Niedostępne</span>
+                                    }
+                                </th>
+                                <td>@row.Name</td>
+                                <td class="watchlist-table__number">@row.PriceText</td>
+                                <td class="watchlist-table__number @WatchlistTablePresenter.ToneClass(row.Change24Hours.Tone)">@row.Change24Hours.Text</td>
+                                <td class="watchlist-table__number @WatchlistTablePresenter.ToneClass(row.Change7Days.Tone)">@row.Change7Days.Text</td>
+                                <td class="watchlist-table__number @WatchlistTablePresenter.ToneClass(row.Change30Days.Tone)">@row.Change30Days.Text</td>
+                                <td>
+                                    @if (row.Sparkline is { } rowSparkline)
+                                    {
+                                        <span class="watchlist-sparkline @rowTone">
+                                            <partial name="_Sparkline" model="rowSparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {row.Name}" }' />
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="watchlist-tone--unavailable">@WatchlistTablePresenter.MissingDataText</span>
+                                    }
+                                </td>
+                                <td class="watchlist-table__number">
+                                    <a asp-page="/Analysis/Index">Analiza</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.WatchlistHasMore)
+            {
+                <footer class="watchlist-card__footer">
+                    <a asp-page="/Watchlist/Index">Zobacz wszystkie</a>
+                </footer>
+            }
+        }
+    </section>
+
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-market-title">
         <header class="watchlist-card__header">
             <h2 id="dashboard-market-title">Przegląd rynku</h2>
@@ -74,21 +156,33 @@
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-insights-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
                 <h2 id="dashboard-insights-title">Najważniejsze wnioski</h2>
-                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+                <a asp-page="/Analysis/Index">Przejdź do analizy</a>
             </header>
-            <ul class="account-list dashboard-insights">
-                @foreach (var insight in DashboardPresenter.SampleInsights)
-                {
-                    <li>
-                        <span class="strategy-icon strategy-accent--1" aria-hidden="true">@insight.Monogram</span>
-                        <span class="dashboard-insights__text">
-                            <strong>@insight.Title</strong>
-                            <small>@insight.Text</small>
-                        </span>
-                        <small>@insight.Age</small>
-                    </li>
-                }
-            </ul>
+            @if (Model.Insights.Count == 0)
+            {
+                <p class="watchlist-placeholder">@(Model.WatchlistEmpty
+                    ? "Wnioski pojawią się po zapisaniu aktywów na liście obserwowanych."
+                    : "Brak danych do opisania zmian obserwowanych aktywów.")</p>
+            }
+            else
+            {
+                <ul class="account-list dashboard-insights">
+                    @foreach (var insight in Model.Insights)
+                    {
+                        <li data-dashboard-insight="@insight.AssetId">
+                            <partial name="_AssetGlyph" model="insight.AssetId" />
+                            <span class="dashboard-insights__text">
+                                <strong><a asp-page="/Analysis/Index">@insight.AssetId · @insight.Name</a></strong>
+                                <small>@insight.Text</small>
+                            </span>
+                            @if (insight.TrendLabel is { } trendLabel)
+                            {
+                                <small>@trendLabel</small>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
         </section>
     </div>
 

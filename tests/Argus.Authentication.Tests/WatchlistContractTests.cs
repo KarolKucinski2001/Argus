@@ -259,7 +259,9 @@ internal sealed class UnauthenticatedWatchlistFactory : WebApplicationFactory<Pr
     }
 }
 
-internal sealed class WatchlistTestFactory(IMarketDataService? marketDataService = null)
+internal sealed class WatchlistTestFactory(
+    IMarketDataService? marketDataService = null,
+    IWatchlistStore? storeOverride = null)
     : WebApplicationFactory<Program>
 {
     public InMemoryWatchlistStore Store { get; } = new();
@@ -289,7 +291,7 @@ internal sealed class WatchlistTestFactory(IMarketDataService? marketDataService
                         .Build();
             });
             services.RemoveAll<IWatchlistStore>();
-            services.AddSingleton<IWatchlistStore>(Store);
+            services.AddSingleton<IWatchlistStore>(storeOverride ?? Store);
             if (marketDataService is not null)
             {
                 services.RemoveAll<IMarketDataService>();
@@ -362,6 +364,44 @@ internal sealed class InMemoryWatchlistStore : IWatchlistStore
         return Task.FromResult(new WatchlistRemoveResult(
             normalized,
             WatchlistRemoveStatus.Removed));
+    }
+}
+
+internal sealed class FailingWatchlistStore : IWatchlistStore
+{
+    public Task<WatchlistListResult> ListAsync(
+        string subjectId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(new WatchlistListResult(WatchlistListStatus.StorageFailure, []));
+
+    public Task<WatchlistSaveResult> SaveAsync(
+        string subjectId,
+        IEnumerable<string> assetIds,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("store unavailable");
+
+    public Task<WatchlistRemoveResult> RemoveAsync(
+        string subjectId,
+        string assetId,
+        CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("store unavailable");
+}
+
+internal sealed class RecordingMarketDataService : IMarketDataService
+{
+    private readonly StaticMarketDataService inner = new();
+
+    public int Calls { get; private set; }
+
+    public List<string> RequestedIds { get; } = [];
+
+    public Task<MarketDataServiceResult> GetAsync(
+        MarketDataRequest? request,
+        CancellationToken cancellationToken = default)
+    {
+        Calls++;
+        RequestedIds.AddRange(request!.Assets.Select(asset => asset.Id));
+        return inner.GetAsync(request, cancellationToken);
     }
 }
 
