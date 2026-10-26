@@ -424,4 +424,4 @@ than creating a process-local substitute.
 
 #### Manual
 
-- [ ] 3.3 The documented local setup and HTTPS smoke test complete successfully at narrow and wide viewport sizes
+- [x] 3.3 The documented local setup and HTTPS smoke test complete successfully at narrow and wide viewport sizes

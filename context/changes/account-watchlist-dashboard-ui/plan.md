@@ -171,7 +171,7 @@ changed views shows 0 hits.
 
 #### Manual
 
-- [ ] 1.3 Shell renders correctly at desktop and one mobile width
+- [x] 1.3 Shell renders correctly at desktop and one mobile width
 
 ### Phase 2: Watchlist view
 
@@ -183,7 +183,7 @@ changed views shows 0 hits.
 
 #### Manual
 
-- [ ] 2.4 Watchlist matches the mockup and its remove and ranking flows work
+- [x] 2.4 Watchlist matches the mockup and its remove and ranking flows work
 
 ### Phase 3: Account view
 
@@ -193,7 +193,7 @@ changed views shows 0 hits.
 
 #### Manual
 
-- [ ] 3.2 Account matches the mockup at desktop and one mobile width
+- [x] 3.2 Account matches the mockup at desktop and one mobile width
 
 ### Phase 4: States, guardrails, documentation
 
@@ -204,4 +204,4 @@ changed views shows 0 hits.
 
 #### Manual
 
-- [ ] 4.3 Final visual review of both views and the state fixture
+- [x] 4.3 Final visual review of both views and the state fixture

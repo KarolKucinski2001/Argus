@@ -88,7 +88,7 @@ and `/strategies`; full test suites.
 - [x] 1.2 Literal scan on changed views is empty — 74b4680
 
 #### Manual
-- [ ] 1.3 /dashboard matches the mockup at desktop and one mobile width
+- [x] 1.3 /dashboard matches the mockup at desktop and one mobile width
 
 ### Phase 2: /strategies
 
@@ -97,7 +97,7 @@ and `/strategies`; full test suites.
 - [x] 2.2 Literal scan on changed views is empty — 74b4680
 
 #### Manual
-- [ ] 2.3 /strategies matches the mockup at desktop and one mobile width
+- [x] 2.3 /strategies matches the mockup at desktop and one mobile width
 
 ### Phase 3: States and guardrails
 
@@ -106,4 +106,4 @@ and `/strategies`; full test suites.
 - [x] 3.2 AGENTS.md UI rule extended — 74b4680
 
 #### Manual
-- [ ] 3.3 Final visual review of both views
+- [x] 3.3 Final visual review of both views

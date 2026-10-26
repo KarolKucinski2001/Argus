@@ -1,7 +1,7 @@
 ---
 change_id: watchlist-monitoring-dashboard
 title: Watchlist monitoring on the Dashboard
-status: implementing
+status: impl_reviewed
 created: 2026-10-26
 updated: 2026-10-26
 archived_at: null

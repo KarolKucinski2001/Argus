@@ -229,7 +229,7 @@ None; no stored data changes.
 
 #### Manual
 
-- [ ] 1.3 Reviewing the diff shows no change to `/watchlist` or `/analysis` behavior
+- [x] 1.3 Reviewing the diff shows no change to `/watchlist` or `/analysis` behavior
 
 ### Phase 2: Dashboard view
 
@@ -241,8 +241,8 @@ None; no stored data changes.
 
 #### Manual
 
-- [ ] 2.4 `/dashboard` at narrow and wide widths shows the watchlist card and insights without overlap or horizontal scroll
-- [ ] 2.5 Empty watchlist shows the call to action; saved assets show real prices
+- [x] 2.4 `/dashboard` at narrow and wide widths shows the watchlist card and insights without overlap or horizontal scroll
+- [x] 2.5 Empty watchlist shows the call to action; saved assets show real prices
 
 ### Phase 3: Docs, roadmap and guardrails
 
@@ -253,4 +253,4 @@ None; no stored data changes.
 
 #### Manual
 
-- [ ] 3.3 Final read-through of Dashboard copy confirms it is descriptive, not advice
+- [x] 3.3 Final read-through of Dashboard copy confirms it is descriptive, not advice
