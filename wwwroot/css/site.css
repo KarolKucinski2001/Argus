@@ -1898,7 +1898,7 @@ a.account-quick-action:focus-visible {
 .dashboard-tile__name > .asset-glyph,
 .watchlist-table__symbol > .asset-glyph,
 .watchlist-movers__list > li > .asset-glyph,
-.dashboard-insights > li > .asset-glyph {
+.account-list.dashboard-insights > li > .asset-glyph {
     display: grid;
     place-items: center;
     align-self: center;
