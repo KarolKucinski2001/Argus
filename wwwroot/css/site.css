@@ -1276,7 +1276,8 @@ a.account-quick-action:focus-visible {
 }
 
 .dashboard-insights li {
-    align-items: flex-start;
+    align-items: center;
+    gap: var(--space-3);
 }
 
 .dashboard-insights__text {
@@ -1896,7 +1897,8 @@ a.account-quick-action:focus-visible {
 
 .dashboard-tile__name > .asset-glyph,
 .watchlist-table__symbol > .asset-glyph,
-.watchlist-movers__list > li > .asset-glyph {
+.watchlist-movers__list > li > .asset-glyph,
+.dashboard-insights > li > .asset-glyph {
     flex: none;
     inline-size: var(--asset-glyph-size);
     block-size: var(--asset-glyph-size);
