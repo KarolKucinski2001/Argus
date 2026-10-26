@@ -43,6 +43,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | done |
 | S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | done |
+| S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | proposed |
 
 ## Baseline
 
@@ -89,12 +90,27 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Risk:** Monitoring must stay descriptive and educational; "monitoring" must not drift into real-time alerts, which the PRD lists as a non-goal.
 - **Status:** done
 
+### S-06: Production market data for existing assets
+
+- **Outcome:** user sees real current and historical market data for the supported assets in Analysis, Watchlist, and Dashboard instead of development data.
+- **Change ID:** production-market-data
+- **PRD refs:** FR-004, FR-006, FR-007
+- **Prerequisites:** provider decision (GitHub issue #1)
+- **Parallel with:** PRD v2 shaping (strategy profiles); static-data strategy slices
+- **Blockers:** Open Roadmap Question 1
+- **Unknowns:**
+  - Which approved provider, and what are its rate limits, licensing, and cost? — Owner: team. Block: yes.
+  - How are provider outages and stale data shown to the user? — Owner: team. Block: no (decided in `/10x-plan`).
+- **Risk:** Provider limits or licensing could constrain the supported-asset list; the existing market-data contract, cache and request budget stay the seam so Analysis, Watchlist and Dashboard need no changes.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | Let users save assets to a personal watchlist | — | yes | Run `/10x-plan save-assets-to-watchlist`. |
 | S-05 | watchlist-monitoring-dashboard | Add a Dashboard tab that monitors the watchlist | — | no | Requires S-04. |
+| S-06 | production-market-data | Replace the development market-data provider with a real source | — | no | Needs provider decision (#1) first. |
 
 ## Open Roadmap Questions
 
