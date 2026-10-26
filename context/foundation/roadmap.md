@@ -3,7 +3,7 @@ project: "Argus"
 version: 2
 status: draft
 created: 2026-09-30
-updated: 2026-10-23
+updated: 2026-10-26
 prd_version: 1
 main_goal: low-complexity
 top_blocker: decisions
@@ -41,8 +41,8 @@ Argus helps beginners or prospective first-time investors understand how selecte
 
 | ID | Change ID | Outcome (user can …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
-| S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | in-progress |
-| S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | in-progress |
+| S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | done |
+| S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | done |
 
 ## Baseline
 
@@ -74,7 +74,7 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Unknowns:**
   - Which persistent store holds per-user watchlists on Azure App Service? — Owner: team. Block: no (decided in `/10x-plan`).
 - **Risk:** First persistent per-user data in Argus; it is sequenced first so the storage choice is proven on the smallest flow before the Dashboard depends on it.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-05: Watchlist monitoring dashboard
 
@@ -87,7 +87,7 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Unknowns:**
   - Should the Dashboard also show a fixed market overview (indices, BTC, ETH) beyond the user's own watchlist, given the "no full-market analysis" non-goal? — Owner: user. Block: no.
 - **Risk:** Monitoring must stay descriptive and educational; "monitoring" must not drift into real-time alerts, which the PRD lists as a non-goal.
-- **Status:** in-progress
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -117,6 +117,8 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **M-1: First explained market analysis** (`first-explained-market-analysis`) — closed 2026-10-23. An authenticated beginner selects assets and gets a ranked, explained analysis with market data, factors, a compact trend view, a grounded AI summary, and the educational boundary.
 
 ## Done
+- **S-04: user can save assets to a personal watchlist, review and remove them, and start an analysis from the watchlist.** — Archived 2026-10-26 → `context/archive/2026-10-23-save-assets-to-watchlist/`. Lesson: —.
+- **S-05: user can land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, and move between Dashboard, Analysis, and Watchlist tabs.** — Archived 2026-10-26 → `context/archive/2026-10-26-watchlist-monitoring-dashboard/`. Lesson: —.
 - **S-02: user can select one or more supported assets and start a market analysis.** — Archived 2026-10-16 → `context/archive/2026-10-14-select-and-start-analysis/`. Lesson: —.
 - **F-01: (foundation) the application has the minimum authentication and protected-route contract required for the MVP workflow.** — Archived 2026-10-02 → `context/archive/2026-10-01-minimal-auth-foundation/`. Lesson: —.
 - **S-01: user can create an account, log in, and see a short explanation that Argus provides educational analysis rather than investment advice.** — Archived 2026-10-06 → `context/archive/2026-10-05-account-access-flow/`. Lesson: —.

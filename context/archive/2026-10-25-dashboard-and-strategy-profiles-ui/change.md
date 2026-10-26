@@ -1,10 +1,10 @@
 ---
 change_id: dashboard-and-strategy-profiles-ui
 title: Dashboard and Strategy Profiles views
-status: implemented
+status: archived
 created: 2026-10-25
 updated: 2026-10-26
-archived_at: null
+archived_at: 2026-10-26T15:30:11Z
 ---
 
 ## Notes
