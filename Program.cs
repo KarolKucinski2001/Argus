@@ -35,10 +35,7 @@ builder.Services.AddSingleton<IWatchlistStore, AzureTableWatchlistStore>();
 builder.Services.AddOptions<AnalysisSummaryOptions>()
     .Bind(builder.Configuration.GetSection(AnalysisSummaryOptions.SectionName));
 builder.Services.AddSingleton<IAnalysisSummaryGenerator, UnavailableAnalysisSummaryGenerator>();
-builder.Services.AddSingleton<IMarketDataProvider>(_ =>
-    builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing")
-        ? new DevelopmentMarketDataProvider()
-        : new UnavailableMarketDataProvider());
+builder.Services.AddMarketDataProvider(builder.Configuration, builder.Environment);
 
 var entraSection = builder.Configuration.GetSection("Entra");
 builder.Services.AddOptions<EntraOptions>()
