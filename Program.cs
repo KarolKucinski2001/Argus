@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
+using _bootstrap_scaffold.Strategies;
 using _bootstrap_scaffold.Watchlist;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +33,9 @@ builder.Services.AddSingleton<IAnalysisService, AnalysisService>();
 builder.Services.AddOptions<WatchlistOptions>()
     .Bind(builder.Configuration.GetSection(WatchlistOptions.SectionName));
 builder.Services.AddSingleton<IWatchlistStore, AzureTableWatchlistStore>();
+builder.Services.AddOptions<SimulatedPortfolioOptions>()
+    .Bind(builder.Configuration.GetSection(SimulatedPortfolioOptions.SectionName));
+builder.Services.AddSingleton<ISimulatedPortfolioStore, AzureTableSimulatedPortfolioStore>();
 builder.Services.AddOptions<AnalysisSummaryOptions>()
     .Bind(builder.Configuration.GetSection(AnalysisSummaryOptions.SectionName));
 builder.Services.AddSingleton<IAnalysisSummaryGenerator, UnavailableAnalysisSummaryGenerator>();

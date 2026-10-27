@@ -1,0 +1,45 @@
+@page "/strategies/profiles"
+@model _bootstrap_scaffold.Pages.Strategies.Profiles.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Profile publiczne";
+}
+
+@using _bootstrap_scaffold.Strategies
+
+<section class="watchlist-page" aria-labelledby="profiles-title">
+    <header class="watchlist-page__header">
+        <div class="watchlist-page__heading">
+            <h1 id="profiles-title">Profile publiczne</h1>
+            <p>Poznaj skład znanych portfeli publicznych i skopiuj wybrany do własnego portfela symulowanego.</p>
+        </div>
+        <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">Moje portfele symulowane</a>
+    </header>
+
+    <section class="watchlist-card watchlist-card--padded" aria-labelledby="profiles-list-title">
+        <header class="watchlist-card__header watchlist-card__header--inline">
+            <h2 id="profiles-list-title">Wybrane profile</h2>
+            <span class="watchlist-badge">@CuratedProfileCatalog.ApproximateBadge</span>
+        </header>
+        <p class="account-note" role="note">@CuratedProfileCatalog.Disclaimer</p>
+        <ul class="strategy-grid">
+            @foreach (var card in Model.Cards)
+            {
+                <li class="strategy-card" data-strategy-profile="@card.Id">
+                    <span class="strategy-icon @StrategyProfileCatalog.AccentClass(card.AccentIndex)" aria-hidden="true">@card.Monogram</span>
+                    <h3>@card.Name</h3>
+                    <p>@card.Description</p>
+                    <p class="strategy-card__range">@card.HoldingsCount</p>
+                    <p>@card.AsOfText</p>
+                    <p>@card.SourceLabel</p>
+                    <a class="strategy-card__link" asp-page="/Strategies/Profiles/Detail" asp-route-id="@card.Id">Zobacz skład</a>
+                </li>
+            }
+        </ul>
+        <p class="strategy-quality__note" role="note">@CuratedProfileCatalog.DataNote</p>
+    </section>
+
+    <p class="watchlist-page__boundary">
+        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+    </p>
+</section>
