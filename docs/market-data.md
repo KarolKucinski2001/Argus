@@ -125,3 +125,60 @@ Argus displays educational analysis, not financial advice. Provider
 activation decisions, AI Copilot/chat, and follow-up questions are outside S-03.
 Provider attribution and evidence-quality warnings must remain available to the
 analysis UI and summary layers.
+
+## Live free-tier adapters (S-06)
+
+Adapters live in `MarketData/Live/` and are routed by `RoutingMarketDataProvider`
+per `MarketAssetClass`. `AddMarketDataProvider` (`MarketDataProviderRegistration`)
+selects them only when `MarketData:PublicDisplayApproved=true` **and**
+`MarketData:ProviderId=argus-live-free`; otherwise Development/Testing keep the
+illustrative provider and other environments keep the unavailable provider.
+**No file in the repository sets `PublicDisplayApproved=true`**, and
+`MarketDataOptions` rejects a `ProviderId` while approval is false.
+
+| Asset class | Quote | Daily history |
+| --- | --- | --- |
+| Equity | Finnhub `GET /quote` (free) | Twelve Data `GET /time_series` (Basic, free) |
+| Crypto | CoinGecko Demo `GET /simple/price` | CoinGecko Demo `GET /coins/{id}/market_chart/range` (daily, 00:00 UTC) |
+
+Why Twelve Data: Finnhub's `/stock/candle` and `/crypto/candle` are marked
+"Premium Access Required" in its official API docs, so the free tier cannot serve
+12 months of daily candles. Stooq's CSV endpoint now sits behind a JavaScript
+challenge and is unusable from a server. CoinGecko Basic/Demo history covers the
+past 2 years, which includes the 12-month window.
+
+Keys are sent in headers (`X-Finnhub-Token`, `Authorization: apikey ...`,
+`x-cg-demo-api-key`), never in URLs or logs. Failures map to
+`MarketDataErrorCategory`: 401/403 authentication, 429 quota, 400/404 unsupported
+asset, 5xx upstream, timeout, malformed JSON invalid response. A failing quote
+degrades the asset to `Incomplete` with a warning; a failing history call yields an
+error result for that asset only.
+
+### Enabling (only after licensing is confirmed)
+
+1. Obtain free keys: Finnhub, Twelve Data (Basic), CoinGecko Demo.
+2. Store them outside the repository, e.g.
+   `dotnet user-secrets set "MarketData:Live:FinnhubApiKey" "<key>" --project .bootstrap-scaffold.csproj`
+   (likewise `MarketData:Live:TwelveDataApiKey`, `MarketData:Live:CoinGeckoApiKey`), or
+   App Service settings such as `MarketData__Live__FinnhubApiKey`.
+3. Set `MarketData:ProviderId=argus-live-free` and `MarketData:PublicDisplayApproved=true`
+   in environment-specific configuration, not in committed defaults.
+4. Add new assets to `MarketData:AllowedAssets`; crypto assets also need a CoinGecko id
+   in `MarketData:Live:CoinGeckoIds` (defaults: BTC-USD, ETH-USD).
+
+### Attribution text
+
+Show wherever the data is displayed (also returned in `MarketDataSource.Attribution`):
+
+- Equities: "Quotes: Finnhub (finnhub.io). Daily history: Twelve Data (twelvedata.com)."
+- Crypto: "Powered by CoinGecko API (coingecko.com)." with a link to CoinGecko.
+
+### Licensing status: blocked
+
+Public display is **not** confirmed in writing. Confirmation emails to Finnhub and
+CoinGecko support are pending. Twelve Data's Basic plan is described as "internal
+non-display usage", so it needs the same confirmation (or a paid plan). Until then
+keep the gate closed. Free-tier rate limits (Twelve Data 8/min and 800/day,
+CoinGecko Demo about 30/min, Finnhub 60/min) apply on top of the application
+budget; the cache absorbs most load. Equity quote delay is not guaranteed by the
+free plans, so the source is marked delayed.
