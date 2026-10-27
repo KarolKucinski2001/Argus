@@ -44,6 +44,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | done |
 | S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | done |
 | S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | proposed |
+| S-07 | strategy-profiles-simulation | browse curated public strategy profiles, see their holdings with explained factors, and copy one into a private simulated model portfolio they can list and delete | S-04 (per-user storage pattern) | PRD v2 FR-001, FR-002, FR-003, FR-004, FR-006, FR-007 | in-progress |
 
 ## Baseline
 
@@ -104,13 +105,25 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Risk:** Provider limits or licensing could constrain the supported-asset list; the existing market-data contract, cache and request budget stay the seam so Analysis, Watchlist and Dashboard need no changes.
 - **Status:** proposed
 
-## Backlog Handoff
+### S-07: Strategy profiles and simulated model portfolio
+
+- **Outcome:** user can browse curated public strategy profiles, open one to see its holdings with descriptive explained factors, copy it into a private simulated model portfolio, and list and delete their own portfolios; every view shows the educational/simulation disclaimer and the data "as of" date.
+- **Change ID:** strategy-profiles-simulation
+- **PRD refs:** `context/foundation/prd-v2.md` FR-001, FR-002, FR-003, FR-004 (FR-005 portfolio analysis deferred), preserving FR-006, FR-007
+- **Prerequisites:** S-04 (per-user table storage pattern)
+- **Parallel with:** S-06
+- **Blockers:** PRD v2 Open Question 4 (source terms of use) before release
+- **Unknowns:**
+  - Which public portfolios are curated and who maintains their holdings and "as of" dates? — Owner: user. Block: yes for release; first slice ships 3 approximate example profiles.
+- **Risk:** Explained factors on someone else's holdings can read as a recommendation; copy stays descriptive and data is labelled approximate.
+- **Status:** in-progress
 
 | Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | Let users save assets to a personal watchlist | — | yes | Run `/10x-plan save-assets-to-watchlist`. |
 | S-05 | watchlist-monitoring-dashboard | Add a Dashboard tab that monitors the watchlist | — | no | Requires S-04. |
 | S-06 | production-market-data | Replace the development market-data provider with a real source | — | no | Needs provider decision (#1) first. |
+| S-07 | strategy-profiles-simulation | Add strategy profiles and simulated model portfolios | — | in progress | PRD v2 FR-001–FR-004; see `context/changes/strategy-profiles-simulation/`. |
 
 ## Open Roadmap Questions
 

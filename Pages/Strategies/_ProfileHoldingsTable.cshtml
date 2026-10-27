@@ -1,0 +1,34 @@
+@using _bootstrap_scaffold.Strategies
+@model IReadOnlyList<ProfileHoldingRow>
+
+<div class="watchlist-table-scroll">
+    <table class="watchlist-table">
+        <thead>
+            <tr>
+                <th scope="col">Aktywo</th>
+                <th scope="col">Sektor</th>
+                <th scope="col">Klasa aktywów</th>
+                <th scope="col" class="watchlist-table__number">Waga</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var holding in Model)
+            {
+                <tr>
+                    <th scope="row" class="watchlist-table__symbol">
+                        <partial name="_AssetGlyph" model="holding.AssetId" />
+                        <span>@holding.AssetId <small>@holding.Name</small></span>
+                    </th>
+                    <td>@holding.Sector</td>
+                    <td>@holding.AssetClass</td>
+                    <td class="watchlist-table__number">
+                        <span class="strategy-meter">
+                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.WeightMeter" aria-label="Waga: @holding.AssetId">@holding.WeightText</meter>
+                            <span>@holding.WeightText</span>
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

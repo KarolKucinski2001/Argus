@@ -1,0 +1,70 @@
+@page "/strategies/portfolios"
+@model _bootstrap_scaffold.Pages.Strategies.Portfolios.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Portfele symulowane";
+}
+
+@using _bootstrap_scaffold.Strategies
+
+<section class="watchlist-page" aria-labelledby="portfolios-title">
+    <header class="watchlist-page__header">
+        <div class="watchlist-page__heading">
+            <h1 id="portfolios-title">Portfele symulowane</h1>
+            <p>Twoje prywatne kopie profili publicznych. To symulacja edukacyjna, a nie prawdziwy portfel.</p>
+        </div>
+        <a class="button" asp-page="/Strategies/Profiles/Index">Przeglądaj profile</a>
+    </header>
+
+    @if (Model.Message is not null)
+    {
+        <div class="status-card @(Model.IsError ? "status-card--error" : "status-card--success")"
+             role="@(Model.IsError ? "alert" : "status")">
+            <p>@Model.Message</p>
+        </div>
+    }
+
+    <p class="account-note" role="note">@CuratedProfileCatalog.Disclaimer</p>
+
+    @if (Model.Portfolios.Count == 0 && !Model.IsError)
+    {
+        <section class="watchlist-card watchlist-card--padded">
+            <p class="account-note">Nie masz jeszcze portfeli symulowanych. Otwórz profil publiczny i skopiuj go, aby zacząć.</p>
+        </section>
+    }
+
+    @foreach (var portfolio in Model.Portfolios)
+    {
+        <section class="watchlist-card" aria-labelledby="portfolio-@portfolio.Id" data-simulated-portfolio="@portfolio.Id">
+            <header class="watchlist-card__header watchlist-card__header--inline">
+                <h2 id="portfolio-@portfolio.Id">@portfolio.Name</h2>
+                <span class="watchlist-badge">Symulacja</span>
+            </header>
+            <dl class="account-stats">
+                <div>
+                    <dt>Profil źródłowy</dt>
+                    <dd>@portfolio.ProfileName</dd>
+                </div>
+                <div>
+                    <dt>Aktualność danych</dt>
+                    <dd>@portfolio.AsOfText</dd>
+                </div>
+                <div>
+                    <dt>Skład</dt>
+                    <dd>@portfolio.HoldingsSummary</dd>
+                </div>
+            </dl>
+            <partial name="_ProfileHoldingsTable" model="portfolio.Holdings" />
+            <footer class="watchlist-card__footer">
+                <span>@portfolio.CreatedText</span>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@portfolio.Id">
+                    <button class="button button--secondary" type="submit">Usuń portfel</button>
+                </form>
+            </footer>
+        </section>
+    }
+
+    <p class="watchlist-page__boundary">
+        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+    </p>
+</section>
