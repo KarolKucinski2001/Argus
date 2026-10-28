@@ -27,7 +27,7 @@ list and delete own portfolios (FR-004). Educational simulation only.
 
 #### Manual
 
-- [ ] 1.3 Check pages against Azurite and `/strategies/ui-states` visually
+- [x] 1.3 Check pages against Azurite and `/strategies/ui-states` visually
 - [ ] 1.4 Review curated data accuracy and source terms (PRD v2 Open Questions 1, 4)
 
 ### Phase 2: Deferred
