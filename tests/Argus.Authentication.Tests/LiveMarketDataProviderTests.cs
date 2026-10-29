@@ -149,6 +149,27 @@ public sealed class LiveMarketDataProviderTests
     }
 
     [Fact]
+    public async Task Twelve_data_crypto_provider_maps_pair_symbol_history_and_price()
+    {
+        List<HttpRequestMessage> calls = [];
+        var provider = new LiveTwelveDataCryptoMarketDataProvider(
+            new FakeFactory(
+                request => request.RequestUri!.AbsolutePath.EndsWith("price") ? Json("""{"price":"92100.5"}""") : Json(SeriesJson),
+                calls),
+            Options.Create(new LiveMarketDataOptions { TwelveDataApiKey = "secret-twelve" }),
+            new FixedTime());
+
+        var result = Assert.Single(await provider.GetAsync(Request(Btc)));
+
+        Assert.Null(result.Error);
+        Assert.Equal(92100.5m, result.CurrentQuote?.Value);
+        Assert.Equal(2, result.HistoricalPoints.Count);
+        Assert.Contains("Twelve Data", result.Source?.Attribution);
+        Assert.All(calls, call => Assert.Contains("symbol=BTC%2FUSD", call.RequestUri!.Query));
+        Assert.All(calls, call => Assert.DoesNotContain("secret", call.RequestUri!.ToString()));
+    }
+
+    [Fact]
     public async Task Unmapped_crypto_asset_is_unsupported_and_missing_keys_are_not_configured()
     {
         var provider = CryptoProvider(out _, _ => Json(CryptoJson));

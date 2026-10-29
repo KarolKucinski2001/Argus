@@ -114,9 +114,30 @@ public sealed class MarketDataProviderEnvironmentTests
 internal sealed class ProviderEnvironmentFactory(string environment)
     : WebApplicationFactory<Program>
 {
+    // Provider selection is read while services are registered, before test configuration overrides apply,
+    // so local user-secrets that enable the live providers are neutralised through the environment.
+    private const string ApprovalVariable = "MarketData__PublicDisplayApproved";
+    private const string ProviderVariable = "MarketData__ProviderId";
+    private readonly string? previousApproval = Swap(ApprovalVariable, "false");
+    private readonly string? previousProvider = Swap(ProviderVariable, "");
+
+    private static string? Swap(string name, string value)
+    {
+        var previous = Environment.GetEnvironmentVariable(name);
+        Environment.SetEnvironmentVariable(name, value);
+        return previous;
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(environment);
         TestEntraConfiguration.Apply(builder);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        Environment.SetEnvironmentVariable(ApprovalVariable, previousApproval);
+        Environment.SetEnvironmentVariable(ProviderVariable, previousProvider);
     }
 }

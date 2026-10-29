@@ -156,7 +156,8 @@ error result for that asset only.
 
 ### Enabling (only after licensing is confirmed)
 
-1. Obtain free keys: Finnhub, Twelve Data (Basic), CoinGecko Demo.
+1. Obtain free keys: Finnhub, Twelve Data (Basic), and optionally CoinGecko Demo.
+   Without a CoinGecko key, crypto assets are served by Twelve Data (`BTC-USD` is requested as `BTC/USD`).
 2. Store them outside the repository, e.g.
    `dotnet user-secrets set "MarketData:Live:FinnhubApiKey" "<key>" --project .bootstrap-scaffold.csproj`
    (likewise `MarketData:Live:TwelveDataApiKey`, `MarketData:Live:CoinGeckoApiKey`), or

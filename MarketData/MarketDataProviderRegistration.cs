@@ -44,11 +44,15 @@ public static class MarketDataProviderRegistration
 
         services.AddSingleton<LiveEquityMarketDataProvider>();
         services.AddSingleton<LiveCryptoMarketDataProvider>();
+        services.AddSingleton<LiveTwelveDataCryptoMarketDataProvider>();
         return services.AddSingleton<IMarketDataProvider>(sp =>
             new RoutingMarketDataProvider(new Dictionary<MarketAssetClass, IMarketDataProvider>
             {
                 [MarketAssetClass.Equity] = sp.GetRequiredService<LiveEquityMarketDataProvider>(),
-                [MarketAssetClass.Crypto] = sp.GetRequiredService<LiveCryptoMarketDataProvider>()
+                [MarketAssetClass.Crypto] = string.IsNullOrWhiteSpace(
+                        sp.GetRequiredService<IOptions<LiveMarketDataOptions>>().Value.CoinGeckoApiKey)
+                    ? sp.GetRequiredService<LiveTwelveDataCryptoMarketDataProvider>()
+                    : sp.GetRequiredService<LiveCryptoMarketDataProvider>()
             }));
     }
 
