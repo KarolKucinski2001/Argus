@@ -157,7 +157,7 @@ textual list as a no-script and screen-reader fallback.
 
 #### Manual
 
-- [ ] 1.2 Confirm the chart communicates historical observations without predictive language.
+- [x] 1.2 Confirm the chart communicates historical observations without predictive language.
 
 ### Phase 2: Add tooltip interaction and responsive styling
 
@@ -168,14 +168,14 @@ textual list as a no-script and screen-reader fallback.
 
 #### Manual
 
-- [ ] 2.3 Verify hover, keyboard focus, touch selection, and tooltip placement.
+- [x] 2.3 Verify hover, keyboard focus, touch selection, and tooltip placement.
 
 ### Phase 3: Final verification and documentation
 
 #### Automated
 
-- [ ] 3.1 Full tests, build, and relevant leakage/style checks pass.
+- [x] 3.1 Full tests, build, and relevant leakage/style checks pass.
 
 #### Manual
 
-- [ ] 3.2 Verify desktop, mobile, populated, limited-history, no-history, and no-script states.
+- [x] 3.2 Verify desktop, mobile, populated, limited-history, no-history, and no-script states.

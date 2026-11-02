@@ -345,7 +345,7 @@ Testing-only visual fixture.
 
 #### Manual
 
-- [ ] 1.3 Seven-state fixture is readable at desktop and narrow mobile widths
+- [x] 1.3 Seven-state fixture is readable at desktop and narrow mobile widths
 
 ### Phase 2: Refine the semantic token hierarchy
 
@@ -356,7 +356,7 @@ Testing-only visual fixture.
 
 #### Manual
 
-- [ ] 2.3 Token changes preserve contrast and visible focus in the dark theme
+- [x] 2.3 Token changes preserve contrast and visible focus in the dark theme
 
 ### Phase 3: Improve the authenticated analysis workspace
 
@@ -368,8 +368,8 @@ Testing-only visual fixture.
 
 #### Manual
 
-- [ ] 3.4 Desktop hierarchy and mobile two-column metrics are readable without overflow
-- [ ] 3.5 Keyboard focus is visible across navigation, picker, submit, and chart controls
+- [x] 3.4 Desktop hierarchy and mobile two-column metrics are readable without overflow
+- [x] 3.5 Keyboard focus is visible across navigation, picker, submit, and chart controls
 
 ### Phase 4: Complete state coverage and verification
 
@@ -382,5 +382,5 @@ Testing-only visual fixture.
 
 #### Manual
 
-- [ ] 4.5 Seven-state fixture and final analysis flow pass desktop/mobile review
-- [ ] 4.6 Public landing, authenticated shell, loading, empty, error, and result states are coherent
+- [x] 4.5 Seven-state fixture and final analysis flow pass desktop/mobile review
+- [x] 4.6 Public landing, authenticated shell, loading, empty, error, and result states are coherent
