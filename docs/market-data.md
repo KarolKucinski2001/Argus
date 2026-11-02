@@ -74,6 +74,17 @@ false. The application must report the explicit `ProviderNotApproved` or
 configuration-unavailable state rather than presenting a provider response as
 fresh market evidence.
 
+### Provider replies
+
+- **Twelve Data (2026-11-02, support reply):** the free Basic plan is personal,
+  non-display only and may not be used to show prices, charts, or analytics to other
+  users. Display in a web or mobile app requires a business plan (Venture or higher),
+  with attribution to Twelve Data. Caching rules are not specified.
+  Decision: live providers are used only locally by the project owner through user
+  secrets (`PublicDisplayApproved=true` on the developer machine). They must not be
+  enabled in any deployed environment, which keeps the illustrative provider or the
+  unavailable state.
+
 Development and Testing environments register a deterministic fake provider
 that returns clearly labelled illustrative data for local protected-flow
 testing. The fake provider has no credentials or network calls and is never
