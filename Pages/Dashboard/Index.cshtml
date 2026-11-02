@@ -63,7 +63,6 @@
                     <tbody>
                         @foreach (var row in Model.WatchlistRows)
                         {
-                            var rowTone = WatchlistTablePresenter.ToneClass(row.Change24Hours.Tone);
                             <tr class="@(row.IsAvailable ? null : "watchlist-table__row--unavailable")" data-dashboard-row="@row.AssetId">
                                 <th scope="row" class="watchlist-table__symbol">
                                     <partial name="_AssetGlyph" model="row.AssetId" />
@@ -81,7 +80,7 @@
                                 <td>
                                     @if (row.Sparkline is { } rowSparkline)
                                     {
-                                        <span class="watchlist-sparkline @rowTone">
+                                        <span class="watchlist-sparkline @WatchlistTablePresenter.ToneClass(rowSparkline.Tone)">
                                             <partial name="_Sparkline" model="rowSparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {row.Name}" }' />
                                         </span>
                                     }
@@ -131,7 +130,7 @@
                     <p class="dashboard-tile__change @tone">@tile.Change.Text</p>
                     @if (tile.Sparkline is { } sparkline)
                     {
-                        <span class="watchlist-sparkline @tone">
+                        <span class="watchlist-sparkline @WatchlistTablePresenter.ToneClass(sparkline.Tone)">
                             <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {tile.Name}" }' />
                         </span>
                     }

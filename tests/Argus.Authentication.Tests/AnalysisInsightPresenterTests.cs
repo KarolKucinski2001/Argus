@@ -270,6 +270,18 @@ public sealed class AnalysisInsightPresenterTests
     }
 
     [Fact]
+    public void Sparkline_tone_follows_first_and_last_close()
+    {
+        var up = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 10m, 20m, 15m));
+        var down = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 15m, 20m, 10m));
+        var flat = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 5m, 5m));
+
+        Assert.Equal(_bootstrap_scaffold.Watchlist.WatchlistTone.Positive, up.Sparkline!.Tone);
+        Assert.Equal(_bootstrap_scaffold.Watchlist.WatchlistTone.Negative, down.Sparkline!.Tone);
+        Assert.Equal(_bootstrap_scaffold.Watchlist.WatchlistTone.Neutral, flat.Sparkline!.Tone);
+    }
+
+    [Fact]
     public void Fewer_than_two_points_produce_no_sparkline()
     {
         var view = AnalysisInsightPresenter.Present(Analysis("AAPL", 1m, 1m, 1m, 5m));

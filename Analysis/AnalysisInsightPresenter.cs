@@ -44,7 +44,8 @@ public sealed record FactorBarView(
 public sealed record SparklineView(
     string ViewBox,
     string LinePoints,
-    string AreaPath);
+    string AreaPath,
+    _bootstrap_scaffold.Watchlist.WatchlistTone Tone = _bootstrap_scaffold.Watchlist.WatchlistTone.Neutral);
 
 public sealed record AssetInsightView(
     AssetIdentity Identity,
@@ -329,7 +330,10 @@ public static class AnalysisInsightPresenter
         return new SparklineView(
             $"0 0 {Format(SparklineWidth)} {baseline}",
             string.Join(" ", coordinates),
-            $"M0,{baseline} L{string.Join(" L", coordinates)} L{Format(SparklineWidth)},{baseline} Z");
+            $"M0,{baseline} L{string.Join(" L", coordinates)} L{Format(SparklineWidth)},{baseline} Z",
+            closes[^1] > closes[0] ? _bootstrap_scaffold.Watchlist.WatchlistTone.Positive
+                : closes[^1] < closes[0] ? _bootstrap_scaffold.Watchlist.WatchlistTone.Negative
+                : _bootstrap_scaffold.Watchlist.WatchlistTone.Neutral);
     }
 
     private static string FormatSignedPercent(decimal value) =>

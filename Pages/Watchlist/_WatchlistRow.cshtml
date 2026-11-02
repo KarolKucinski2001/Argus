@@ -39,7 +39,7 @@
     <td>
         @if (Model.Sparkline is { } sparkline)
         {
-            <span class="watchlist-sparkline @Tone(Model.Change24Hours.Tone)">
+            <span class="watchlist-sparkline @Tone(sparkline.Tone)">
                 <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {Model.Name}" }' />
             </span>
         }
