@@ -1,10 +1,10 @@
 ---
 change_id: analysis-workspace-ui-refinement
 title: Refine the authenticated analysis workspace
-status: implementing
+status: archived
 created: 2026-10-20
-updated: 2026-10-20
-archived_at: null
+updated: 2026-11-02
+archived_at: 2026-11-02T13:01:56Z
 ---
 
 ## Notes
