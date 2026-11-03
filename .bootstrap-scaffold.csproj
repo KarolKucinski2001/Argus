@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>_bootstrap_scaffold</RootNamespace>
     <UserSecretsId>8859f53e-0c71-4507-8bf9-e28f911640b6</UserSecretsId>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>

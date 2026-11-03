@@ -36,6 +36,9 @@ jobs:
       - name: Build
         run: dotnet build "$PROJECT_PATH" --configuration Release --no-restore
 
+      - name: Test
+        run: dotnet test tests/Argus.Authentication.Tests/Argus.Authentication.Tests.csproj --configuration Release
+
       - name: Publish
         run: dotnet publish "$PROJECT_PATH" --configuration Release --no-restore --output "$PUBLISH_PATH"
 
