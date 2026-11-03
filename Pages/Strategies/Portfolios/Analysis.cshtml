@@ -1,0 +1,112 @@
+@page "/strategies/portfolios/{id}/analysis"
+@model _bootstrap_scaffold.Pages.Strategies.Portfolios.AnalysisModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Analiza portfela symulowanego";
+    var analysis = Model.Analysis;
+}
+
+@using _bootstrap_scaffold.Strategies
+
+<section class="watchlist-page" aria-labelledby="portfolio-analysis-title">
+    <header class="watchlist-page__header">
+        <div class="watchlist-page__heading">
+            <h1 id="portfolio-analysis-title">Analiza portfela symulowanego</h1>
+            <p>@(analysis?.Name ?? "Opis składu Twojego portfela symulowanego.")</p>
+        </div>
+        <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">Moje portfele</a>
+    </header>
+
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="status-card status-card--error" role="alert">
+            <p>@Model.ErrorMessage</p>
+        </div>
+    }
+
+    <p class="account-note" role="note">@CuratedProfileCatalog.Disclaimer</p>
+
+    @if (analysis is not null)
+    {
+        <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-concentration-title">
+            <header class="watchlist-card__header watchlist-card__header--inline">
+                <h2 id="portfolio-concentration-title">@analysis.ConcentrationLabel</h2>
+                <span class="watchlist-badge">Symulacja</span>
+            </header>
+            <dl class="account-stats">
+                <div>
+                    <dt>Profil źródłowy</dt>
+                    <dd>@analysis.ProfileName</dd>
+                </div>
+                <div>
+                    <dt>Aktualność danych</dt>
+                    <dd>@analysis.AsOfText</dd>
+                </div>
+                @foreach (var metric in analysis.Metrics)
+                {
+                    <div title="@metric.Hint">
+                        <dt>@metric.Label</dt>
+                        <dd>@metric.Value</dd>
+                    </div>
+                }
+            </dl>
+            <p class="strategy-quality__note" role="note">@analysis.ConcentrationExplanation @CuratedProfileCatalog.DataNote</p>
+        </section>
+
+        <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-factors-title">
+            <header class="watchlist-card__header">
+                <h2 id="portfolio-factors-title">Czynniki opisujące skład</h2>
+            </header>
+            <ul class="account-note">
+                @foreach (var factor in analysis.Factors)
+                {
+                    <li>@factor</li>
+                }
+            </ul>
+        </section>
+
+        <div class="account-grid">
+            <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-sector-title">
+                <header class="watchlist-card__header">
+                    <h2 id="portfolio-sector-title">Udział sektorów</h2>
+                </header>
+                <partial name="_ProfileShares" model="analysis.SectorShares" />
+            </section>
+            <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-class-title">
+                <header class="watchlist-card__header">
+                    <h2 id="portfolio-class-title">Udział klas aktywów</h2>
+                </header>
+                <partial name="_ProfileShares" model="analysis.AssetClassShares" />
+            </section>
+        </div>
+
+        <section class="watchlist-card" aria-labelledby="portfolio-holdings-title">
+            <header class="watchlist-card__header watchlist-card__header--inline">
+                <h2 id="portfolio-holdings-title">Pozycje portfela</h2>
+                <span class="watchlist-badge">@CuratedProfileCatalog.ApproximateBadge</span>
+            </header>
+            <partial name="_ProfileHoldingsTable" model="analysis.Holdings" />
+        </section>
+
+        <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-coverage-title">
+            <header class="watchlist-card__header">
+                <h2 id="portfolio-coverage-title">Dane rynkowe dla pozycji</h2>
+            </header>
+            <p class="account-note">@analysis.CoverageText</p>
+            @if (analysis.AnalyzableAssetIds.Count > 0)
+            {
+                <form method="post" asp-page="/Analysis/Index" asp-page-handler="Analyze" class="account-actions">
+                    @foreach (var assetId in analysis.AnalyzableAssetIds)
+                    {
+                        <input type="hidden" name="SelectedAssetIds" value="@assetId" />
+                    }
+                    <button class="button" type="submit">Analizuj obsługiwane pozycje</button>
+                </form>
+            }
+        </section>
+    }
+
+    <p class="watchlist-page__boundary">
+        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+    </p>
+</section>

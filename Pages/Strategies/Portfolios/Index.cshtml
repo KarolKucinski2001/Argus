@@ -57,6 +57,7 @@
             <partial name="_ProfileHoldingsTable" model="portfolio.Holdings" />
             <footer class="watchlist-card__footer">
                 <span>@portfolio.CreatedText</span>
+                <a class="button" asp-page="/Strategies/Portfolios/Analysis" asp-route-id="@portfolio.Id">Zobacz analizę składu</a>
                 <form method="post" asp-page-handler="Delete" asp-route-id="@portfolio.Id">
                     <button class="button button--secondary" type="submit">Usuń portfel</button>
                 </form>

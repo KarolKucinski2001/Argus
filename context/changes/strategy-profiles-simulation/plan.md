@@ -33,6 +33,28 @@ list and delete own portfolios (FR-004). Educational simulation only.
   and All Weather as an unofficial educational style; public-display terms remain
   unapproved.
 
-### Phase 2: Deferred
+### Phase 2: FR-005 explained analysis of a simulated portfolio
 
-- [ ] 2.1 FR-005 explained analysis of a simulated portfolio
+Approach (decided autonomously; composition-based because live market data covers
+only AAPL, MSFT, NVDA, BTC-USD, ETH-USD and the production gate stays closed):
+
+- `SimulatedPortfolioAnalysisPresenter` (unit-tested) derives a descriptive
+  concentration label from the effective number of positions (1 / Σ wᵢ²:
+  < 4 high, < 7 moderate, otherwise spread), metrics (largest position, top-3
+  share, effective positions, sector and asset-class counts), sector/class
+  shares, reused composition factors, and coverage of assets Argus can analyze
+  (`MarketDataOptions.AllowedAssets`, capped at `MaximumSelectedAssets`).
+- Page `/strategies/portfolios/{id}/analysis` loads only the signed-in user's
+  portfolio via `ListAsync`; unknown or foreign ids return 404; storage failure
+  renders an error card. Covered assets post to the existing `/analysis?handler=Analyze`.
+- Every view keeps the simulation disclaimer, as-of date and no advice/forecast wording.
+
+#### Automated
+
+- [x] 2.1 Presenter tests: effective positions, labels, coverage, banned wording
+- [x] 2.2 Page tests: auth, own portfolio, foreign/unknown 404, storage failure
+- [x] 2.3 Full Release test suite passes (330)
+
+#### Manual
+
+- [ ] 2.4 Visual check of `/strategies/portfolios/{id}/analysis` against Azurite
