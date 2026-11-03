@@ -56,8 +56,7 @@
                             <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
                             <th scope="col" class="watchlist-table__number">7d</th>
                             <th scope="col" class="watchlist-table__number">30d</th>
-                            <th scope="col">Trend</th>
-                            <th scope="col" class="watchlist-table__number">Analiza</th>
+                            <th scope="col" title="@WatchlistTablePresenter.TrendHint">@WatchlistTablePresenter.TrendHeader</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,9 +87,6 @@
                                     {
                                         <span class="watchlist-tone--unavailable">@WatchlistTablePresenter.MissingDataText</span>
                                     }
-                                </td>
-                                <td class="watchlist-table__number">
-                                    <a asp-page="/Analysis/Index">Analiza</a>
                                 </td>
                             </tr>
                         }
@@ -153,9 +149,8 @@
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-insights-title">
-            <header class="watchlist-card__header watchlist-card__header--inline">
+            <header class="watchlist-card__header">
                 <h2 id="dashboard-insights-title">Najważniejsze wnioski</h2>
-                <a asp-page="/Analysis/Index">Przejdź do analizy</a>
             </header>
             @if (Model.Insights.Count == 0)
             {

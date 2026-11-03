@@ -31,6 +31,12 @@ public static class CuratedProfileCatalog
     public const string DataNote =
         "Składy i wagi są przybliżone, zaokrąglone i przeliczone na wyświetlane pozycje. Nie zastępują oficjalnych zgłoszeń.";
 
+    public const string ProvenanceNote =
+        "Profile publiczne to edukacyjne przykłady składu portfeli opisanych w publicznych źródłach, takich jak zgłoszenia SEC 13F lub publiczne opisy strategii. Argus nie jest powiązany z ich autorami ani zarządzającymi.";
+
+    public const string ApproximateExplanation =
+        "„Przykładowe, przybliżone dane” oznacza, że wagi są zaokrąglone i przeliczone tylko na pokazane pozycje. Służą do nauki i porównań, a nie do odtworzenia oficjalnego zgłoszenia.";
+
     public static IReadOnlyList<CuratedProfile> Profiles { get; } =
     [
         new(
@@ -52,12 +58,12 @@ public static class CuratedProfileCatalog
             ]),
         new(
             "sp500-top-holdings",
-            "Największe pozycje indeksu S&P 500",
-            "Przybliżony skład największych spółek szerokiego indeksu amerykańskiego.",
+            "Ilustracyjny skrót S&P 500",
+            "Ilustracyjny, przybliżony wybór dużych spółek z szerokiego indeksu amerykańskiego.",
             "SP",
             2,
             new DateOnly(2025, 6, 30),
-            "Publiczne dane dostawców indeksu (przybliżone)",
+            "Ilustracyjny przykład bez zatwierdzonego źródła publicznego",
             [
                 new("NVDA", "NVIDIA Corp.", 21m, "Technologia", "Akcje"),
                 new("MSFT", "Microsoft Corp.", 19m, "Technologia", "Akcje"),
@@ -70,12 +76,12 @@ public static class CuratedProfileCatalog
             ]),
         new(
             "all-weather-style",
-            "Portfel wszechpogodowy (All Weather)",
-            "Publicznie opisywany podział między akcje, obligacje, złoto i surowce.",
+            "Portfel w stylu All Weather (przykład)",
+            "Edukacyjna, przybliżona ilustracja podziału między akcje, obligacje, złoto i surowce.",
             "AW",
             3,
             new DateOnly(2025, 6, 30),
-            "Publiczny opis strategii, przykładowe fundusze ETF (przybliżone)",
+            "Publicznie opisywany styl; nieoficjalna ilustracja z ETF-ami",
             [
                 new("VTI", "Vanguard Total Stock Market ETF", 30m, "Akcje amerykańskie", "Akcje"),
                 new("TLT", "iShares 20+ Year Treasury Bond ETF", 40m, "Obligacje długoterminowe", "Obligacje"),

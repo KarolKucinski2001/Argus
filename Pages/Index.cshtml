@@ -16,7 +16,14 @@
             </p>
             <div class="hero-actions">
                 <a class="button" href="#how-it-works">Poznaj sposób działania</a>
-                <a class="button button--secondary" asp-page="/Account/SignIn">Zaloguj się lub utwórz konto</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="button button--secondary" asp-page="/Dashboard/Index">Przejdź do Dashboardu</a>
+                }
+                else
+                {
+                    <a class="button button--secondary" asp-page="/Account/SignIn">Zaloguj się lub utwórz konto</a>
+                }
             </div>
         </div>
 
@@ -82,6 +89,28 @@
                 <span class="workflow-card__number">03</span>
                 <h3>Zrozum czynniki</h3>
                 <p>Poznaj sygnały i dowody, które wpływają na każdy wynik.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="section" id="data-sources" aria-labelledby="data-sources-title">
+        <div class="section-heading">
+            <p class="eyebrow">Źródła danych</p>
+            <h2 id="data-sources-title">Skąd pochodzą dane i co z nich bierzemy.</h2>
+            <p>Każdy widok pokazuje, na jakich danych się opiera. Nie ukrywamy przybliżeń.</p>
+        </div>
+        <div class="workflow-grid">
+            <article class="workflow-card source-card" data-data-source="market">
+                <h3>Dane rynkowe</h3>
+                <p>Ceny, zmiany 24h, 7 i 30 dni oraz historia cen. Dane są ujednolicane przed analizą. W tej wersji publicznej pokazujemy dane ilustracyjne — produkcyjny dostawca danych czeka na zatwierdzenie licencji.</p>
+            </article>
+            <article class="workflow-card source-card" data-data-source="profiles">
+                <h3>Profile publiczne</h3>
+                <p>Przybliżone składy portfeli z publicznych zgłoszeń SEC 13F oraz edukacyjne ilustracje oparte na publicznych opisach strategii. Wagi są zaokrąglone i nie zastępują oficjalnych dokumentów.</p>
+            </article>
+            <article class="workflow-card source-card" data-data-source="ai">
+                <h3>Podsumowania AI</h3>
+                <p>Podsumowania powstają wyłącznie z danych widocznych na stronie wyników. Nie dodają informacji spoza nich.</p>
             </article>
         </div>
     </section>

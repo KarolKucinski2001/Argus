@@ -34,6 +34,7 @@ product described in `@context/foundation/prd.md` remains under development.
 - `dotnet restore .bootstrap-scaffold.csproj` — restore NuGet dependencies.
 - `dotnet build .bootstrap-scaffold.csproj --no-restore` — compile the API.
 - `dotnet run --project .bootstrap-scaffold.csproj` — run the Development API using launch profiles.
+- `.\scripts\run-local.ps1` — preferred local run: starts Azurite, rebuilds, and serves `https://localhost:7219` via `dotnet <dll>` (the `.exe` apphost can be blocked by machine policy).
 - `dotnet test .bootstrap-scaffold.csproj --no-restore` — the production project has no test cases; use the focused authentication test project below.
 - `dotnet test tests\Argus.Authentication.Tests\Argus.Authentication.Tests.csproj --no-restore` — deterministic authentication contract tests; no network or production secrets required.
 

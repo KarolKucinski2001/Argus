@@ -50,6 +50,26 @@ public sealed class WatchlistContractTests
     }
 
     [Fact]
+    public async Task Watchlist_movers_heading_uses_clear_polish_label()
+    {
+        await using var factory = new WatchlistTestFactory();
+        await factory.Store.SaveAsync("test-subject", ["AAPL"]);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var html = WebUtility.HtmlDecode(await client.GetStringAsync("/watchlist"));
+
+        Assert.Contains(">Największe zmiany</h2>", html);
+        Assert.Contains(
+            $"title=\"{WatchlistTablePresenter.TrendHint}\">{WatchlistTablePresenter.TrendHeader}</th>",
+            html);
+        Assert.DoesNotContain("ruszyciele", html);
+    }
+
+    [Fact]
     public async Task Analysis_save_handler_persists_selected_asset()
     {
         await using var factory = new WatchlistTestFactory();

@@ -51,6 +51,44 @@ public sealed class AccountAccessContractTests
     }
 
     [Fact]
+    public async Task Public_entry_lists_data_sources_before_boundary()
+    {
+        await using var factory = new AccountAccessFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var html = WebUtility.HtmlDecode(await client.GetStringAsync("/"));
+
+        Assert.Contains("Źródła danych", html);
+        Assert.Contains("data-data-source=\"market\"", html);
+        Assert.Contains("data-data-source=\"profiles\"", html);
+        Assert.Contains("data-data-source=\"ai\"", html);
+        Assert.Contains("SEC 13F", html);
+        Assert.True(
+            html.IndexOf("Źródła danych", StringComparison.Ordinal) <
+            html.IndexOf("Ważne ograniczenie", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Signed_in_entry_links_to_dashboard_instead_of_sign_in()
+    {
+        await using var factory = new WatchlistTestFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false,
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var html = WebUtility.HtmlDecode(await client.GetStringAsync("/"));
+
+        Assert.Contains("href=\"/dashboard\">Przejdź do Dashboardu", html);
+        Assert.DoesNotContain("Zaloguj się lub utwórz konto", html);
+    }
+
+    [Fact]
     public async Task Site_stylesheet_is_served_as_css()
     {
         await using var factory = new AccountAccessFactory();

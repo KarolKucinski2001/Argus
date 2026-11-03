@@ -29,6 +29,9 @@ list and delete own portfolios (FR-004). Educational simulation only.
 
 - [x] 1.3 Check pages against Azurite and `/strategies/ui-states` visually
 - [ ] 1.4 Review curated data accuracy and source terms (PRD v2 Open Questions 1, 4)
+  — profile wording now explicitly marks unverified S&P 500 data as illustrative
+  and All Weather as an unofficial educational style; public-display terms remain
+  unapproved.
 
 ### Phase 2: Deferred
 

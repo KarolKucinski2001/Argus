@@ -46,6 +46,9 @@ public sealed record WatchlistMoversView(
 public static class WatchlistTablePresenter
 {
     public const string MissingDataText = "brak danych";
+    public const string TrendHeader = "Trend 12 mies.";
+    public const string TrendHint =
+        "Dzienne ceny zamknięcia z ostatnich 12 miesięcy. Zielony: cena wyższa niż 12 miesięcy temu, czerwony: niższa.";
     public const int MaximumMovers = 5;
 
     private static readonly CultureInfo Polish = CultureInfo.GetCultureInfo("pl-PL");

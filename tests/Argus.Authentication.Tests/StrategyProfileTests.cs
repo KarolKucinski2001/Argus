@@ -68,6 +68,18 @@ public sealed class StrategyProfilePresenterTests
         Assert.Equal("1 pozycja", StrategyProfilePresenter.HoldingsCount(1));
         Assert.Equal("5 pozycji", StrategyProfilePresenter.HoldingsCount(5));
     }
+
+    [Fact]
+    public void Unverified_profiles_are_explicitly_labelled_as_illustrations()
+    {
+        var sAndP = CuratedProfileCatalog.Find("sp500-top-holdings")!;
+        var allWeather = CuratedProfileCatalog.Find("all-weather-style")!;
+
+        Assert.Contains("Ilustracyjny", sAndP.Name);
+        Assert.Contains("bez zatwierdzonego źródła", sAndP.SourceLabel);
+        Assert.Contains("stylu All Weather", allWeather.Name);
+        Assert.Contains("nieoficjalna ilustracja", allWeather.SourceLabel);
+    }
 }
 
 public sealed class StrategyPortfolioContractTests
@@ -107,6 +119,8 @@ public sealed class StrategyPortfolioContractTests
         {
             Assert.Contains("symulacja edukacyjna", html);
             Assert.Contains("Dane na dzień: 2025-06-30", html);
+            Assert.Contains(CuratedProfileCatalog.ProvenanceNote, html);
+            Assert.Contains(CuratedProfileCatalog.ApproximateExplanation, html);
         }
 
         Assert.Equal(3, Regex.Matches(list, "data-strategy-profile=").Count);

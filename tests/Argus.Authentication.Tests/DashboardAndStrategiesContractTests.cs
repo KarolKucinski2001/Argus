@@ -86,6 +86,13 @@ public sealed class DashboardAndStrategiesContractTests
         Assert.Contains("href=\"/watchlist\"", html);
         Assert.DoesNotContain("Lista obserwowanych jest pusta", html);
         Assert.DoesNotMatch(AdviceWording, html);
+        Assert.DoesNotContain(">Analiza</th>", html);
+        Assert.DoesNotContain(">Analiza</a>", html);
+        Assert.DoesNotContain("Przejdź do analizy", html);
+        Assert.Contains("Zobacz wszystkie", html);
+        Assert.Contains(
+            $"title=\"{WatchlistTablePresenter.TrendHint}\">{WatchlistTablePresenter.TrendHeader}</th>",
+            html);
     }
 
     [Fact]

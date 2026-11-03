@@ -139,7 +139,7 @@ public sealed class AzureTableSimulatedPortfolioStore : ISimulatedPortfolioStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             return new SimulatedPortfolioListResult(SimulatedPortfolioStatus.StorageFailure, []);
         }
@@ -182,7 +182,7 @@ public sealed class AzureTableSimulatedPortfolioStore : ISimulatedPortfolioStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             return SimulatedPortfolioStatus.StorageFailure;
         }
@@ -222,7 +222,7 @@ public sealed class AzureTableSimulatedPortfolioStore : ISimulatedPortfolioStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             return SimulatedPortfolioStatus.StorageFailure;
         }

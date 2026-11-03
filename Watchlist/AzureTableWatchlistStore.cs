@@ -67,7 +67,7 @@ public sealed class AzureTableWatchlistStore : IWatchlistStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             return new WatchlistListResult(
                 WatchlistListStatus.StorageFailure,
@@ -182,7 +182,7 @@ public sealed class AzureTableWatchlistStore : IWatchlistStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             results.AddRange(validIds.Select(assetId =>
                 new WatchlistSaveItemResult(assetId, WatchlistSaveStatus.StorageFailure)));
@@ -237,7 +237,7 @@ public sealed class AzureTableWatchlistStore : IWatchlistStore
         {
             throw;
         }
-        catch (RequestFailedException)
+        catch (Exception exception) when (exception is RequestFailedException or AggregateException)
         {
             return new WatchlistRemoveResult(
                 normalizedAssetId,

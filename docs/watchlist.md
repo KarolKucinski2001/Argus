@@ -19,6 +19,13 @@ the tracked `appsettings*.json` files keep them empty.
 
 ## Local development
 
+Run `.\scripts\run-local.ps1`. It starts Azurite if port 10002 is free,
+rebuilds the app, and runs it on `https://localhost:7219` through
+`dotnet <dll>` (the generated `.exe` may be blocked by machine policy).
+Running an old `bin\Debug` DLL without rebuilding serves stale code.
+
+Manual steps, if needed:
+
 1. Start Azurite (requires Node.js):
 
    ```powershell
@@ -49,7 +56,10 @@ store it as an App Service setting or Key Vault reference.
 
 When storage is not configured or unreachable, the app still starts. Saving,
 listing, and removing show an explicit Polish error message and never report
-success. `/analysis` itself keeps working without the watchlist.
+success. `/analysis` itself keeps working without the watchlist. An
+unreachable endpoint (for example Azurite not running) is reported only after
+the Azure SDK exhausts its retries, so affected pages take about 10–15 seconds
+to load; start Azurite to avoid the delay.
 
 ## Tests
 
