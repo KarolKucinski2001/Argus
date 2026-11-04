@@ -11,6 +11,7 @@ using _bootstrap_scaffold.Watchlist;
 
 namespace Argus.Authentication.Tests;
 
+[Collection(TestAuthenticationServiceCollection.Name)]
 public sealed class WatchlistContractTests
 {
     [Fact]

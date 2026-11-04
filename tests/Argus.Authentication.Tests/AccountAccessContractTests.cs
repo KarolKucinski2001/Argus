@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Argus.Authentication.Tests;
 
+[Collection(TestAuthenticationServiceCollection.Name)]
 public sealed class AccountAccessContractTests
 {
     [Fact]
@@ -341,6 +342,14 @@ public sealed class AccountAccessContractTests
         }
     }
 
+}
+
+// TestAuthenticationService records calls in static state, so classes that
+// use it must not run in parallel with each other.
+[CollectionDefinition(Name)]
+public sealed class TestAuthenticationServiceCollection
+{
+    public const string Name = "TestAuthenticationService";
 }
 
 internal sealed class TestAuthenticationService : IAuthenticationService
