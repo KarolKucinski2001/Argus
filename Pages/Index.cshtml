@@ -18,7 +18,7 @@
                 <a class="button" href="#how-it-works">Poznaj sposób działania</a>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a class="button button--secondary" asp-page="/Dashboard/Index">Przejdź do Dashboardu</a>
+                    <a class="button button--secondary" asp-page="/Dashboard/Index">Przejdź do pulpitu</a>
                 }
                 else
                 {
@@ -32,7 +32,7 @@
                 <div class="analysis-card__header">
                     <div>
                         <p class="analysis-card__label">Przykładowy podgląd</p>
-                        <h2 id="analysis-preview-title">Opportunity Score</h2>
+                        <h2 id="analysis-preview-title">Wskaźnik okazji</h2>
                     </div>
                     <span class="analysis-card__note">Dane ilustracyjne</span>
                 </div>

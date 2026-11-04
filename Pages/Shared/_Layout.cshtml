@@ -34,9 +34,9 @@
                     <span>Argus</span>
                 </a>
                 <nav class="app-nav" aria-label="Nawigacja główna">
-                    <a class="@NavClass(onDashboard)" aria-current="@NavCurrent(onDashboard)" asp-page="/Dashboard/Index"><partial name="_NavIcon" model='"dashboard"' />Dashboard</a>
+                    <a class="@NavClass(onDashboard)" aria-current="@NavCurrent(onDashboard)" asp-page="/Dashboard/Index"><partial name="_NavIcon" model='"dashboard"' />Pulpit</a>
                     <a class="@NavClass(onAnalysis)" aria-current="@NavCurrent(onAnalysis)" asp-page="/Analysis/Index"><partial name="_NavIcon" model='"analysis"' />Analiza</a>
-                    <a class="@NavClass(onStrategies)" aria-current="@NavCurrent(onStrategies)" asp-page="/Strategies/Index"><partial name="_NavIcon" model='"strategies"' />Strategy Profiles</a>
+                    <a class="@NavClass(onStrategies)" aria-current="@NavCurrent(onStrategies)" asp-page="/Strategies/Index"><partial name="_NavIcon" model='"strategies"' />Profile strategii</a>
                     <a class="@NavClass(onWatchlist)" aria-current="@NavCurrent(onWatchlist)" asp-page="/Watchlist/Index"><partial name="_NavIcon" model='"watchlist"' />Obserwowane</a>
                     @{ var accountActive = onAccount && currentPage != "/Account/SignOut"; }
                     <a class="@NavClass(accountActive)" aria-current="@NavCurrent(accountActive)" asp-page="/Account/Index"><partial name="_NavIcon" model='"account"' />Konto</a>

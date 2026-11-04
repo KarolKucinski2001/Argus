@@ -76,6 +76,8 @@
     --color-asset-microsoft: #38bdf8;
     --color-asset-nvidia: #76b900;
     --color-asset-tesla: #e82127;
+    --color-asset-crypto: #2dd4bf;
+    --asset-list-max-height: 30rem;
     --insight-badge-surface: var(--color-surface-raised);
     --insight-badge-text: var(--color-muted);
     --insight-badge-radius: var(--radius-sm);
@@ -1524,6 +1526,12 @@ a.account-quick-action:focus-visible {
         position: sticky;
         top: var(--space-4);
     }
+
+    .analysis-workspace__sidebar .asset-list {
+        max-block-size: var(--asset-list-max-height);
+        overflow-y: auto;
+        padding-inline-end: var(--space-1);
+    }
 }
 
 .analysis-workspace__sidebar .analysis-page__header {
@@ -1872,6 +1880,10 @@ a.account-quick-action:focus-visible {
 
 .asset-accent--tesla {
     --asset-accent: var(--color-asset-tesla);
+}
+
+.asset-accent--crypto {
+    --asset-accent: var(--color-asset-crypto);
 }
 
 .asset-glyph {

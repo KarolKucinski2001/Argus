@@ -149,9 +149,9 @@ public sealed class UiStateFixtureModel(IWebHostEnvironment environment) : PageM
             points);
         AnalysisFactor[] factors =
         [
-            Factor("momentum-24h", "24-hour momentum", change24Hours),
-            Factor("momentum-7d", "7-day momentum", change7Days),
-            Factor("trend-30d", "30-day trend", change30Days)
+            Factor("momentum-24h", "Impet 24h", change24Hours),
+            Factor("momentum-7d", "Impet 7 dni", change7Days),
+            Factor("trend-30d", "Trend 30 dni", change30Days)
         ];
 
         return new AssetAnalysis(

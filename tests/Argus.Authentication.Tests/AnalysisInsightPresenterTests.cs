@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Xunit;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
@@ -24,9 +25,40 @@ public sealed class AnalysisInsightPresenterTests
     }
 
     [Theory]
-    [InlineData("momentum-24h", "Momentum 24h")]
-    [InlineData("momentum-7d", "Momentum 7d")]
-    [InlineData("trend-30d", "Trend 30d")]
+    [InlineData("appsettings.json")]
+    [InlineData("appsettings.Development.json")]
+    public void Every_configured_asset_has_an_identity_and_crypto_has_a_coingecko_id(string file)
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile(file)
+            .Build();
+        var assets = configuration.GetSection("MarketData:AllowedAssets").GetChildren().ToArray();
+        var coinGeckoIds = new _bootstrap_scaffold.MarketData.Live.LiveMarketDataOptions().CoinGeckoIds;
+
+        Assert.True(assets.Length >= 15);
+        Assert.All(assets, asset =>
+        {
+            var identity = AssetIdentityCatalog.For(asset.Key);
+            Assert.NotEqual(AssetAccent.Neutral, identity.Accent);
+            Assert.NotEqual(asset.Key, identity.Name);
+            if (asset.Value == "Crypto")
+            {
+                Assert.True(coinGeckoIds.ContainsKey(asset.Key), $"{asset.Key} has no CoinGecko id.");
+            }
+        });
+    }
+
+    [Fact]
+    public void Alternative_crypto_uses_the_crypto_accent_class() =>
+        Assert.Equal(
+            "asset-accent--crypto",
+            AssetIdentityCatalog.AccentClass(AssetIdentityCatalog.For("SOL-USD").Accent));
+
+    [Theory]
+    [InlineData("momentum-24h", "Impet 24h")]
+    [InlineData("momentum-7d", "Impet 7 dni")]
+    [InlineData("trend-30d", "Trend 30 dni")]
     [InlineData("other", "Czynnik")]
     public void Factor_labels_are_polish_and_fall_back_for_unknown_keys(string key, string label) =>
         Assert.Equal(label, AnalysisInsightPresenter.FactorLabel(key));
@@ -222,7 +254,7 @@ public sealed class AnalysisInsightPresenterTests
         var view = AnalysisInsightPresenter.Present(Analysis("AAPL", null, 3m, 8.2m, 10m, 11m));
 
         Assert.Equal(new[] { "momentum-24h", "momentum-7d", "trend-30d" }, view.FactorBars.Select(bar => bar.Key));
-        Assert.Equal(new[] { "Momentum 24h", "Momentum 7d", "Trend 30d" }, view.FactorBars.Select(bar => bar.Label));
+        Assert.Equal(new[] { "Impet 24h", "Impet 7 dni", "Trend 30 dni" }, view.FactorBars.Select(bar => bar.Label));
         Assert.False(view.FactorBars[0].IsAvailable);
         Assert.Null(view.FactorBars[0].Value);
         Assert.Equal(58m, view.FactorBars[1].Value);
@@ -357,11 +389,11 @@ public sealed class AnalysisInsightPresenterTests
             new[]
             {
                 "Wynik 60 — o 7.5 pkt powyżej średniej analizy",
-                "Momentum 24h spada (-1.1%)",
-                "Momentum 7d rośnie (+3%)"
+                "Impet 24h spada (-1.1%)",
+                "Impet 7 dni rośnie (+3%)"
             },
             view.WhyBullets);
-        Assert.DoesNotContain(view.WhyBullets, bullet => bullet.StartsWith("Trend 30d", StringComparison.Ordinal));
+        Assert.DoesNotContain(view.WhyBullets, bullet => bullet.StartsWith("Trend 30 dni", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -376,8 +408,8 @@ public sealed class AnalysisInsightPresenterTests
 
         Assert.Equal(3, view.WhyBullets.Count);
         Assert.Equal("Wynik 60 — o 10 pkt poniżej średniej analizy", view.WhyBullets[0]);
-        Assert.Equal("Momentum 24h bez wyraźnej zmiany (+0.5%)", view.WhyBullets[1]);
-        Assert.Equal("Momentum 7d rośnie (+2%)", view.WhyBullets[2]);
+        Assert.Equal("Impet 24h bez wyraźnej zmiany (+0.5%)", view.WhyBullets[1]);
+        Assert.Equal("Impet 7 dni rośnie (+2%)", view.WhyBullets[2]);
     }
 
     [Fact]

@@ -34,10 +34,10 @@ public static class StrategyProfileCatalog
 
     public static IReadOnlyList<StrategyProfileView> Profiles { get; } =
     [
-        new("large-funds", "Large Funds", "Fundusze hedgingowe i instytucjonalne", "50–200 spółek", "LF", 1, false),
-        new("company-insiders", "Company Insiders", "Zarządy i rady nadzorcze (zgłoszenia SEC)", "10–50 spółek", "CI", 2, false),
-        new("congress-disclosures", "Congress Disclosures", "Członkowie Kongresu USA (zgłoszenia etyczne)", "10–100 spółek", "CD", 3, false),
-        new("broad-market-benchmark", "Broad Market Benchmark", "S&P 500 lub skład całego indeksu", "500+ spółek", "BM", 4, false),
+        new("large-funds", "Duże fundusze", "Fundusze hedgingowe i instytucjonalne", "50–200 spółek", "DF", 1, false),
+        new("company-insiders", "Osoby z wewnątrz spółek", "Zarządy i rady nadzorcze (zgłoszenia SEC)", "10–50 spółek", "OW", 2, false),
+        new("congress-disclosures", "Zgłoszenia Kongresu USA", "Członkowie Kongresu USA (zgłoszenia etyczne)", "10–100 spółek", "KG", 3, false),
+        new("broad-market-benchmark", "Szeroki rynek (benchmark)", "S&P 500 lub skład całego indeksu", "500+ spółek", "SR", 4, false),
         new("public-profile-a", "Profil publiczny: Przykład A", "Przykładowy portfel publiczny (zgłoszenia SEC)", "5–20 spółek", "A", 1, true),
         new("public-profile-b", "Profil publiczny: Przykład B", "Przykładowy portfel publiczny (zgłoszenia SEC)", "5–20 spółek", "B", 3, true)
     ];
@@ -47,9 +47,9 @@ public static class StrategyProfileCatalog
 
     public static IReadOnlyList<AllocationSliceView> Allocation { get; } =
     [
-        new("Large Funds", 20, 1),
-        new("Company Insiders", 10, 2),
-        new("Broad Market Benchmark", 20, 3),
+        new("Duże fundusze", 20, 1),
+        new("Osoby z wewnątrz spółek", 10, 2),
+        new("Szeroki rynek (benchmark)", 20, 3),
         new("Moja selekcja", 50, 4)
     ];
 

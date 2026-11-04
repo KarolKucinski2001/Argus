@@ -5,8 +5,8 @@
 @{
     var performers = new (string Label, SummaryPerformer? Performer)[]
     {
-        ("Najlepszy wynik 7d", Model.Best),
-        ("Najsłabszy wynik 7d", Model.Worst)
+        ("Najlepszy wynik 7 dni", Model.Best),
+        ("Najsłabszy wynik 7 dni", Model.Worst)
     };
 }
 <section class="analysis-summary-strip" aria-label="Podsumowanie rankingu">
@@ -43,7 +43,7 @@
         @if (Model.StrongestTrend is { } strongestTrend)
         {
             <div class="analysis-summary-strip__item">
-                <dt>Najsilniejszy trend 30d</dt>
+                <dt>Najsilniejszy trend 30 dni</dt>
                 <dd class="analysis-summary-strip__value">
                     <span class="analysis-summary-strip__name">@strongestTrend.Name</span>
                     <span class="analysis-summary-strip__change analysis-summary-strip__change--positive">@AnalysisFormatting.SignedPercent(strongestTrend.Change)</span>
@@ -51,7 +51,7 @@
             </div>
         }
         <div class="analysis-summary-strip__item">
-            <dt>Średni score</dt>
+            <dt>Średni wynik</dt>
             @if (Model.AverageScore is { } average)
             {
                 <dd class="analysis-summary-strip__value">@AnalysisFormatting.Decimal(average)</dd>

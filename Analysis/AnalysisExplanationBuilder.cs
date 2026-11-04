@@ -35,8 +35,8 @@ public sealed class AnalysisExplanationBuilder : IAnalysisExplanationBuilder
     private static string PolishFactorLabel(string key) =>
         key switch
         {
-            "momentum-24h" => "momentum 24 godziny",
-            "momentum-7d" => "momentum 7 dni",
+            "momentum-24h" => "impet 24 godziny",
+            "momentum-7d" => "impet 7 dni",
             "trend-30d" => "trend 30 dni",
             _ => "czynnik"
         };

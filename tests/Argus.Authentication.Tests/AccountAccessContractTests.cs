@@ -85,7 +85,7 @@ public sealed class AccountAccessContractTests
 
         var html = WebUtility.HtmlDecode(await client.GetStringAsync("/"));
 
-        Assert.Contains("href=\"/dashboard\">Przejdź do Dashboardu", html);
+        Assert.Contains("href=\"/dashboard\">Przejdź do pulpitu", html);
         Assert.DoesNotContain("Zaloguj się lub utwórz konto", html);
     }
 
@@ -230,10 +230,10 @@ public sealed class AccountAccessContractTests
 
         using var response = await client.GetAsync(
             "/account/error?code=provider-failure&exception=client_secret=super-secret");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("could not complete", html, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Nie udało się uzyskać dostępu do konta", html);
         Assert.DoesNotContain("super-secret", html);
         Assert.DoesNotContain("client_secret", html);
     }
@@ -249,10 +249,10 @@ public sealed class AccountAccessContractTests
         });
 
         using var response = await client.GetAsync("/account/error?code=access-denied");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("Access was denied", html);
+        Assert.Contains("Odmówiono dostępu", html);
         Assert.DoesNotContain("provider-failure", html);
     }
 

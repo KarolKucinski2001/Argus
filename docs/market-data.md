@@ -176,7 +176,7 @@ error result for that asset only.
 3. Set `MarketData:ProviderId=argus-live-free` and `MarketData:PublicDisplayApproved=true`
    in environment-specific configuration, not in committed defaults.
 4. Add new assets to `MarketData:AllowedAssets`; crypto assets also need a CoinGecko id
-   in `MarketData:Live:CoinGeckoIds` (defaults: BTC-USD, ETH-USD).
+   in `MarketData:Live:CoinGeckoIds` (defaults: BTC-USD, ETH-USD, SOL-USD, XRP-USD, ADA-USD) and a name in `Analysis/AssetIdentityCatalog.cs`. `appsettings.json` lists 17 assets (12 US equities/ETFs, 5 crypto); a test fails if a configured asset lacks either.
 
 ### Attribution text
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using _bootstrap_scaffold.Account;
 using _bootstrap_scaffold.Analysis;
 using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Strategies;
@@ -90,6 +91,10 @@ builder.Services
         options.SaveTokens = false;
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.RequireHttpsMetadata = true;
+        if (entraSection.GetValue<bool>("AllowAnyTenant"))
+        {
+            options.TokenValidationParameters.IssuerValidator = (issuer, token, _) => EntraIssuerValidator.ValidateAnyTenant(issuer, token);
+        }
         options.Events.OnAccessDenied = context =>
         {
             context.HandleResponse();
@@ -203,6 +208,7 @@ sealed class EntraOptions
     public string? ClientId { get; set; }
     public string? ClientSecret { get; set; }
     public string? CallbackPath { get; set; }
+    public bool AllowAnyTenant { get; set; }
 
     public bool HasRequiredValues =>
         !string.IsNullOrWhiteSpace(Authority) &&

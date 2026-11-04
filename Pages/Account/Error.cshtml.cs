@@ -10,15 +10,15 @@ public sealed class ErrorModel : PageModel
     [BindProperty(SupportsGet = true)]
     public string? Code { get; set; }
 
-    public string Message { get; private set; } = "We could not complete account access. Please try again.";
+    public string Message { get; private set; } = "Nie udało się uzyskać dostępu do konta. Spróbuj ponownie.";
 
     public void OnGet()
     {
         Message = Code switch
         {
-            "access-denied" => "Access was denied. You can try again or return to Argus.",
-            "cancelled" => "Account access was cancelled. You can try again or return to Argus.",
-            _ => "We could not complete account access. Please try again."
+            "access-denied" => "Odmówiono dostępu. Możesz spróbować ponownie lub wrócić do Argus.",
+            "cancelled" => "Logowanie zostało anulowane. Możesz spróbować ponownie lub wrócić do Argus.",
+            _ => "Nie udało się uzyskać dostępu do konta. Spróbuj ponownie."
         };
     }
 }

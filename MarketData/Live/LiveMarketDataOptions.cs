@@ -18,6 +18,9 @@ public sealed class LiveMarketDataOptions
     public Dictionary<string, string> CoinGeckoIds { get; set; } = new(StringComparer.OrdinalIgnoreCase)
     {
         ["BTC-USD"] = "bitcoin",
-        ["ETH-USD"] = "ethereum"
+        ["ETH-USD"] = "ethereum",
+        ["SOL-USD"] = "solana",
+        ["XRP-USD"] = "ripple",
+        ["ADA-USD"] = "cardano"
     };
 }

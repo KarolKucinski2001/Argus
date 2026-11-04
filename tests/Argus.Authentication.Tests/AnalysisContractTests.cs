@@ -23,9 +23,9 @@ public sealed class AnalysisContractTests
         var summary = builder.Build(marketData, performance, assessment);
 
         Assert.Contains("Wynik 57.5/100", summary);
-        Assert.Contains("momentum 24 godziny", summary);
+        Assert.Contains("impet 24 godziny", summary);
         Assert.Contains("-20", summary);
-        Assert.Contains("momentum 7 dni", summary);
+        Assert.Contains("impet 7 dni", summary);
         Assert.Contains("0", summary);
         Assert.Contains("trend 30 dni", summary);
         Assert.Contains("20", summary);
@@ -53,7 +53,7 @@ public sealed class AnalysisContractTests
 
         Assert.Contains("Niewystarczające dane", summary);
         Assert.Contains("mniej niż wymagane dwa czynniki", summary);
-        Assert.Contains("momentum 7 dni", summary);
+        Assert.Contains("impet 7 dni", summary);
         Assert.Contains("20", summary);
         Assert.DoesNotContain("test", summary, StringComparison.OrdinalIgnoreCase);
     }

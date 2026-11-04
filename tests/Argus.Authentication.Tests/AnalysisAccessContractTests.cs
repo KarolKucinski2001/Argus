@@ -66,7 +66,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("insight-card__error", html);
         Assert.Contains("Dane opóźnione", html);
         Assert.DoesNotMatch(@"insight-card__chips""[^>]*>\s*</div>", html);
-        Assert.Contains("Niewystarczające dane do wyliczenia score.", html);
+        Assert.Contains("Niewystarczające dane do wyliczenia wyniku.", html);
         Assert.Contains("class=\"insight-card__monogram\"", html);
         Assert.Contains("data-sparkline", html);
         Assert.Contains("data-factor-bar=\"trend-30d\"", html);
@@ -165,7 +165,7 @@ public sealed class AnalysisAccessContractTests
             "<span class=\"analysis-summary-strip__name\">Ethereum</span>\\s*" +
             "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--negative\">-3.9%</span>",
             html);
-        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">56.8</dd>", html);
+        Assert.Matches("<dt>Średni wynik</dt>\\s*<dd class=\"analysis-summary-strip__value\">56.8</dd>", html);
         Assert.Equal(4, Regex.Matches(html, "class=\"asset-option__score\"").Count);
         Assert.Contains("Generuj ranking", html);
         Assert.DoesNotContain("chwilowo niedostępne", html);
@@ -410,16 +410,16 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("<section class=\"analysis-summary-strip\" aria-label=\"Podsumowanie rankingu\">", html);
         Assert.Matches("<dt>Przeanalizowane aktywa</dt>\\s*<dd class=\"analysis-summary-strip__value\">2</dd>", html);
         Assert.Matches(
-            "<dt>Najlepszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<dt>Najlepszy wynik 7 dni</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
             "<span class=\"analysis-summary-strip__name\">Microsoft</span>\\s*" +
             "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+50%</span>",
             html);
         Assert.Matches(
-            "<dt>Najsłabszy wynik 7d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<dt>Najsłabszy wynik 7 dni</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
             "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
             "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--neutral\">0%</span>",
             html);
-        Assert.Matches("<dt>Średni score</dt>\\s*<dd class=\"analysis-summary-strip__value\">75</dd>", html);
+        Assert.Matches("<dt>Średni wynik</dt>\\s*<dd class=\"analysis-summary-strip__value\">75</dd>", html);
     }
 
     [Fact]
@@ -440,7 +440,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("<span class=\"insight-card__badge\">Akcje</span>", html);
         Assert.Matches(
-            "<dt>Najsilniejszy trend 30d</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
+            "<dt>Najsilniejszy trend 30 dni</dt>\\s*<dd class=\"analysis-summary-strip__value\">\\s*" +
             "<span class=\"analysis-summary-strip__name\">Apple</span>\\s*" +
             "<span class=\"analysis-summary-strip__change analysis-summary-strip__change--positive\">\\+50%</span>",
             html);
@@ -490,7 +490,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Matches(
             "<div class=\"insight-card__score-block insight-card__score-block--strong\">\\s*" +
             "<p class=\"analysis-result-card__rank\"><span aria-hidden=\"true\">#1</span><span class=\"visually-hidden\">Miejsce 1</span></p>\\s*" +
-            "<p class=\"analysis-result-card__score\"><span class=\"visually-hidden\">Score 100/100</span><span class=\"insight-card__score-value\" aria-hidden=\"true\">100</span></p>\\s*" +
+            "<p class=\"analysis-result-card__score\"><span class=\"visually-hidden\">Wynik 100/100</span><span class=\"insight-card__score-value\" aria-hidden=\"true\">100</span></p>\\s*" +
             "<p class=\"insight-card__band\">Silny</p>",
             card);
         Assert.Contains("<span class=\"insight-card__bar-word insight-card__bar-word--rising\">Rosnący</span>", card);
@@ -602,8 +602,8 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("class=\"asset-option__monogram\"", html);
-        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>100</span>", html);
-        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Score </span>50</span>", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Wynik </span>100</span>", html);
+        Assert.Contains("<span class=\"asset-option__score\"><span class=\"visually-hidden\">Wynik </span>50</span>", html);
         Assert.Equal(2, Regex.Matches(html, "class=\"asset-option__score\"").Count);
         Assert.DoesNotContain("asset-option__rank", html);
         Assert.Equal(2, Regex.Matches(html, "data-sparkline").Count);
@@ -815,7 +815,7 @@ public sealed class AnalysisAccessContractTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Podsumowanie", html);
-        Assert.Contains("Score 100/100", html);
+        Assert.Contains("Wynik 100/100", html);
         Assert.Contains("100/100", html);
         Assert.Contains("Czynniki", html);
         Assert.DoesNotContain("provider", html, StringComparison.OrdinalIgnoreCase);
@@ -901,7 +901,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("Niewystarczające dane", html);
         Assert.Contains("insight-card__change insight-card__change--muted\">n/d</p>", html);
         Assert.DoesNotContain("0/100", html);
-        Assert.DoesNotContain("Score 0", html);
+        Assert.DoesNotContain("Wynik 0", html);
     }
 
     [Fact]

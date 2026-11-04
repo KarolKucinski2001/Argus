@@ -11,9 +11,9 @@ public sealed class OpportunityScorer : IOpportunityScorer
     {
         var inputs = new[]
         {
-            new FactorInput("momentum-24h", "24-hour momentum", performance.Change24Hours, TwentyFourHourWeight),
-            new FactorInput("momentum-7d", "7-day momentum", performance.Change7Days, SevenDayWeight),
-            new FactorInput("trend-30d", "30-day trend", performance.Change30Days, ThirtyDayWeight)
+            new FactorInput("momentum-24h", "Impet 24h", performance.Change24Hours, TwentyFourHourWeight),
+            new FactorInput("momentum-7d", "Impet 7 dni", performance.Change7Days, SevenDayWeight),
+            new FactorInput("trend-30d", "Trend 30 dni", performance.Change30Days, ThirtyDayWeight)
         };
 
         var availableWeight = inputs
@@ -44,7 +44,7 @@ public sealed class OpportunityScorer : IOpportunityScorer
                 0m,
                 null,
                 false,
-                $"{input.Label} is unavailable because the source history does not contain enough data.");
+                $"{input.Label}: brak wystarczającej historii danych, aby wyliczyć ten czynnik.");
         }
 
         var normalizedWeight = input.BaseWeight / availableWeight;
@@ -58,7 +58,7 @@ public sealed class OpportunityScorer : IOpportunityScorer
             normalizedWeight,
             contribution,
             true,
-            $"{input.Label} contributes {contribution:0.##} points after fixed-weight normalization.");
+            $"{input.Label}: wkład {contribution:0.##} pkt po normalizacji stałych wag.");
     }
 
     private static bool IsAvailable(PerformanceMetric metric) =>

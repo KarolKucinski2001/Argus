@@ -42,7 +42,7 @@
             {
                 <div class="insight-card__score-block insight-card__score-block--@band.ToString().ToLowerInvariant()">
                     <p class="analysis-result-card__rank"><span aria-hidden="true">#@Model.Rank</span><span class="visually-hidden">Miejsce @Model.Rank</span></p>
-                    <p class="analysis-result-card__score"><span class="visually-hidden">Score @AnalysisFormatting.Decimal(score)/100</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
+                    <p class="analysis-result-card__score"><span class="visually-hidden">Wynik @AnalysisFormatting.Decimal(score)/100</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
                     <p class="insight-card__band">@AnalysisInsightPresenter.BandLabel(band)</p>
                 </div>
             }
@@ -51,7 +51,7 @@
                 <p class="analysis-result-card__rank">Wynik nierankingowy</p>
                 if (result.Error is null)
                 {
-                    <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia score.</p>
+                    <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia wyniku.</p>
                 }
             }
         </header>

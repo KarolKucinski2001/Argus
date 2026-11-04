@@ -1,6 +1,6 @@
 # Authentication and account access
 
-Argus uses Microsoft Entra External ID through OpenID Connect. The browser
+Argus uses Microsoft Entra ID (workforce or External ID tenant) through OpenID Connect. The browser
 account flow uses the provider for both sign-in and account creation, then
 stores the authenticated session in a secure, HTTP-only cookie. Argus does not
 persist local profiles, passwords, tokens, or provider credentials.
@@ -14,7 +14,8 @@ to nested configuration keys:
 | Environment variable | Configuration key | Secret? | Purpose |
 | --- | --- | --- | --- |
 | `Entra__Authority` | `Entra:Authority` | No | OpenID Connect authority, including the tenant/policy path |
-| `Entra__TenantId` | `Entra:TenantId` | No | External ID tenant identifier |
+| `Entra__TenantId` | `Entra:TenantId` | No | Home tenant identifier of the app registration |
+| `Entra__AllowAnyTenant` | `Entra:AllowAnyTenant` | No | Optional, default `false`; set `true` with the `common` authority (see *Who can sign in*) |
 | `Entra__ClientId` | `Entra:ClientId` | No | Application (client) ID |
 | `Entra__ClientSecret` | `Entra:ClientSecret` | Yes | Confidential-client secret |
 | `Entra__CallbackPath` | `Entra:CallbackPath` | No | Relative callback path; use `/signin-oidc` |
@@ -27,7 +28,7 @@ token.
 ## Browser contract
 
 The public root route `/` explains Argus's educational purpose and provides one
-unified **Sign in or create an account** action at `/account/signin`. The action
+unified **Zaloguj się lub utwórz konto** action at `/account/signin`. The action
 starts an explicit OpenID Connect challenge; it does not change the API's
 default challenge behavior.
 
@@ -49,9 +50,31 @@ to `/account/error` with a bounded, friendly message. Raw provider exceptions,
 query-string details, authorization codes, tokens, and credentials are not
 rendered.
 
+## Who can sign in and what they can access
+
+Authorization has no roles or policies: every page and endpoint only calls
+`RequireAuthorization()`, so **every signed-in user can use every feature**.
+Watchlists and simulated portfolios are scoped to the user's `sub` claim, so
+users never see each other's data.
+
+Who can sign in is decided by the Entra app registration, not by Argus code:
+
+- **Single tenant (current setup)** — `Entra:Authority` is
+  `https://login.microsoftonline.com/<tenant-id>/v2.0`. Only members of that
+  tenant and invited guests can sign in.
+- **Any Microsoft account** — in the Azure portal set the app registration's
+  *Supported account types* to *Accounts in any organizational directory and
+  personal Microsoft accounts*, then set
+  `Entra:Authority` = `https://login.microsoftonline.com/common/v2.0` and
+  `Entra:AllowAnyTenant` = `true`. `AllowAnyTenant` replaces the default
+  issuer check (which cannot match `common`) with one that accepts only the
+  v2.0 issuer of the tenant named in the token's `tid` claim.
+- **Self-service sign-up with any email** — use an Entra External ID tenant with
+  a sign-up user flow and point `Entra:Authority` at its `ciamlogin.com`
+  authority; `AllowAnyTenant` stays `false`.
 ## Local development
 
-Register a web application in a non-production Entra External ID tenant and add
+Register a web application in a non-production Entra tenant and add
 this exact redirect URI:
 
 ```text

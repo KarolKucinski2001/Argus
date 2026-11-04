@@ -70,9 +70,9 @@ public static class AnalysisInsightPresenter
 
     private static readonly (string Key, string Label, string Period)[] FactorOrder =
     [
-        ("momentum-24h", "Momentum 24h", "24 godzin"),
-        ("momentum-7d", "Momentum 7d", "7 dni"),
-        ("trend-30d", "Trend 30d", "30 dni")
+        ("momentum-24h", "Impet 24h", "24 godzin"),
+        ("momentum-7d", "Impet 7 dni", "7 dni"),
+        ("trend-30d", "Trend 30 dni", "30 dni")
     ];
 
     public static AssetInsightView Present(AssetAnalysis analysis, int? rank = null, decimal? averageScore = null)
