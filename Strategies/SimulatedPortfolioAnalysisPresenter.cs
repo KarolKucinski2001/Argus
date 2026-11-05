@@ -35,8 +35,7 @@ public static class SimulatedPortfolioAnalysisPresenter
 
     public static SimulatedPortfolioAnalysisView Build(
         SimulatedPortfolio portfolio,
-        IEnumerable<string> supportedAssetIds,
-        int maximumAnalyzedAssets)
+        IEnumerable<string> supportedAssetIds)
     {
         var holdings = portfolio.Holdings
             .Select(holding => new CuratedHolding(
@@ -67,7 +66,6 @@ public static class SimulatedPortfolioAnalysisPresenter
         var analyzable = ordered
             .Where(holding => supported.Contains(holding.AssetId))
             .Select(holding => holding.AssetId)
-            .Take(Math.Max(0, maximumAnalyzedAssets))
             .ToArray();
         var coveredCount = ordered.Count(holding => supported.Contains(holding.AssetId));
 
@@ -84,7 +82,7 @@ public static class SimulatedPortfolioAnalysisPresenter
             classes,
             factors,
             analyzable,
-            Coverage(coveredCount, ordered.Length, analyzable, maximumAnalyzedAssets));
+            Coverage(coveredCount, ordered.Length, analyzable));
     }
 
     public static decimal EffectivePositions(IEnumerable<decimal> weights)
@@ -125,17 +123,14 @@ public static class SimulatedPortfolioAnalysisPresenter
         ];
     }
 
-    private static string Coverage(int covered, int total, IReadOnlyList<string> analyzable, int maximum)
+    private static string Coverage(int covered, int total, IReadOnlyList<string> analyzable)
     {
         if (covered == 0)
         {
             return "Żadna pozycja tego portfela nie jest obecnie obsługiwana przez źródło danych rynkowych Argus, więc analiza dotyczy tylko składu.";
         }
 
-        var text = $"Argus może pokazać analizę rynkową dla {covered} z {total} pozycji: {string.Join(", ", analyzable)}. Pozostałe pozycje opisuje tylko analiza składu.";
-        return covered > analyzable.Count
-            ? text + $" Do jednej analizy można przekazać maksymalnie {maximum} aktywów."
-            : text;
+        return $"Argus może pokazać analizę rynkową dla {covered} z {total} pozycji: {string.Join(", ", analyzable)}. Pozostałe pozycje opisuje tylko analiza składu.";
     }
 
     private static string Number(decimal value) => value.ToString("0.0", Polish);

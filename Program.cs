@@ -123,6 +123,14 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     app.UseHttpsRedirection();
 }
+app.Use(async (context, next) =>
+{
+    // UI language is a per-request preference; Polish stays the default without a cookie.
+    _bootstrap_scaffold.Localization.Lang.Current = _bootstrap_scaffold.Localization.Lang.Parse(
+        context.Request.Cookies[_bootstrap_scaffold.Localization.Lang.CookieName]);
+    await next(context);
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

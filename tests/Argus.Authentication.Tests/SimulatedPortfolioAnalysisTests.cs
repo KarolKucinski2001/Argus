@@ -32,7 +32,7 @@ public sealed class SimulatedPortfolioAnalysisPresenterTests
     [InlineData("sp500-top-holdings", "Umiarkowana koncentracja")]
     public void Concentration_label_follows_effective_positions(string profileId, string expected)
     {
-        var view = SimulatedPortfolioAnalysisPresenter.Build(Copy(profileId), Supported, 5);
+        var view = SimulatedPortfolioAnalysisPresenter.Build(Copy(profileId), Supported);
 
         Assert.Equal(expected, view.ConcentrationLabel);
         Assert.Equal("Rozproszony skład", SimulatedPortfolioAnalysisPresenter.ConcentrationLabel(7m));
@@ -41,7 +41,7 @@ public sealed class SimulatedPortfolioAnalysisPresenterTests
     [Fact]
     public void Analysis_lists_metrics_shares_and_keeps_as_of_date()
     {
-        var view = SimulatedPortfolioAnalysisPresenter.Build(Copy("berkshire-style"), Supported, 5);
+        var view = SimulatedPortfolioAnalysisPresenter.Build(Copy("berkshire-style"), Supported);
 
         Assert.Equal("Dane na dzień: 2025-06-30", view.AsOfText);
         Assert.Contains(view.Metrics, metric => metric.Label == "Największa pozycja" && metric.Value == "40%");
@@ -53,15 +53,15 @@ public sealed class SimulatedPortfolioAnalysisPresenterTests
     }
 
     [Fact]
-    public void Coverage_lists_only_supported_assets_up_to_the_selection_limit()
+    public void Coverage_lists_every_supported_asset_without_a_selection_limit()
     {
-        var berkshire = SimulatedPortfolioAnalysisPresenter.Build(Copy("berkshire-style"), Supported, 5);
-        var sAndP = SimulatedPortfolioAnalysisPresenter.Build(Copy("sp500-top-holdings"), Supported, 2);
-        var allWeather = SimulatedPortfolioAnalysisPresenter.Build(Copy("all-weather-style"), Supported, 5);
+        var berkshire = SimulatedPortfolioAnalysisPresenter.Build(Copy("berkshire-style"), Supported);
+        var sAndP = SimulatedPortfolioAnalysisPresenter.Build(Copy("sp500-top-holdings"), Supported);
+        var allWeather = SimulatedPortfolioAnalysisPresenter.Build(Copy("all-weather-style"), Supported);
 
         Assert.Equal(["AAPL"], berkshire.AnalyzableAssetIds);
         Assert.Contains("1 z 7", berkshire.CoverageText);
-        Assert.Equal(["NVDA", "MSFT"], sAndP.AnalyzableAssetIds);
+        Assert.Equal(["NVDA", "MSFT", "AAPL"], sAndP.AnalyzableAssetIds);
         Assert.Empty(allWeather.AnalyzableAssetIds);
         Assert.Contains("Żadna", allWeather.CoverageText);
     }
@@ -72,7 +72,7 @@ public sealed class SimulatedPortfolioAnalysisPresenterTests
         var banned = new[] { "kup", "sprzedaj", "polecam", "zalecamy", "warto", "prognoz", "zysk", "gwarant", "najlepsz", "ryzykown", "bezpieczn" };
         foreach (var profile in CuratedProfileCatalog.Profiles)
         {
-            var view = SimulatedPortfolioAnalysisPresenter.Build(Copy(profile.Id), Supported, 5);
+            var view = SimulatedPortfolioAnalysisPresenter.Build(Copy(profile.Id), Supported);
             var text = string.Join(
                 " ",
                 view.Factors

@@ -39,6 +39,7 @@
     --brand-mark-size: 1.5rem;
     --content-width: 72rem;
     --workspace-sidebar-width: 24rem;
+    --workspace-sidebar-compact-width: 20rem;
     --workspace-content-min: 0;
     --workspace-card-min: 28rem;
     --workspace-gap: var(--space-4);
@@ -161,6 +162,38 @@
     --strategy-hover-surface: var(--color-nav-hover-surface);
     color-scheme: dark;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --brand-mark-filter: none;
+}
+
+/* Light theme: only token overrides; components keep using the same semantic tokens. */
+:root[data-theme="light"] {
+    --color-bg: #f4f7fb;
+    --color-surface: #ffffff;
+    --color-surface-raised: #eaf0f7;
+    --color-text: #0f1b2d;
+    --color-muted: #4a5b73;
+    --color-accent: #0f766e;
+    --color-accent-strong: #115e59;
+    --color-border: #c9d5e3;
+    --color-warning-surface: #fff6dc;
+    --color-on-accent: #ffffff;
+    --color-shadow: rgb(15 27 45 / 10%);
+    --color-divider: rgb(74 91 115 / 20%);
+    --color-positive: #15803d;
+    --color-negative: #b91c1c;
+    --color-warning: #b45309;
+    --color-asset-equity: #2563eb;
+    --color-asset-bitcoin: #c2410c;
+    --color-asset-ethereum: #7c3aed;
+    --color-asset-apple: #4b5563;
+    --color-asset-microsoft: #0369a1;
+    --color-asset-nvidia: #4d7c0f;
+    --color-asset-tesla: #b91c1c;
+    --color-asset-crypto: #0f766e;
+    --color-on-asset: #ffffff;
+    --color-sidebar-surface: #e9eef5;
+    --brand-mark-filter: brightness(0.12);
+    color-scheme: light;
 }
 
 * {
@@ -214,9 +247,42 @@ button:focus-visible {
 }
 
 .brand img {
+    filter: var(--brand-mark-filter);
     width: var(--brand-mark-size);
     height: var(--brand-mark-size);
     flex: 0 0 var(--brand-mark-size);
+}
+
+.preference-switches {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.preference-switches__form {
+    margin: 0;
+}
+
+.preference-switch {
+    min-block-size: var(--nav-link-height);
+    padding-inline: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.preference-switch:hover {
+    background: var(--color-surface-raised);
+}
+
+.preference-switch:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
 }
 
 .site-nav {
@@ -241,6 +307,11 @@ button:focus-visible {
 }
 
 .app-shell__sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    block-size: 100vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -1521,10 +1592,13 @@ a.account-quick-action:focus-visible {
     min-width: 0;
 }
 
-@media (min-width: 60rem) and (min-height: 55rem) {
+@media (min-width: 60rem) {
     .analysis-workspace__sidebar {
         position: sticky;
         top: var(--space-4);
+        max-block-size: var(--workspace-sidebar-max-height);
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     .analysis-workspace__sidebar .asset-list {
@@ -2294,6 +2368,9 @@ a.account-quick-action:focus-visible {
     }
 
     .app-shell__sidebar {
+        position: static;
+        block-size: auto;
+        overflow-y: visible;
         flex-flow: row wrap;
         align-items: center;
         gap: var(--space-2);
@@ -2423,6 +2500,14 @@ a.account-quick-action:focus-visible {
     .strategy-allocation__bar {
         grid-column: 1 / -1;
         grid-row: 2;
+    }
+}
+
+/* Desktop analysis needs room for two result cards next to the picker. */
+@media (min-width: 64rem) {
+    body:has(.analysis-workspace) {
+        --content-width: var(--workspace-wide-width);
+        --workspace-sidebar-width: var(--workspace-sidebar-compact-width);
     }
 }
 

@@ -206,17 +206,20 @@ public sealed class MarketDataContractTests
     }
 
     [Fact]
-    public async Task Over_limit_request_returns_invalid_request_problem()
+    public async Task Request_with_more_than_five_assets_is_not_capped()
     {
-        await using var factory = new MarketDataTestFactory(
-            new FakeMarketDataProvider(),
-            configureOptions: options => options.MaximumSelectedAssets = 1);
+        string[] ids = ["AAPL", "MSFT", "TSLA", "JPM", "V", "BTC-USD", "ETH-USD", "XRP-USD"];
+        var provider = new FakeMarketDataProvider();
+        provider.SetResults(ids
+            .Select(id => CreateResult(id, id.EndsWith("-USD", StringComparison.Ordinal) ? MarketAssetClass.Crypto : MarketAssetClass.Equity))
+            .ToArray());
+        await using var factory = new MarketDataTestFactory(provider);
 
-        using var response = await PostAsync(factory, CreateRequest("AAPL", "MSFT"));
-        var category = await ReadProblemCategoryAsync(response);
+        var response = await PostAsync(factory, CreateRequest(ids));
+        var data = await ReadResponseAsync(response);
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("InvalidRequest", category);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(ids, data.Results.Select(result => result.Asset.Id));
     }
 
     [Fact]

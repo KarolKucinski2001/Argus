@@ -1,0 +1,23 @@
+@using _bootstrap_scaffold.Localization
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isLight = Theme.Normalize(Context.Request.Cookies[Theme.CookieName]) == Theme.Light;
+}
+<div class="preference-switches">
+    <form method="post" asp-page="/Preferences/Index" asp-page-handler="Language" class="preference-switches__form">
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <input type="hidden" name="language" value="@(Lang.IsEnglish ? "pl" : "en")" />
+        <button type="submit" class="preference-switch" lang="@(Lang.IsEnglish ? "pl" : "en")"
+                aria-label="@(Lang.IsEnglish ? "Zmień język na polski" : "Switch language to English")">
+            @(Lang.IsEnglish ? "PL" : "EN")
+        </button>
+    </form>
+    <form method="post" asp-page="/Preferences/Index" asp-page-handler="Theme" class="preference-switches__form">
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <input type="hidden" name="theme" value="@(isLight ? Theme.Dark : Theme.Light)" />
+        <button type="submit" class="preference-switch" data-theme-toggle
+                aria-label="@(isLight ? Lang.T("Włącz ciemny motyw") : Lang.T("Włącz jasny motyw"))">
+            @(isLight ? Lang.T("Ciemny") : Lang.T("Jasny"))
+        </button>
+    </form>
+</div>

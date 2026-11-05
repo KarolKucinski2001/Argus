@@ -8,7 +8,6 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
     public const int RequiredHistoryMonths = 12;
 
     public int HistoryWindowMonths { get; set; } = RequiredHistoryMonths;
-    public int MaximumSelectedAssets { get; set; } = 5;
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(10);
     public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(5);
     public int ApplicationRequestBudget { get; set; } = 100;
@@ -30,11 +29,6 @@ public sealed class MarketDataOptions : IValidateOptions<MarketDataOptions>
         if (options.HistoryWindowMonths != RequiredHistoryMonths)
         {
             errors.Add($"{nameof(HistoryWindowMonths)} must be exactly {RequiredHistoryMonths}.");
-        }
-
-        if (options.MaximumSelectedAssets <= 0)
-        {
-            errors.Add($"{nameof(MaximumSelectedAssets)} must be greater than zero.");
         }
 
         if (options.RequestTimeout <= TimeSpan.Zero)

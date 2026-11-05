@@ -229,7 +229,7 @@ public sealed class AnalysisAccessContractTests
         Assert.Contains("MSFT", html);
         Assert.Contains("BTC-USD", html);
         Assert.Contains("ETH-USD", html);
-        Assert.Contains("maksymalnie 5", html);
+        Assert.Contains("dowolną liczbę aktywów", html);
         Assert.Matches(@"(?s)</svg>\s*Analiza</a>", html);
         Assert.Matches(@"(?s)</svg>\s*Konto</a>", html);
         Assert.Contains("/account/signout", html, StringComparison.OrdinalIgnoreCase);
@@ -1034,7 +1034,7 @@ public sealed class AnalysisAccessContractTests
     }
 
     [Fact]
-    public async Task Over_limit_analysis_submission_renders_bounded_inline_validation()
+    public async Task Duplicate_analysis_submission_renders_inline_validation()
     {
         await using var factory = new AuthenticationTestFactory();
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
@@ -1059,7 +1059,7 @@ public sealed class AnalysisAccessContractTests
         var html = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Contains("maksymalnie 5", html);
+        Assert.Contains("Każde aktywo można wybrać tylko raz.", System.Net.WebUtility.HtmlDecode(html));
         Assert.DoesNotContain("Analiza rozpoczęta", html);
     }
 

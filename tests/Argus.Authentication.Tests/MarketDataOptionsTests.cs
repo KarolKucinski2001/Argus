@@ -8,7 +8,6 @@ public sealed class MarketDataOptionsTests
 {
     [Theory]
     [InlineData(nameof(MarketDataOptions.HistoryWindowMonths))]
-    [InlineData(nameof(MarketDataOptions.MaximumSelectedAssets))]
     [InlineData(nameof(MarketDataOptions.RequestTimeout))]
     [InlineData(nameof(MarketDataOptions.CacheDuration))]
     public void Invalid_positive_or_fixed_settings_are_rejected(string setting)
@@ -18,9 +17,6 @@ public sealed class MarketDataOptionsTests
         {
             case nameof(MarketDataOptions.HistoryWindowMonths):
                 options.HistoryWindowMonths = 6;
-                break;
-            case nameof(MarketDataOptions.MaximumSelectedAssets):
-                options.MaximumSelectedAssets = 0;
                 break;
             case nameof(MarketDataOptions.RequestTimeout):
                 options.RequestTimeout = TimeSpan.Zero;
@@ -77,5 +73,16 @@ public sealed class MarketDataOptionsTests
         };
 
         Assert.False(options.Validate(Options.DefaultName, options).Succeeded);
+    }
+
+    [Theory]
+    [InlineData(1, 10)]
+    [InlineData(4, 40)]
+    [InlineData(17, 60)]
+    public void Provider_timeout_scales_with_batch_size_up_to_a_cap(int assets, int expectedSeconds)
+    {
+        Assert.Equal(
+            TimeSpan.FromSeconds(expectedSeconds),
+            MarketDataService.BatchTimeout(TimeSpan.FromSeconds(10), assets));
     }
 }

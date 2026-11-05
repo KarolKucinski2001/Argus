@@ -46,8 +46,7 @@ public sealed class AnalysisModel(
         var options = marketDataOptions.Value;
         Analysis = SimulatedPortfolioAnalysisPresenter.Build(
             portfolio,
-            options.AllowedAssets.Keys,
-            options.MaximumSelectedAssets);
+            options.AllowedAssets.Keys);
         return Page();
     }
 

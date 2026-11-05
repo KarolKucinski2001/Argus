@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="pl">
+@{
+    var theme = _bootstrap_scaffold.Localization.Theme.Normalize(Context.Request.Cookies[_bootstrap_scaffold.Localization.Theme.CookieName]);
+}
+<html lang="@HtmlLang" data-theme="@theme">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,7 +25,7 @@
         {
             displayName = User.Identity?.Name;
         }
-        displayName = string.IsNullOrWhiteSpace(displayName) ? "Użytkownik" : displayName.Trim();
+        displayName = string.IsNullOrWhiteSpace(displayName) ? T("Użytkownik") : displayName.Trim();
         var initials = string.Concat(displayName
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Take(2)
@@ -33,23 +36,24 @@
                     <img src="~/img/argus-symbol-white.svg" alt="" />
                     <span>Argus</span>
                 </a>
-                <nav class="app-nav" aria-label="Nawigacja główna">
-                    <a class="@NavClass(onDashboard)" aria-current="@NavCurrent(onDashboard)" asp-page="/Dashboard/Index"><partial name="_NavIcon" model='"dashboard"' />Pulpit</a>
-                    <a class="@NavClass(onAnalysis)" aria-current="@NavCurrent(onAnalysis)" asp-page="/Analysis/Index"><partial name="_NavIcon" model='"analysis"' />Analiza</a>
-                    <a class="@NavClass(onStrategies)" aria-current="@NavCurrent(onStrategies)" asp-page="/Strategies/Index"><partial name="_NavIcon" model='"strategies"' />Profile strategii</a>
-                    <a class="@NavClass(onWatchlist)" aria-current="@NavCurrent(onWatchlist)" asp-page="/Watchlist/Index"><partial name="_NavIcon" model='"watchlist"' />Obserwowane</a>
+                <nav class="app-nav" aria-label="@T("Nawigacja główna")">
+                    <a class="@NavClass(onDashboard)" aria-current="@NavCurrent(onDashboard)" asp-page="/Dashboard/Index"><partial name="_NavIcon" model='"dashboard"' />@T("Pulpit")</a>
+                    <a class="@NavClass(onAnalysis)" aria-current="@NavCurrent(onAnalysis)" asp-page="/Analysis/Index"><partial name="_NavIcon" model='"analysis"' />@T("Analiza")</a>
+                    <a class="@NavClass(onStrategies)" aria-current="@NavCurrent(onStrategies)" asp-page="/Strategies/Index"><partial name="_NavIcon" model='"strategies"' />@T("Profile strategii")</a>
+                    <a class="@NavClass(onWatchlist)" aria-current="@NavCurrent(onWatchlist)" asp-page="/Watchlist/Index"><partial name="_NavIcon" model='"watchlist"' />@T("Obserwowane")</a>
                     @{ var accountActive = onAccount && currentPage != "/Account/SignOut"; }
-                    <a class="@NavClass(accountActive)" aria-current="@NavCurrent(accountActive)" asp-page="/Account/Index"><partial name="_NavIcon" model='"account"' />Konto</a>
-                    <a class="@NavClass(false) app-nav__link--signout" asp-page="/Account/SignOut"><partial name="_NavIcon" model='"signout"' />Wyloguj się</a>
+                    <a class="@NavClass(accountActive)" aria-current="@NavCurrent(accountActive)" asp-page="/Account/Index"><partial name="_NavIcon" model='"account"' />@T("Konto")</a>
+                    <a class="@NavClass(false) app-nav__link--signout" asp-page="/Account/SignOut"><partial name="_NavIcon" model='"signout"' />@T("Wyloguj się")</a>
                 </nav>
             </aside>
             <div class="app-shell__body">
                 <div class="app-topbar">
                     <input class="app-topbar__search"
                            type="search"
-                           placeholder="Szukaj aktywów, strategii…"
-                           aria-label="Szukaj aktywów, strategii (wkrótce)"
+                           placeholder="@T("Szukaj aktywów, strategii…")"
+                           aria-label="@T("Szukaj aktywów, strategii (wkrótce)")"
                            disabled />
+                    <partial name="_Preferences" />
                     <p class="app-user-chip">
                         <span class="app-user-chip__avatar" aria-hidden="true">@initials</span>
                         <span class="app-user-chip__name">@displayName</span>
@@ -68,9 +72,10 @@
                 <img src="~/img/argus-symbol-white.svg" alt="" />
                 <span>Argus</span>
             </a>
-            <nav class="site-nav" aria-label="Nawigacja główna">
-                <a class="text-link" asp-page="/Index" asp-fragment="how-it-works">Jak to działa</a>
-                <a class="text-link" asp-page="/Account/SignIn">Zaloguj się</a>
+            <nav class="site-nav" aria-label="@T("Nawigacja główna")">
+                <a class="text-link" asp-page="/Index" asp-fragment="how-it-works">@T("Jak to działa")</a>
+                <a class="text-link" asp-page="/Account/SignIn">@T("Zaloguj się")</a>
+                <partial name="_Preferences" />
             </nav>
         </header>
         <main class="landing-main">

@@ -25,7 +25,6 @@ public sealed class IndexModel(
     public string[] SelectedAssetIds { get; set; } = [];
 
     public IReadOnlyList<SelectableAsset> Assets { get; private set; } = [];
-    public int MaximumSelectedAssets => options.MaximumSelectedAssets;
     public bool HasStarted { get; private set; }
     public bool HasResults => AnalysisResults is not null;
     public bool HasPartialResults => AnalysisResults?.Results.Any(result => result.Error is not null) == true &&
@@ -68,7 +67,6 @@ public sealed class IndexModel(
 
         SelectedAssetIds = options.AllowedAssets.Keys
             .Where(id => defaults.Contains(id, StringComparer.OrdinalIgnoreCase))
-            .Take(options.MaximumSelectedAssets)
             .ToArray();
         if (SelectedAssetIds.Length > 0)
         {
@@ -227,11 +225,6 @@ public sealed class IndexModel(
         if (SelectedAssetIds.Length == 0)
         {
             return "Wybierz co najmniej jedno aktywo.";
-        }
-
-        if (SelectedAssetIds.Length > options.MaximumSelectedAssets)
-        {
-            return $"Wybierz maksymalnie {options.MaximumSelectedAssets} aktyw.";
         }
 
         if (SelectedAssetIds

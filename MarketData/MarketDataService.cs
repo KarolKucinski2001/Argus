@@ -159,6 +159,14 @@ public sealed class MarketDataService(
         return MarketDataServiceResult.Success(new MarketDataResponse(orderedResults));
     }
 
+    public static readonly TimeSpan MaximumBatchTimeout = TimeSpan.FromSeconds(60);
+
+    public static TimeSpan BatchTimeout(TimeSpan perAsset, int assetCount)
+    {
+        var scaled = perAsset * Math.Max(1, assetCount);
+        return scaled < MaximumBatchTimeout ? scaled : (perAsset > MaximumBatchTimeout ? perAsset : MaximumBatchTimeout);
+    }
+
     private async Task<IReadOnlyList<MarketDataResult>> GetProviderResultsAsync(
         MarketDataRequest request,
         IReadOnlyList<AssetReference> uncachedAssets,
@@ -168,7 +176,8 @@ public sealed class MarketDataService(
         try
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(options.RequestTimeout);
+            // Providers fetch assets one by one, so the budget grows with the batch instead of failing it as a whole.
+            timeout.CancelAfter(BatchTimeout(options.RequestTimeout, uncachedAssets.Count));
             return await provider.GetAsync(request with { Assets = uncachedAssets }, timeout.Token);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -243,15 +252,6 @@ public sealed class MarketDataService(
                 StatusCodes.Status400BadRequest,
                 "Invalid market data request",
                 "Assets and a valid historical range are required.",
-                MarketDataErrorCategory.InvalidRequest);
-        }
-
-        if (request.Assets.Count > options.MaximumSelectedAssets)
-        {
-            return Failure(
-                StatusCodes.Status400BadRequest,
-                "Too many assets requested",
-                $"A maximum of {options.MaximumSelectedAssets} assets may be requested.",
                 MarketDataErrorCategory.InvalidRequest);
         }
 
