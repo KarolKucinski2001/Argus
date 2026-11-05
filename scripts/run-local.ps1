@@ -19,8 +19,21 @@ if (-not (Test-Port 10002)) {
     }
 }
 
-if (Test-Port 7219) {
-    throw 'Port 7219 is already in use. Stop the running Argus instance first.'
+$owners = Get-NetTCPConnection -LocalPort 7219, 5027 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty OwningProcess -Unique
+foreach ($ownerId in $owners) {
+    $process = Get-CimInstance Win32_Process -Filter "ProcessId = $ownerId"
+    if ($null -eq $process) { continue }
+    if ($process.CommandLine -notmatch 'bootstrap-scaffold') {
+        throw "Port 7219 or 5027 is used by another application (PID $ownerId). Stop it first."
+    }
+    Write-Host "Stopping previous Argus instance (PID $ownerId)..."
+    Stop-Process -Id $ownerId -Force
+}
+$deadline = (Get-Date).AddSeconds(15)
+while ((Test-Port 7219) -or (Test-Port 5027)) {
+    if ((Get-Date) -gt $deadline) { throw 'Previous Argus instance did not release its ports.' }
+    Start-Sleep -Milliseconds 500
 }
 
 # Build first so the browser never runs a stale binary. The app is started through
