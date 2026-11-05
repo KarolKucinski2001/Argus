@@ -10,12 +10,12 @@
 }
 <li class="@cardClass" data-strategy-profile="@Model.Id">
     <span class="strategy-icon @StrategyProfileCatalog.AccentClass(Model.AccentIndex)" aria-hidden="true">@Model.Monogram</span>
-    <h3>@Model.Name</h3>
-    <p>@Model.Description</p>
-    <p class="strategy-card__range">@Model.StockRange</p>
+    <h3>@T(Model.Name)</h3>
+    <p>@T(Model.Description)</p>
+    <p class="strategy-card__range">@T(Model.StockRange)</p>
     @if (Model.IsExample)
     {
-        <span class="watchlist-badge">Przykład</span>
+        <span class="watchlist-badge">@T("Przykład")</span>
     }
-    <a class="@linkClass" asp-page="/Strategies/Index" asp-fragment="allocation-builder">Przejdź do alokacji</a>
+    <a class="@linkClass" asp-page="/Strategies/Index" asp-fragment="allocation-builder">@T("Przejdź do alokacji")</a>
 </li>

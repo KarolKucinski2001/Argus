@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Strategies.Portfolios.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Portfele symulowane";
+    ViewData["Title"] = T("Portfele symulowane");
 }
 
 @using _bootstrap_scaffold.Strategies
@@ -10,10 +10,10 @@
 <section class="watchlist-page" aria-labelledby="portfolios-title">
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <h1 id="portfolios-title">Portfele symulowane</h1>
-            <p>Twoje prywatne kopie profili publicznych. To symulacja edukacyjna, a nie prawdziwy portfel.</p>
+            <h1 id="portfolios-title">@T("Portfele symulowane")</h1>
+            <p>@T("Twoje prywatne kopie profili publicznych. To symulacja edukacyjna, a nie prawdziwy portfel.")</p>
         </div>
-        <a class="button" asp-page="/Strategies/Profiles/Index">Przeglądaj profile</a>
+        <a class="button" asp-page="/Strategies/Profiles/Index">@T("Przeglądaj profile")</a>
     </header>
 
     @if (Model.Message is not null)
@@ -24,12 +24,12 @@
         </div>
     }
 
-    <p class="account-note" role="note">@CuratedProfileCatalog.Disclaimer</p>
+    <p class="account-note" role="note">@T(CuratedProfileCatalog.Disclaimer)</p>
 
     @if (Model.Portfolios.Count == 0 && !Model.IsError)
     {
         <section class="watchlist-card watchlist-card--padded">
-            <p class="account-note">Nie masz jeszcze portfeli symulowanych. Otwórz profil publiczny i skopiuj go, aby zacząć.</p>
+            <p class="account-note">@T("Nie masz jeszcze portfeli symulowanych. Otwórz profil publiczny i skopiuj go, aby zacząć.")</p>
         </section>
     }
 
@@ -38,34 +38,34 @@
         <section class="watchlist-card" aria-labelledby="portfolio-@portfolio.Id" data-simulated-portfolio="@portfolio.Id">
             <header class="watchlist-card__header watchlist-card__header--inline">
                 <h2 id="portfolio-@portfolio.Id">@portfolio.Name</h2>
-                <span class="watchlist-badge">Symulacja</span>
+                <span class="watchlist-badge">@T("Symulacja")</span>
             </header>
             <dl class="account-stats">
                 <div>
-                    <dt>Profil źródłowy</dt>
+                    <dt>@T("Profil źródłowy")</dt>
                     <dd>@portfolio.ProfileName</dd>
                 </div>
                 <div>
-                    <dt>Aktualność danych</dt>
+                    <dt>@T("Aktualność danych")</dt>
                     <dd>@portfolio.AsOfText</dd>
                 </div>
                 <div>
-                    <dt>Skład</dt>
+                    <dt>@T("Skład")</dt>
                     <dd>@portfolio.HoldingsSummary</dd>
                 </div>
             </dl>
             <partial name="_ProfileHoldingsTable" model="portfolio.Holdings" />
             <footer class="watchlist-card__footer">
                 <span>@portfolio.CreatedText</span>
-                <a class="button" asp-page="/Strategies/Portfolios/Analysis" asp-route-id="@portfolio.Id">Zobacz analizę składu</a>
+                <a class="button" asp-page="/Strategies/Portfolios/Analysis" asp-route-id="@portfolio.Id">@T("Zobacz analizę składu")</a>
                 <form method="post" asp-page-handler="Delete" asp-route-id="@portfolio.Id">
-                    <button class="button button--secondary" type="submit">Usuń portfel</button>
+                    <button class="button button--secondary" type="submit">@T("Usuń portfel")</button>
                 </form>
             </footer>
         </section>
     }
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

@@ -7,7 +7,7 @@
         <li class="strategy-allocation__row">
             <span class="strategy-allocation__label">@share.Label</span>
             <span class="strategy-meter">
-                <meter class="strategy-meter__bar" min="0" max="100" value="@share.ShareMeter" aria-label="Udział: @share.Label">@share.ShareText</meter>
+                <meter class="strategy-meter__bar" min="0" max="100" value="@share.ShareMeter" aria-label="@T("Udział: {0}", share.Label)">@share.ShareText</meter>
                 <strong>@share.ShareText</strong>
             </span>
         </li>

@@ -1,11 +1,11 @@
 @page
 @model _bootstrap_scaffold.Pages.Account.ErrorModel
 @{
-    ViewData["Title"] = "Dostęp do konta";
+    ViewData["Title"] = T("Dostęp do konta");
 }
 
 <main>
-    <h1>Dostęp do konta</h1>
+    <h1>@T("Dostęp do konta")</h1>
     <p>@Model.Message</p>
-    <p><a asp-page="/Index">Wróć do Argus</a></p>
+    <p><a asp-page="/Index">@T("Wróć do Argus")</a></p>
 </main>

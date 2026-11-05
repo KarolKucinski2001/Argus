@@ -1,4 +1,5 @@
 using _bootstrap_scaffold.Analysis;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.Watchlist;
 
 namespace _bootstrap_scaffold.Dashboard;
@@ -44,7 +45,7 @@ public static class DashboardPresenter
     }
 
     public static string Greeting(string? firstName) =>
-        string.IsNullOrWhiteSpace(firstName) ? "Dzień dobry!" : $"Dzień dobry, {firstName}!";
+        string.IsNullOrWhiteSpace(firstName) ? Lang.T("Dzień dobry!") : Lang.T("Dzień dobry, {0}!", firstName);
 
     public static IReadOnlyList<string> RequestableAssetIds(IEnumerable<string> allowedAssetIds)
     {

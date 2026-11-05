@@ -1,3 +1,5 @@
+using _bootstrap_scaffold.Localization;
+
 namespace _bootstrap_scaffold.Analysis;
 
 public sealed record SummaryPerformer(string Name, decimal Change);
@@ -18,11 +20,9 @@ public static class AnalysisSummaryStripPresenter
     {
         var lastTwo = Math.Abs(count) % 100;
         var last = lastTwo % 10;
-        var noun = count == 1 ? "aktywo"
-            : last is >= 2 and <= 4 && lastTwo is < 12 or > 14 ? "aktywa"
-            : "aktywów";
-
-        return $"{count} {noun}";
+        return count == 1 ? Lang.T("{0} aktywo", count)
+            : last is >= 2 and <= 4 && lastTwo is < 12 or > 14 ? Lang.T("{0} aktywa", count)
+            : Lang.T("{0} aktywów", count);
     }
 
     public static AnalysisSummaryStripView Build(IReadOnlyList<AssetAnalysis> results)

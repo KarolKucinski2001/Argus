@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Strategies.UiStateFixtureModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Stany interfejsu profili strategii";
+    ViewData["Title"] = T("Stany interfejsu profili strategii");
     var hoverData = new ViewDataDictionary(ViewData) { ["CardModifier"] = "strategy-card--hover" };
     var focusData = new ViewDataDictionary(ViewData) { ["LinkModifier"] = "strategy-card__link--focus-visible" };
 }
@@ -10,15 +10,15 @@
 <section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
     <div class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <p class="eyebrow">Tylko testy</p>
-            <h1 id="ui-state-fixture-title">Stany interfejsu profili strategii</h1>
-            <p>Siedem stanów kart i tabeli profili strategii na tych samych częściach widoku co strona produkcyjna.</p>
+            <p class="eyebrow">@T("Tylko testy")</p>
+            <h1 id="ui-state-fixture-title">@T("Stany interfejsu profili strategii")</h1>
+            <p>@T("Siedem stanów kart i tabeli profili strategii na tych samych częściach widoku co strona produkcyjna.")</p>
         </div>
     </div>
 
     <div class="ui-state-fixture__grid">
         <section class="ui-state-fixture__state" aria-labelledby="state-default">
-            <h2 id="state-default">Domyślny</h2>
+            <h2 id="state-default">@T("Domyślny")</h2>
             <ul class="strategy-grid">
                 <partial name="_StrategyProfileCard" model="Model.Profiles[0]" />
                 <partial name="_StrategyProfileCard" model="Model.Profiles[4]" />
@@ -26,43 +26,43 @@
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-hover">
-            <h2 id="state-hover">Najechanie</h2>
+            <h2 id="state-hover">@T("Najechanie")</h2>
             <ul class="strategy-grid">
                 <partial name="_StrategyProfileCard" model="Model.Profiles[1]" view-data="hoverData" />
             </ul>
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-focus">
-            <h2 id="state-focus">Fokus klawiatury</h2>
+            <h2 id="state-focus">@T("Fokus klawiatury")</h2>
             <ul class="strategy-grid">
                 <partial name="_StrategyProfileCard" model="Model.Profiles[2]" view-data="focusData" />
             </ul>
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
-            <h2 id="state-disabled">Wyłączony</h2>
+            <h2 id="state-disabled">@T("Wyłączony")</h2>
             <div class="account-actions">
-                <button class="button" type="button" disabled>Zapisz alokację</button>
+                <button class="button" type="button" disabled>@T("Zapisz alokację")</button>
             </div>
-            <p class="watchlist-placeholder">Zapis alokacji jest niedostępny w tej wersji.</p>
+            <p class="watchlist-placeholder">@T("Zapis alokacji jest niedostępny w tej wersji.")</p>
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-error">
-            <h2 id="state-error">Błąd</h2>
+            <h2 id="state-error">@T("Błąd")</h2>
             <div class="status-card status-card--error" role="alert">
-                <p>Nie udało się pobrać profili strategii.</p>
+                <p>@T("Nie udało się pobrać profili strategii.")</p>
             </div>
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-empty">
-            <h2 id="state-empty">Brak danych</h2>
+            <h2 id="state-empty">@T("Brak danych")</h2>
             <partial name="_StrategyEmpty" />
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-loading">
-            <h2 id="state-loading">Ładowanie</h2>
+            <h2 id="state-loading">@T("Ładowanie")</h2>
             <div class="watchlist-card" aria-busy="true">
-                <p class="watchlist-placeholder" role="status">Ładowanie profili strategii...</p>
+                <p class="watchlist-placeholder" role="status">@T("Ładowanie profili strategii...")</p>
                 <div class="watchlist-table-scroll">
                     <table class="watchlist-table" aria-hidden="true">
                         <tbody>

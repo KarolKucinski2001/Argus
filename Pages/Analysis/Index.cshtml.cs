@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using _bootstrap_scaffold.Analysis;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Watchlist;
 
@@ -145,14 +146,14 @@ public sealed class IndexModel(
         if (!result.Succeeded)
         {
             WatchlistMessage = result.HasStorageFailure
-                ? "Nie udało się zapisać aktywów. Spróbuj ponownie później."
+                ? Lang.T("Nie udało się zapisać aktywów. Spróbuj ponownie później.")
                 : result.Items.Any(item => item.Status == WatchlistSaveStatus.CapacityExceeded)
-                    ? $"Lista obserwowanych może zawierać maksymalnie {WatchlistConstants.MaximumEntries} aktywów."
-                    : "Nie udało się zapisać wybranych aktywów.";
+                    ? Lang.T("Lista obserwowanych może zawierać maksymalnie {0} aktywów.", WatchlistConstants.MaximumEntries)
+                    : Lang.T("Nie udało się zapisać wybranych aktywów.");
             return Page();
         }
 
-        TempData["WatchlistMessage"] = "Wybrane aktywa zapisano na liście obserwowanych.";
+        TempData["WatchlistMessage"] = Lang.T("Wybrane aktywa zapisano na liście obserwowanych.");
         TempData["WatchlistSelection"] = string.Join(',', SelectedAssetIds);
         return RedirectToPage();
     }
@@ -188,11 +189,11 @@ public sealed class IndexModel(
             cancellationToken);
         HasStarted = true;
         StartedMessage = AnalysisResults.Results.Any(item => item.Error is not null)
-            ? "Częściowe wyniki są gotowe. Aktywa z brakującymi danymi pokazują bezpieczny stan."
+            ? Lang.T("Częściowe wyniki są gotowe. Aktywa z brakującymi danymi pokazują bezpieczny stan.")
             : result.Response.Results.Any(item =>
                 item.Source?.Attribution?.Contains("illustrative", StringComparison.OrdinalIgnoreCase) == true)
-                ? "Analiza została rozpoczęta na podstawie ilustracyjnych danych."
-            : "Analiza została rozpoczęta.";
+                ? Lang.T("Analiza została rozpoczęta na podstawie ilustracyjnych danych.")
+            : Lang.T("Analiza została rozpoczęta.");
     }
 
     private void LoadAssets() =>
@@ -211,7 +212,7 @@ public sealed class IndexModel(
         }
         else
         {
-            WatchlistMessage = "Nie udało się pobrać listy obserwowanych aktywów.";
+            WatchlistMessage = Lang.T("Nie udało się pobrać listy obserwowanych aktywów.");
         }
     }
 
@@ -224,20 +225,20 @@ public sealed class IndexModel(
     {
         if (SelectedAssetIds.Length == 0)
         {
-            return "Wybierz co najmniej jedno aktywo.";
+            return Lang.T("Wybierz co najmniej jedno aktywo.");
         }
 
         if (SelectedAssetIds
             .GroupBy(id => id, StringComparer.OrdinalIgnoreCase)
             .Any(group => group.Count() > 1))
         {
-            return "Każde aktywo można wybrać tylko raz.";
+            return Lang.T("Każde aktywo można wybrać tylko raz.");
         }
 
         if (SelectedAssetIds.Any(id => !options.AllowedAssets.Keys
             .Any(allowedId => string.Equals(allowedId, id, StringComparison.OrdinalIgnoreCase))))
         {
-            return "Wybrano aktywo spoza dostępnej listy.";
+            return Lang.T("Wybrano aktywo spoza dostępnej listy.");
         }
 
         return null;
@@ -250,24 +251,24 @@ public sealed class IndexModel(
         category switch
         {
             MarketDataErrorCategory.Timeout =>
-                "Nie udało się przeanalizować tego aktywa. Pobieranie danych trwało zbyt długo. Spróbuj ponownie później.",
+                Lang.T("Nie udało się przeanalizować tego aktywa. Pobieranie danych trwało zbyt długo. Spróbuj ponownie później."),
             MarketDataErrorCategory.QuotaExceeded =>
-                "Nie udało się przeanalizować tego aktywa. Limit zapytań został osiągnięty. Spróbuj ponownie później.",
+                Lang.T("Nie udało się przeanalizować tego aktywa. Limit zapytań został osiągnięty. Spróbuj ponownie później."),
             MarketDataErrorCategory.UnsupportedAsset =>
-                "Nie udało się przeanalizować tego aktywa. Aktywo nie jest teraz obsługiwane.",
+                Lang.T("Nie udało się przeanalizować tego aktywa. Aktywo nie jest teraz obsługiwane."),
             _ =>
-                "Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później."
+                Lang.T("Nie udało się przeanalizować tego aktywa. Spróbuj ponownie później.")
         };
 
     public static string MapSummaryStatusMessage(AnalysisSummaryStatus status) =>
         status switch
         {
             AnalysisSummaryStatus.InsufficientEvidence =>
-                "Niewystarczające dane do przygotowania podsumowania.",
+                Lang.T("Niewystarczające dane do przygotowania podsumowania."),
             AnalysisSummaryStatus.Unavailable =>
-                "Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne.",
+                Lang.T("Podsumowanie analizy jest obecnie niedostępne. Wynik, czynniki i dane pozostają dostępne."),
             _ =>
-                "Podsumowanie analizy."
+                Lang.T("Podsumowanie analizy.")
         };
 
     private static string MapProviderMessage(MarketDataErrorCategory? category) =>
@@ -275,13 +276,13 @@ public sealed class IndexModel(
         {
             MarketDataErrorCategory.ProviderNotApproved or
             MarketDataErrorCategory.NotConfigured =>
-                "Analiza jest obecnie niedostępna. Spróbuj ponownie później.",
+                Lang.T("Analiza jest obecnie niedostępna. Spróbuj ponownie później."),
             MarketDataErrorCategory.Timeout =>
-                "Pobieranie danych trwało zbyt długo. Spróbuj ponownie.",
+                Lang.T("Pobieranie danych trwało zbyt długo. Spróbuj ponownie."),
             MarketDataErrorCategory.QuotaExceeded =>
-                "Osiągnięto limit zapytań. Spróbuj ponownie później.",
+                Lang.T("Osiągnięto limit zapytań. Spróbuj ponownie później."),
             _ =>
-                "Nie udało się pobrać danych do analizy. Spróbuj ponownie później."
+                Lang.T("Nie udało się pobrać danych do analizy. Spróbuj ponownie później.")
         };
 }
 

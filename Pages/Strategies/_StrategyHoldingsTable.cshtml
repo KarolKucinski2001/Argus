@@ -5,14 +5,14 @@
     <table class="watchlist-table strategy-table">
         <thead>
             <tr>
-                <th scope="col">Aktywo</th>
-                <th scope="col">Profil</th>
-                <th scope="col" class="watchlist-table__number">Waga</th>
-                <th scope="col" class="watchlist-table__number">Wartość pozycji</th>
-                <th scope="col">Ostatnia transakcja</th>
-                <th scope="col">Opublikowano</th>
-                <th scope="col">Źródło</th>
-                <th scope="col">Kompletność</th>
+                <th scope="col">@T("Aktywo")</th>
+                <th scope="col">@T("Profil")</th>
+                <th scope="col" class="watchlist-table__number">@T("Waga")</th>
+                <th scope="col" class="watchlist-table__number">@T("Wartość pozycji")</th>
+                <th scope="col">@T("Ostatnia transakcja")</th>
+                <th scope="col">@T("Opublikowano")</th>
+                <th scope="col">@T("Źródło")</th>
+                <th scope="col">@T("Kompletność")</th>
             </tr>
         </thead>
         <tbody>
@@ -23,15 +23,15 @@
                         <partial name="_AssetGlyph" model="holding.AssetId" />
                         <span>@holding.AssetId <small>@holding.Name</small></span>
                     </th>
-                    <td>@holding.Profile</td>
-                    <td class="watchlist-table__number">@holding.Weight</td>
-                    <td class="watchlist-table__number">@holding.PositionValue</td>
+                    <td>@T(holding.Profile)</td>
+                    <td class="watchlist-table__number">@T(holding.Weight)</td>
+                    <td class="watchlist-table__number">@T(holding.PositionValue)</td>
                     <td>@holding.LastTransaction</td>
                     <td>@holding.Published</td>
                     <td>@holding.Source</td>
                     <td>
                         <span class="strategy-meter">
-                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.Completeness" aria-label="Kompletność danych: @holding.AssetId">@holding.Completeness%</meter>
+                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.Completeness" aria-label="@T("Kompletność danych: {0}", holding.AssetId)">@holding.Completeness%</meter>
                             <span>@holding.Completeness%</span>
                         </span>
                     </td>

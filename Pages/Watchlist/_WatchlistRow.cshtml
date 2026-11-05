@@ -20,7 +20,7 @@
                    name="SelectedAssetIds"
                    value="@Model.AssetId"
                    id="watchlist-@Model.AssetId"
-                   aria-label="Wybierz @Model.AssetId do analizy" />
+                   aria-label="@T("Wybierz {0} do analizy", Model.AssetId)" />
         }
     </td>
     <th scope="row" class="watchlist-table__symbol">
@@ -28,7 +28,7 @@
         <span>@Model.AssetId</span>
         @if (!Model.IsAvailable)
         {
-            <span class="watchlist-row__status">Niedostępne</span>
+            <span class="watchlist-row__status">@T("Niedostępne")</span>
         }
     </th>
     <td>@Model.Name</td>
@@ -40,12 +40,12 @@
         @if (Model.Sparkline is { } sparkline)
         {
             <span class="watchlist-sparkline @Tone(sparkline.Tone)">
-                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {Model.Name}" }' />
+                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = T("Trend ceny: {0}", Model.Name) }' />
             </span>
         }
         else
         {
-            <span class="watchlist-tone--unavailable">brak danych</span>
+            <span class="watchlist-tone--unavailable">@T(WatchlistTablePresenter.MissingDataText)</span>
         }
     </td>
     <td class="watchlist-table__number">
@@ -54,7 +54,7 @@
                 formaction="/watchlist?handler=Remove"
                 name="assetId"
                 value="@Model.AssetId">
-            Usuń
+            @T("Usuń")
         </button>
     </td>
 </tr>

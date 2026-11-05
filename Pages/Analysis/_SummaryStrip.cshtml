@@ -5,22 +5,22 @@
 @{
     var performers = new (string Label, SummaryPerformer? Performer)[]
     {
-        ("Najlepszy wynik 7 dni", Model.Best),
-        ("Najsłabszy wynik 7 dni", Model.Worst)
+        (T("Najlepszy wynik 7 dni"), Model.Best),
+        (T("Najsłabszy wynik 7 dni"), Model.Worst)
     };
 }
-<section class="analysis-summary-strip" aria-label="Podsumowanie rankingu">
+<section class="analysis-summary-strip" aria-label="@T("Podsumowanie rankingu")">
     <p class="analysis-summary-strip__subline">
         <span>@AnalysisSummaryStripPresenter.AssetCountLabel(Model.AnalyzedCount)</span>
         @if (Model.DataAsOf is { } dataAsOf)
         {
             <span aria-hidden="true">•</span>
-            <span>Dane z @dataAsOf.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)</span>
+            <span>@T("Dane z {0}", dataAsOf.ToString(IsEnglish ? "yyyy-MM-dd" : "dd.MM.yyyy", CultureInfo.InvariantCulture))</span>
         }
     </p>
     <dl class="analysis-summary-strip__list">
         <div class="analysis-summary-strip__item">
-            <dt>Przeanalizowane aktywa</dt>
+            <dt>@T("Przeanalizowane aktywa")</dt>
             <dd class="analysis-summary-strip__value">@Model.AnalyzedCount</dd>
         </div>
         @foreach (var (label, performer) in performers)
@@ -30,35 +30,35 @@
                 @if (performer is not null)
                 {
                     <dd class="analysis-summary-strip__value">
-                        <span class="analysis-summary-strip__name">@performer.Name</span>
+                        <span class="analysis-summary-strip__name">@T(performer.Name)</span>
                         <span class="analysis-summary-strip__change analysis-summary-strip__change--@AnalysisInsightPresenter.ToneFor(performer.Change).ToString().ToLowerInvariant()">@AnalysisFormatting.SignedPercent(performer.Change)</span>
                     </dd>
                 }
                 else
                 {
-                    <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">n/d</dd>
+                    <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">@T("n/d")</dd>
                 }
             </div>
         }
         @if (Model.StrongestTrend is { } strongestTrend)
         {
             <div class="analysis-summary-strip__item">
-                <dt>Najsilniejszy trend 30 dni</dt>
+                <dt>@T("Najsilniejszy trend 30 dni")</dt>
                 <dd class="analysis-summary-strip__value">
-                    <span class="analysis-summary-strip__name">@strongestTrend.Name</span>
+                    <span class="analysis-summary-strip__name">@T(strongestTrend.Name)</span>
                     <span class="analysis-summary-strip__change analysis-summary-strip__change--positive">@AnalysisFormatting.SignedPercent(strongestTrend.Change)</span>
                 </dd>
             </div>
         }
         <div class="analysis-summary-strip__item">
-            <dt>Średni wynik</dt>
+            <dt>@T("Średni wynik")</dt>
             @if (Model.AverageScore is { } average)
             {
                 <dd class="analysis-summary-strip__value">@AnalysisFormatting.Decimal(average)</dd>
             }
             else
             {
-                <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">n/d</dd>
+                <dd class="analysis-summary-strip__value analysis-summary-strip__value--muted">@T("n/d")</dd>
             }
         </div>
     </dl>

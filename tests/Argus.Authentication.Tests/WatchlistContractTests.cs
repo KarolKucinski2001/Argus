@@ -41,7 +41,7 @@ public sealed class WatchlistContractTests
         });
 
         using var response = await client.GetAsync("/watchlist");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Lista obserwowanych jest pusta", html);
@@ -134,7 +134,7 @@ public sealed class WatchlistContractTests
         });
 
         using var getResponse = await client.GetAsync("/watchlist");
-        var getHtml = await getResponse.Content.ReadAsStringAsync();
+        var getHtml = WebUtility.HtmlDecode(await getResponse.Content.ReadAsStringAsync());
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         Assert.Contains("Niedostępne", getHtml);
         Assert.Contains("DELISTED", getHtml);

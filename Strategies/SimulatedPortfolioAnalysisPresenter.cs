@@ -1,4 +1,4 @@
-using System.Globalization;
+using _bootstrap_scaffold.Localization;
 
 namespace _bootstrap_scaffold.Strategies;
 
@@ -31,8 +31,6 @@ public static class SimulatedPortfolioAnalysisPresenter
     public const string ConcentrationExplanation =
         "Etykieta opisuje rozkład wag na podstawie efektywnej liczby pozycji: poniżej 4 — wysoka koncentracja, od 4 do poniżej 7 — umiarkowana koncentracja, od 7 wzwyż — rozproszony skład. To opis składu, a nie ocena portfela.";
 
-    private static readonly CultureInfo Polish = CultureInfo.GetCultureInfo("pl-PL");
-
     public static SimulatedPortfolioAnalysisView Build(
         SimulatedPortfolio portfolio,
         IEnumerable<string> supportedAssetIds)
@@ -52,14 +50,14 @@ public static class SimulatedPortfolioAnalysisPresenter
         var sectors = StrategyProfilePresenter.Shares(holdings, holding => holding.Sector);
         var classes = StrategyProfilePresenter.Shares(holdings, holding => holding.AssetClass);
         var effective = EffectivePositions(holdings.Select(holding => holding.Weight));
-        var label = ConcentrationLabel(effective);
+        var label = Lang.T(ConcentrationLabel(effective));
 
         var factors = StrategyProfilePresenter.BuildFactors(holdings, sectors, classes).ToList();
         if (holdings.Length > 0)
         {
             factors.Insert(
                 factors.Count - 1,
-                $"Efektywna liczba pozycji wynosi {Number(effective)}, co odpowiada etykiecie: {label}.");
+                Lang.T("Efektywna liczba pozycji wynosi {0}, co odpowiada etykiecie: {1}.", Number(effective), label));
         }
 
         var supported = new HashSet<string>(supportedAssetIds, StringComparer.OrdinalIgnoreCase);
@@ -71,11 +69,11 @@ public static class SimulatedPortfolioAnalysisPresenter
 
         return new SimulatedPortfolioAnalysisView(
             portfolio.Id,
-            portfolio.Name,
-            portfolio.ProfileName,
+            StrategyProfilePresenter.DisplayName(portfolio),
+            Lang.T(portfolio.ProfileName),
             StrategyProfilePresenter.AsOf(portfolio.AsOf),
             label,
-            ConcentrationExplanation,
+            Lang.T(ConcentrationExplanation),
             BuildMetrics(ordered, effective, sectors.Count, classes.Count),
             StrategyProfilePresenter.BuildHoldings(holdings),
             sectors,
@@ -115,11 +113,11 @@ public static class SimulatedPortfolioAnalysisPresenter
         var topThree = ordered.Take(3).Sum(holding => holding.Weight);
         return
         [
-            new("Największa pozycja", StrategyProfilePresenter.Percent(largest), "Udział pozycji o największej wadze."),
-            new("Trzy największe pozycje", StrategyProfilePresenter.Percent(topThree), "Łączny udział trzech pozycji o największej wadze."),
-            new("Efektywna liczba pozycji", Number(effective), "Liczba równych pozycji o podobnym rozkładzie wag (1 / suma kwadratów wag)."),
-            new("Sektory", sectorCount.ToString(Polish), "Liczba różnych sektorów w składzie."),
-            new("Klasy aktywów", classCount.ToString(Polish), "Liczba różnych klas aktywów w składzie.")
+            new(Lang.T("Największa pozycja"), StrategyProfilePresenter.Percent(largest), Lang.T("Udział pozycji o największej wadze.")),
+            new(Lang.T("Trzy największe pozycje"), StrategyProfilePresenter.Percent(topThree), Lang.T("Łączny udział trzech pozycji o największej wadze.")),
+            new(Lang.T("Efektywna liczba pozycji"), Number(effective), Lang.T("Liczba równych pozycji o podobnym rozkładzie wag (1 / suma kwadratów wag).")),
+            new(Lang.T("Sektory"), sectorCount.ToString(Lang.Culture), Lang.T("Liczba różnych sektorów w składzie.")),
+            new(Lang.T("Klasy aktywów"), classCount.ToString(Lang.Culture), Lang.T("Liczba różnych klas aktywów w składzie."))
         ];
     }
 
@@ -127,11 +125,15 @@ public static class SimulatedPortfolioAnalysisPresenter
     {
         if (covered == 0)
         {
-            return "Żadna pozycja tego portfela nie jest obecnie obsługiwana przez źródło danych rynkowych Argus, więc analiza dotyczy tylko składu.";
+            return Lang.T("Żadna pozycja tego portfela nie jest obecnie obsługiwana przez źródło danych rynkowych Argus, więc analiza dotyczy tylko składu.");
         }
 
-        return $"Argus może pokazać analizę rynkową dla {covered} z {total} pozycji: {string.Join(", ", analyzable)}. Pozostałe pozycje opisuje tylko analiza składu.";
+        return Lang.T(
+            "Argus może pokazać analizę rynkową dla {0} z {1} pozycji: {2}. Pozostałe pozycje opisuje tylko analiza składu.",
+            covered,
+            total,
+            string.Join(", ", analyzable));
     }
 
-    private static string Number(decimal value) => value.ToString("0.0", Polish);
+    private static string Number(decimal value) => value.ToString("0.0", Lang.Culture);
 }

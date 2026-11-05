@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Strategies;
 
@@ -33,7 +34,7 @@ public sealed class AnalysisModel(
         var result = await store.ListAsync(GetSubjectId(), cancellationToken);
         if (!result.Succeeded)
         {
-            ErrorMessage = "Nie udało się pobrać portfela symulowanego. Spróbuj ponownie później.";
+            ErrorMessage = Lang.T("Nie udało się pobrać portfela symulowanego. Spróbuj ponownie później.");
             return Page();
         }
 

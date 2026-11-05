@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using _bootstrap_scaffold.Analysis;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.MarketData;
 using _bootstrap_scaffold.Watchlist;
 
@@ -59,20 +60,20 @@ public sealed class IndexModel(
             cancellationToken);
         if (result.Status == WatchlistRemoveStatus.StorageFailure)
         {
-            Message = "Nie udało się usunąć aktywa. Spróbuj ponownie później.";
+            Message = Lang.T("Nie udało się usunąć aktywa. Spróbuj ponownie później.");
             IsError = true;
         }
         else if (result.Status == WatchlistRemoveStatus.NotFound)
         {
-            Message = "Aktywo nie znajduje się już na liście obserwowanych.";
+            Message = Lang.T("Aktywo nie znajduje się już na liście obserwowanych.");
         }
         else if (result.Status == WatchlistRemoveStatus.Unavailable)
         {
-            Message = "To aktywo nie jest już dostępne, ale można je usunąć z listy.";
+            Message = Lang.T("To aktywo nie jest już dostępne, ale można je usunąć z listy.");
         }
         else
         {
-            Message = "Aktywo usunięto z listy obserwowanych.";
+            Message = Lang.T("Aktywo usunięto z listy obserwowanych.");
         }
 
         await LoadAsync(cancellationToken);
@@ -85,7 +86,7 @@ public sealed class IndexModel(
         if (!result.Succeeded)
         {
             Rows = [];
-            Message ??= "Nie udało się pobrać listy obserwowanych aktywów.";
+            Message ??= Lang.T("Nie udało się pobrać listy obserwowanych aktywów.");
             IsError = true;
             return;
         }

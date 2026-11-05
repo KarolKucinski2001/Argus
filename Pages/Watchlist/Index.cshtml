@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Watchlist.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Lista obserwowanych";
+    ViewData["Title"] = T("Lista obserwowanych");
 }
 
 @using _bootstrap_scaffold.Watchlist
@@ -13,16 +13,16 @@
 <section class="watchlist-page" aria-labelledby="watchlist-title">
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <h1 id="watchlist-title">Lista obserwowanych</h1>
-            <p>Śledź wybrane aktywa i uruchamiaj analizę na podstawie danych rynkowych.</p>
+            <h1 id="watchlist-title">@T("Lista obserwowanych")</h1>
+            <p>@T("Śledź wybrane aktywa i uruchamiaj analizę na podstawie danych rynkowych.")</p>
         </div>
-        <a class="button" asp-page="/Analysis/Index">Dodaj aktywo</a>
+        <a class="button" asp-page="/Analysis/Index">@T("Dodaj aktywo")</a>
     </header>
 
-    <ul class="watchlist-tabs" aria-label="Listy obserwowanych">
+    <ul class="watchlist-tabs" aria-label="@T("Listy obserwowanych")">
         <li class="watchlist-tab watchlist-tab--active" aria-current="true">
-            <strong>Moja lista</strong>
-            <span>@Model.Rows.Count @(Model.Rows.Count == 1 ? "aktywo" : "aktywa")</span>
+            <strong>@T("Moja lista")</strong>
+            <span>@(Model.Rows.Count == 1 ? T("{0} aktywo", Model.Rows.Count) : T("{0} aktywa", Model.Rows.Count))</span>
         </li>
         @foreach (var placeholder in new[] { "Giganci technologiczni", "Krypto", "Energia", "+ Nowa lista" })
         {
@@ -47,12 +47,12 @@
         <form method="post" asp-page="/Analysis/Index" asp-page-handler="Analyze" class="watchlist-form">
             <section class="watchlist-card" aria-labelledby="watchlist-table-title">
                 <header class="watchlist-card__header">
-                    <h2 id="watchlist-table-title">Moja lista</h2>
-                    <p>@Model.Rows.Count @(Model.Rows.Count == 1 ? "aktywo" : "aktywa")</p>
+                    <h2 id="watchlist-table-title">@T("Moja lista")</h2>
+                    <p>@(Model.Rows.Count == 1 ? T("{0} aktywo", Model.Rows.Count) : T("{0} aktywa", Model.Rows.Count))</p>
                 </header>
                 <partial name="_WatchlistTable" model="Model.Rows" />
                 <footer class="watchlist-card__footer">
-                    <button class="button" type="submit">Generuj ranking</button>
+                    <button class="button" type="submit">@T("Generuj ranking")</button>
                 </footer>
             </section>
         </form>
@@ -60,35 +60,35 @@
         <div class="watchlist-panels">
             <section class="watchlist-card watchlist-card--padded" aria-labelledby="watchlist-performance-title">
                 <header class="watchlist-card__header watchlist-card__header--inline">
-                    <h2 id="watchlist-performance-title">Wyniki listy</h2>
-                    <span class="watchlist-badge">Przykładowe dane</span>
+                    <h2 id="watchlist-performance-title">@T("Wyniki listy")</h2>
+                    <span class="watchlist-badge">@T("Przykładowe dane")</span>
                 </header>
                 <p class="watchlist-legend">
-                    <span>Moja lista</span>
+                    <span>@T("Moja lista")</span>
                     <span>S&amp;P 500</span>
                 </p>
                 <p class="watchlist-placeholder" role="note">
-                    Wykres porównujący listę z indeksem S&amp;P 500 nie jest jeszcze dostępny. Nie pokazujemy wymyślonych wartości.
+                    @T("Wykres porównujący listę z indeksem S&P 500 nie jest jeszcze dostępny. Nie pokazujemy wymyślonych wartości.")
                 </p>
             </section>
 
             <section class="watchlist-card watchlist-card--padded" aria-labelledby="watchlist-movers-title">
                 <header class="watchlist-card__header">
-                    <h2 id="watchlist-movers-title">Największe zmiany</h2>
-                    <p>Zmiana 24h</p>
+                    <h2 id="watchlist-movers-title">@T("Największe zmiany")</h2>
+                    <p>@T("Zmiana 24h")</p>
                 </header>
                 <div class="watchlist-movers">
                     @foreach (var group in new[]
                     {
-                        (Title: "Zyskujące", Items: Model.Movers.Gainers),
-                        (Title: "Tracące", Items: Model.Movers.Losers)
+                        (Title: T("Zyskujące"), Items: Model.Movers.Gainers),
+                        (Title: T("Tracące"), Items: Model.Movers.Losers)
                     })
                     {
                         <div class="watchlist-movers__group">
                             <h3>@group.Title</h3>
                             @if (group.Items.Count == 0)
                             {
-                                <p class="watchlist-placeholder">brak danych</p>
+                                <p class="watchlist-placeholder">@T(WatchlistTablePresenter.MissingDataText)</p>
                             }
                             else
                             {
@@ -111,6 +111,6 @@
     }
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

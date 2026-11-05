@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.Strategies;
 
 namespace _bootstrap_scaffold.Pages.Strategies.Profiles;
@@ -44,14 +45,14 @@ public sealed class DetailModel(ISimulatedPortfolioStore store) : PageModel
         var status = await store.CreateAsync(GetSubjectId(), copy, cancellationToken);
         if (status == SimulatedPortfolioStatus.Succeeded)
         {
-            TempData["PortfolioMessage"] = "Skopiowano profil do symulowanego portfela.";
+            TempData["PortfolioMessage"] = Lang.T("Skopiowano profil do symulowanego portfela.");
             return RedirectToPage("/Strategies/Portfolios/Index");
         }
 
         Load(id);
         Message = status == SimulatedPortfolioStatus.CapacityExceeded
-            ? $"Osiągnięto limit {SimulatedPortfolioConstants.MaximumPortfolios} portfeli symulowanych. Usuń jeden, aby dodać kolejny."
-            : "Nie udało się zapisać portfela symulowanego. Spróbuj ponownie później.";
+            ? Lang.T("Osiągnięto limit {0} portfeli symulowanych. Usuń jeden, aby dodać kolejny.", SimulatedPortfolioConstants.MaximumPortfolios)
+            : Lang.T("Nie udało się zapisać portfela symulowanego. Spróbuj ponownie później.");
         return Page();
     }
 

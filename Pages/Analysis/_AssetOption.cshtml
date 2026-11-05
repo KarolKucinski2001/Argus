@@ -12,15 +12,15 @@
            checked="@(Model.IsSelected ? "checked" : null)" />
     <span class="asset-option__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="Model.AssetId" /></span>
     <span class="asset-option__copy">
-        <strong>@identity.Name</strong>
+        <strong>@T(identity.Name)</strong>
         <small>@Model.AssetId</small>
     </span>
     @if (Model.Score is { } score)
     {
-        <span class="asset-option__score"><span class="visually-hidden">Wynik </span>@AnalysisFormatting.Decimal(score)</span>
+        <span class="asset-option__score"><span class="visually-hidden">@T("Wynik") </span>@AnalysisFormatting.Decimal(score)</span>
     }
     @if (Model.IsSaved)
     {
-        <span class="asset-option__saved" aria-label="Na liście obserwowanych">Zapisane</span>
+        <span class="asset-option__saved" aria-label="@T("Na liście obserwowanych")">@T("Zapisane")</span>
     }
 </label>

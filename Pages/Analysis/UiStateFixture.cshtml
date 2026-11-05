@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Analysis.UiStateFixtureModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Stany interfejsu analizy";
+    ViewData["Title"] = T("Stany interfejsu analizy");
 }
 
 @if (Model.ShowRankedGrid)
@@ -10,12 +10,12 @@
     <section class="analysis-workspace" aria-labelledby="analysis-title">
         <aside class="analysis-workspace__sidebar">
             <div class="analysis-page__header">
-                <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
+                <h1 id="analysis-title" class="analysis-workspace__title">@T("Nowa analiza")</h1>
             </div>
             <div class="analysis-form">
                 <div class="analysis-form__header">
-                    <h2>Dostępne aktywa</h2>
-                    <p>Możesz wybrać dowolną liczbę aktywów.</p>
+                    <h2>@T("Dostępne aktywa")</h2>
+                    <p>@T("Możesz wybrać dowolną liczbę aktywów.")</p>
                 </div>
                 <div class="asset-list">
                     @foreach (var option in Model.RankedOptions)
@@ -23,20 +23,20 @@
                         <partial name="_AssetOption" model="option" />
                     }
                 </div>
-                <button class="button" type="button">Generuj ranking</button>
+                <button class="button" type="button">@T("Generuj ranking")</button>
             </div>
         </aside>
 
         <div class="analysis-workspace__content">
             <header class="analysis-workspace__header">
-                <h2>Pulpit analizy</h2>
+                <h2>@T("Pulpit analizy")</h2>
                 <partial name="_SummaryStrip" model="Model.RankedSummary" />
             </header>
 
             <section class="analysis-results" aria-labelledby="analysis-results-title">
-                <h2 id="analysis-results-title" class="visually-hidden">Ranking analizy</h2>
+                <h2 id="analysis-results-title" class="visually-hidden">@T("Ranking analizy")</h2>
                 <p class="analysis-results__boundary">
-                    Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+                    @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
                 </p>
                 <ol class="analysis-results__list">
                     @foreach (var rankedCard in Model.RankedCards)
@@ -52,46 +52,45 @@ else
 {
 <section class="ui-state-fixture" aria-labelledby="ui-state-fixture-title">
     <div class="analysis-page__header">
-        <p class="eyebrow">Tylko testy</p>
-        <h1 id="ui-state-fixture-title">Stany interfejsu analizy</h1>
+        <p class="eyebrow">@T("Tylko testy")</p>
+        <h1 id="ui-state-fixture-title">@T("Stany interfejsu analizy")</h1>
         <p class="analysis-page__lede">
-            Sprawdź wspólne elementy analizy i stany interakcji przed zmianą
-            przepływu produkcyjnego.
+            @T("Sprawdź wspólne elementy analizy i stany interakcji przed zmianą przepływu produkcyjnego.")
         </p>
     </div>
 
     <div class="ui-state-fixture__grid">
         <section class="ui-state-fixture__state" aria-labelledby="state-default">
-            <h2 id="state-default">Domyślny</h2>
+            <h2 id="state-default">@T("Domyślny")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="analysis-form__header">
-                            <h3>Wybierz aktywa</h3>
-                            <p>Stan początkowy selektora.</p>
+                            <h3>@T("Wybierz aktywa")</h3>
+                            <p>@T("Stan początkowy selektora.")</p>
                         </div>
                         <label class="asset-option">
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>AAPL</strong>
-                                <small>Akcje</small>
+                                <small>@_bootstrap_scaffold.Analysis.AnalysisInsightPresenter.AssetClassLabel(_bootstrap_scaffold.MarketData.MarketAssetClass.Equity)</small>
                             </span>
                         </label>
-                        <button class="button" type="button">Generuj ranking</button>
+                        <button class="button" type="button">@T("Generuj ranking")</button>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card">
                         <div class="analysis-result-card__body">
                             <header class="analysis-result-card__header">
-                                <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                                <p class="analysis-result-card__rank">@T("Wynik przykładowy")</p>
                                 <h3>AAPL</h3>
                                 <p class="analysis-result-card__score">82/100</p>
                             </header>
                             <dl class="analysis-result-card__metrics">
                                 <div class="analysis-result-card__metric">
-                                    <dt>Wynik</dt>
+                                    <dt>@T("Wynik")</dt>
                                     <dd>82/100</dd>
                                 </div>
                             </dl>
@@ -102,28 +101,28 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-hover">
-            <h2 id="state-hover">Najechanie</h2>
+            <h2 id="state-hover">@T("Najechanie")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="analysis-form__header">
-                            <h3>Wybierz aktywa</h3>
-                            <p>Najedź na wiersz selektora.</p>
+                            <h3>@T("Wybierz aktywa")</h3>
+                            <p>@T("Najedź na wiersz selektora.")</p>
                         </div>
                         <label class="asset-option">
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>MSFT</strong>
-                                <small>Akcje</small>
+                                <small>@_bootstrap_scaffold.Analysis.AnalysisInsightPresenter.AssetClassLabel(_bootstrap_scaffold.MarketData.MarketAssetClass.Equity)</small>
                             </span>
                         </label>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card">
                         <div class="analysis-result-card__body">
-                            <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                            <p class="analysis-result-card__rank">@T("Wynik przykładowy")</p>
                             <h3>MSFT</h3>
                         </div>
                     </article>
@@ -132,13 +131,13 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-focus">
-            <h2 id="state-focus">Fokus klawiatury</h2>
+            <h2 id="state-focus">@T("Fokus klawiatury")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="analysis-form__header">
-                            <h3>Wybierz aktywa</h3>
-                            <p>Przejdź klawiszem Tab do kontrolki.</p>
+                            <h3>@T("Wybierz aktywa")</h3>
+                            <p>@T("Przejdź klawiszem Tab do kontrolki.")</p>
                         </div>
                         <label class="asset-option ui-state-fixture__focus-target"
                                data-focus-visible-example
@@ -146,16 +145,16 @@ else
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>BTC-USD</strong>
-                                <small>Krypto</small>
+                                <small>@_bootstrap_scaffold.Analysis.AnalysisInsightPresenter.AssetClassLabel(_bootstrap_scaffold.MarketData.MarketAssetClass.Crypto)</small>
                             </span>
                         </label>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card">
                         <div class="analysis-result-card__body">
-                            <p class="analysis-result-card__rank">Wynik przykładowy</p>
+                            <p class="analysis-result-card__rank">@T("Wynik przykładowy")</p>
                             <h3>BTC-USD</h3>
                         </div>
                     </article>
@@ -164,22 +163,22 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-disabled">
-            <h2 id="state-disabled">Wyłączony</h2>
+            <h2 id="state-disabled">@T("Wyłączony")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="analysis-form__header">
-                            <h3>Analiza niedostępna</h3>
-                            <p>Kontrolka pozostaje czytelna bez akcji.</p>
+                            <h3>@T("Analiza niedostępna")</h3>
+                            <p>@T("Kontrolka pozostaje czytelna bez akcji.")</p>
                         </div>
-                        <button class="button" type="button" disabled>Ładowanie analizy</button>
+                        <button class="button" type="button" disabled>@T("Ładowanie analizy")</button>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card">
                         <div class="analysis-result-card__body">
-                            <p class="analysis-result-card__status" role="status">Wynik niedostępny.</p>
+                            <p class="analysis-result-card__status" role="status">@T("Wynik niedostępny.")</p>
                         </div>
                     </article>
                 </div>
@@ -187,28 +186,28 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-error">
-            <h2 id="state-error">Błąd</h2>
+            <h2 id="state-error">@T("Błąd")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="validation-message" role="alert">
-                            <strong>Wybierz co najmniej jedno aktywo.</strong>
-                            <span>To jest stan walidacji selektora.</span>
+                            <strong>@T("Wybierz co najmniej jedno aktywo.")</strong>
+                            <span>@T("To jest stan walidacji selektora.")</span>
                         </div>
                         <label class="asset-option">
                             <input class="asset-option__input" type="checkbox" />
                             <span class="asset-option__copy">
                                 <strong>ETH-USD</strong>
-                                <small>Krypto</small>
+                                <small>@_bootstrap_scaffold.Analysis.AnalysisInsightPresenter.AssetClassLabel(_bootstrap_scaffold.MarketData.MarketAssetClass.Crypto)</small>
                             </span>
                         </label>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card analysis-result-card--error">
                         <div class="analysis-result-card__body">
-                            <p class="analysis-result-card__status" role="status">Nie udało się przygotować wyniku.</p>
+                            <p class="analysis-result-card__status" role="status">@T("Nie udało się przygotować wyniku.")</p>
                         </div>
                     </article>
                 </div>
@@ -216,22 +215,22 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-empty">
-            <h2 id="state-empty">Brak danych</h2>
+            <h2 id="state-empty">@T("Brak danych")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <div class="analysis-form">
                         <div class="status-card status-card--error" role="status">
-                            <h3>Brak skonfigurowanych aktywów</h3>
-                            <p>Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.</p>
+                            <h3>@T("Brak skonfigurowanych aktywów")</h3>
+                            <p>@T("Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.")</p>
                         </div>
-                        <button class="button" type="button" disabled>Generuj ranking</button>
+                        <button class="button" type="button" disabled>@T("Generuj ranking")</button>
                     </div>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card">
                         <div class="analysis-result-card__body">
-                            <p class="analysis-result-card__status" role="status">Brak wyników do wyświetlenia.</p>
+                            <p class="analysis-result-card__status" role="status">@T("Brak wyników do wyświetlenia.")</p>
                         </div>
                     </article>
                 </div>
@@ -239,7 +238,7 @@ else
         </section>
 
         <section class="ui-state-fixture__state" aria-labelledby="state-loading">
-            <h2 id="state-loading">Ładowanie</h2>
+            <h2 id="state-loading">@T("Ładowanie")</h2>
             <div class="analysis-workspace">
                 <aside class="analysis-workspace__sidebar">
                     <form method="post"
@@ -248,40 +247,40 @@ else
                           data-pending="true"
                           aria-busy="true">
                         <div class="analysis-form__header">
-                            <h3>Wybierz aktywa</h3>
-                            <p>Przygotowywanie analizy.</p>
+                            <h3>@T("Wybierz aktywa")</h3>
+                            <p>@T("Przygotowywanie analizy.")</p>
                         </div>
                         <p class="analysis-form__pending"
                            data-pending-status
                            role="status">
-                            Analiza jest przygotowywana. Nie zamykaj tej strony.
+                            @T("Analiza jest przygotowywana. Nie zamykaj tej strony.")
                         </p>
                         <button class="button"
                                 type="submit"
                                 data-submit-button
                                 disabled>
-                            Przygotowywanie analizy...
+                            @T("Przygotowywanie analizy...")
                         </button>
                     </form>
                 </aside>
                 <div class="analysis-workspace__content">
-                    <h3>Pulpit analizy</h3>
+                    <h3>@T("Pulpit analizy")</h3>
                     <article class="analysis-result-card ui-state-fixture__loading-card">
                         <div class="analysis-result-card__body">
                             <header class="analysis-result-card__header">
-                                <p class="analysis-result-card__rank">Analiza w toku</p>
+                                <p class="analysis-result-card__rank">@T("Analiza w toku")</p>
                                 <h3 id="state-loading-result">AAPL</h3>
                                 <p class="analysis-result-card__status" role="status">
-                                    Pobieranie danych i przygotowywanie wyniku.
+                                    @T("Pobieranie danych i przygotowywanie wyniku.")
                                 </p>
                             </header>
-                            <dl class="analysis-result-card__metrics" aria-label="Ładowanie metryk">
+                            <dl class="analysis-result-card__metrics" aria-label="@T("Ładowanie metryk")">
                                 <div class="analysis-result-card__metric" aria-hidden="true">
-                                    <dt>Wynik</dt>
+                                    <dt>@T("Wynik")</dt>
                                     <dd>...</dd>
                                 </div>
                                 <div class="analysis-result-card__metric" aria-hidden="true">
-                                    <dt>Historia</dt>
+                                    <dt>@T("Historia")</dt>
                                     <dd>...</dd>
                                 </div>
                             </dl>
@@ -293,15 +292,15 @@ else
     </div>
 
     <section class="ui-state-fixture__state" aria-labelledby="result-surface-states">
-        <h2 id="result-surface-states">Stany wyników analizy</h2>
+        <h2 id="result-surface-states">@T("Stany wyników analizy")</h2>
         <div class="ui-state-fixture__grid">
             @foreach (var state in Model.ResultStates)
             {
                 <div class="ui-state-fixture__result-state">
-                    <h3>@state.Heading</h3>
+                    <h3>@T(state.Heading)</h3>
                     @if (state.Note is not null)
                     {
-                        <p role="status">@state.Note</p>
+                        <p role="status">@T(state.Note)</p>
                     }
                     <ol class="analysis-results__list analysis-results__list--single">
                         <partial name="_InsightCard" model="state.Card" />

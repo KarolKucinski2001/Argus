@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Strategies.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Profile strategii";
+    ViewData["Title"] = T("Profile strategii");
 }
 
 @using _bootstrap_scaffold.Strategies
@@ -14,21 +14,21 @@
 <section class="watchlist-page" aria-labelledby="strategies-title">
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <h1 id="strategies-title">Profile strategii</h1>
-            <p>Poznaj publiczne profile strategii i zobacz, jak mógłby wyglądać wirtualny portfel zbudowany na ich podstawie.</p>
+            <h1 id="strategies-title">@T("Profile strategii")</h1>
+            <p>@T("Poznaj publiczne profile strategii i zobacz, jak mógłby wyglądać wirtualny portfel zbudowany na ich podstawie.")</p>
         </div>
         <div class="account-actions">
-            <a class="button" asp-page="/Strategies/Profiles/Index">Profile publiczne</a>
-            <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">Moje portfele symulowane</a>
+            <a class="button" asp-page="/Strategies/Profiles/Index">@T("Profile publiczne")</a>
+            <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">@T("Moje portfele symulowane")</a>
         </div>
     </header>
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="strategies-profiles-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="strategies-profiles-title">Dostępne profile</h2>
-            <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            <h2 id="strategies-profiles-title">@T("Dostępne profile")</h2>
+            <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
         </header>
-        <p class="account-note">Argus nie prowadzi prawdziwych portfeli. Profile są przykładami opartymi na publicznych zgłoszeniach.</p>
+        <p class="account-note">@T("Argus nie prowadzi prawdziwych portfeli. Profile są przykładami opartymi na publicznych zgłoszeniach.")</p>
         <ul class="strategy-grid">
             @foreach (var profile in StrategyProfileCatalog.Profiles)
             {
@@ -40,17 +40,17 @@
     <div class="account-grid">
         <section id="allocation-builder" class="watchlist-card watchlist-card--padded" aria-labelledby="strategies-allocation-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="strategies-allocation-title">Zbuduj model portfela</h2>
-                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+                <h2 id="strategies-allocation-title">@T("Zbuduj model portfela")</h2>
+                <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
             </header>
-            <p class="account-note">Wybierz profile i ustaw alokację. Poniższy podział jest przykładem i nie można go jeszcze zmieniać.</p>
+            <p class="account-note">@T("Wybierz profile i ustaw alokację. Poniższy podział jest przykładem i nie można go jeszcze zmieniać.")</p>
             <div class="account-allocation">
                 <ul class="strategy-allocation">
                     @foreach (var slice in StrategyProfileCatalog.Allocation)
                     {
                         <li class="strategy-allocation__row">
                             <span class="strategy-allocation__label">
-                                <span class="account-legend__dot @StrategyProfileCatalog.DotClass(slice.DotIndex)"></span>@slice.Label
+                                <span class="account-legend__dot @StrategyProfileCatalog.DotClass(slice.DotIndex)"></span>@T(slice.Label)
                             </span>
                             <span class="strategy-allocation__bar" aria-hidden="true">
                                 <span class="strategy-allocation__fill @StrategyProfileCatalog.WeightClass(slice.Weight)"></span>
@@ -64,22 +64,22 @@
                 </div>
             </div>
             <div class="account-actions">
-                <button class="button" type="button" disabled>Zapisz alokację</button>
+                <button class="button" type="button" disabled>@T("Zapisz alokację")</button>
             </div>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="strategies-overview-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="strategies-overview-title">Przegląd portfela</h2>
-                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+                <h2 id="strategies-overview-title">@T("Przegląd portfela")</h2>
+                <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
             </header>
-            <p class="account-note">Na podstawie wybranych profili strategii. Wartości są wyłącznie ilustracją.</p>
+            <p class="account-note">@T("Na podstawie wybranych profili strategii. Wartości są wyłącznie ilustracją.")</p>
             <dl class="account-stats">
                 @foreach (var metric in StrategyProfileCatalog.OverviewMetrics)
                 {
                     <div>
-                        <dt>@metric.Label</dt>
-                        <dd class="@Tone(metric.Tone)">@metric.Value</dd>
+                        <dt>@T(metric.Label)</dt>
+                        <dd class="@Tone(metric.Tone)">@T(metric.Value)</dd>
                     </div>
                 }
             </dl>
@@ -88,35 +88,35 @@
 
     <section class="watchlist-card" aria-labelledby="strategies-holdings-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="strategies-holdings-title">Pozycje wybranych profili</h2>
-            <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            <h2 id="strategies-holdings-title">@T("Pozycje wybranych profili")</h2>
+            <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
         </header>
         <partial name="_StrategyHoldingsTable" model="StrategyProfileCatalog.Holdings" />
     </section>
 
     <section class="watchlist-card watchlist-card--padded strategy-quality" aria-labelledby="strategies-quality-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="strategies-quality-title">Jakość danych i ograniczenia</h2>
-            <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            <h2 id="strategies-quality-title">@T("Jakość danych i ograniczenia")</h2>
+            <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
         </header>
         <dl class="account-stats">
             <div>
-                <dt>Aktualność danych</dt>
-                <dd>12 dni</dd>
+                <dt>@T("Aktualność danych")</dt>
+                <dd>@T("12 dni")</dd>
             </div>
             <div>
-                <dt>Kompletność portfela</dt>
+                <dt>@T("Kompletność portfela")</dt>
                 <dd>64%</dd>
             </div>
             <div>
-                <dt>Źródło</dt>
+                <dt>@T("Źródło")</dt>
                 <dd>SEC Form 13F</dd>
             </div>
         </dl>
-        <p class="strategy-quality__note" role="note">Dane są opóźnione i mogą nie odzwierciedlać bieżącego składu portfela.</p>
+        <p class="strategy-quality__note" role="note">@T("Dane są opóźnione i mogą nie odzwierciedlać bieżącego składu portfela.")</p>
     </section>
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

@@ -27,7 +27,7 @@ public sealed class AccountAccessContractTests
         });
 
         using var response = await client.GetAsync("/");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Argus", html);
@@ -153,7 +153,7 @@ public sealed class AccountAccessContractTests
         });
 
         using var response = await client.GetAsync("/account");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("test-subject", html);
@@ -173,7 +173,7 @@ public sealed class AccountAccessContractTests
         });
 
         using var response = await client.GetAsync("/account");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("href=\"/analysis\"", html);
@@ -190,7 +190,7 @@ public sealed class AccountAccessContractTests
         });
 
         using var response = await client.GetAsync("/account");
-        var html = await response.Content.ReadAsStringAsync();
+        var html = WebUtility.HtmlDecode(await response.Content.ReadAsStringAsync());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Przykładowe dane", html);

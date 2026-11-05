@@ -28,30 +28,30 @@
         <header class="analysis-result-card__header">
             <span class="insight-card__monogram" aria-hidden="true"><partial name="_AssetGlyph" model="@result.Asset.Id" /></span>
             <div class="insight-card__identity">
-                <h3 id="analysis-result-@result.Asset.Id">@insight.Identity.Name</h3>
+                <h3 id="analysis-result-@result.Asset.Id">@T(insight.Identity.Name)</h3>
                 <p class="insight-card__meta">
                     <span class="insight-card__ticker">@result.Asset.Id</span>
                     <span class="insight-card__badge">@insight.AssetClassLabel</span>
                 </p>
                 <p class="insight-card__price analysis-result-card__price">
-                    <span class="visually-hidden">Cena aktualna:</span>
-                    @(Model.Quote is { } quote ? $"{AnalysisFormatting.Decimal(quote.Value)} {quote.Currency}" : "Cena niedostępna")
+                    <span class="visually-hidden">@T("Cena aktualna:")</span>
+                    @(Model.Quote is { } quote ? $"{AnalysisFormatting.Decimal(quote.Value)} {quote.Currency}" : T("Cena niedostępna"))
                 </p>
             </div>
             @if (result.Score is { } score && insight.Band is { } band)
             {
                 <div class="insight-card__score-block insight-card__score-block--@band.ToString().ToLowerInvariant()">
-                    <p class="analysis-result-card__rank"><span aria-hidden="true">#@Model.Rank</span><span class="visually-hidden">Miejsce @Model.Rank</span></p>
-                    <p class="analysis-result-card__score"><span class="visually-hidden">Wynik @AnalysisFormatting.Decimal(score)/100</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
+                    <p class="analysis-result-card__rank"><span aria-hidden="true">#@Model.Rank</span><span class="visually-hidden">@T("Miejsce {0}", Model.Rank)</span></p>
+                    <p class="analysis-result-card__score"><span class="visually-hidden">@T("Wynik {0}/100", AnalysisFormatting.Decimal(score))</span><span class="insight-card__score-value" aria-hidden="true">@AnalysisFormatting.Decimal(score)</span></p>
                     <p class="insight-card__band">@AnalysisInsightPresenter.BandLabel(band)</p>
                 </div>
             }
             else
             {
-                <p class="analysis-result-card__rank">Wynik nierankingowy</p>
+                <p class="analysis-result-card__rank">@T("Wynik nierankingowy")</p>
                 if (result.Error is null)
                 {
-                    <p class="analysis-result-card__status">Niewystarczające dane do wyliczenia wyniku.</p>
+                    <p class="analysis-result-card__status">@T("Niewystarczające dane do wyliczenia wyniku.")</p>
                 }
             }
         </header>
@@ -67,11 +67,11 @@
                 <div class="insight-card__chips">
                     @if (isDelayed)
                     {
-                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane opóźnione</span>
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@T("Dane opóźnione")</span>
                     }
                     @if (result.Freshness.IsStale)
                     {
-                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">Dane nieaktualne</span>
+                        <span class="insight-card__chip insight-card__chip--warning analysis-result-card__state" role="status">@T("Dane nieaktualne")</span>
                     }
                     @if (showQualityChip)
                     {
@@ -81,8 +81,8 @@
             }
 
             <div class="insight-card__headline">
-                <p class="insight-card__change@(insight.SevenDayChange.HasValue ? null : " insight-card__change--muted")">@(insight.SevenDayChange.HasValue ? AnalysisFormatting.NullablePercent(insight.SevenDayChange) : "n/d")</p>
-                <p class="insight-card__change-label">7 dni</p>
+                <p class="insight-card__change@(insight.SevenDayChange.HasValue ? null : " insight-card__change--muted")">@(insight.SevenDayChange.HasValue ? AnalysisFormatting.NullablePercent(insight.SevenDayChange) : T("n/d"))</p>
+                <p class="insight-card__change-label">@T("7 dni")</p>
                 @if (insight.Trend is { } trend)
                 {
                     <p class="insight-card__trend insight-card__trend--@trend.ToString().ToLowerInvariant()">@insight.TrendLabel</p>
@@ -91,14 +91,14 @@
 
             @if (insight.Sparkline is { } sparkline)
             {
-                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {insight.Identity.Name}" }' />
+                <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = T("Trend ceny: {0}", T(insight.Identity.Name)) }' />
             }
             else
             {
-                <p class="insight-card__sparkline-empty" role="status">Brak danych do wykresu</p>
+                <p class="insight-card__sparkline-empty" role="status">@T("Brak danych do wykresu")</p>
             }
 
-            <ul class="insight-card__bars" aria-label="Czynniki rankingu dla @result.Asset.Id">
+            <ul class="insight-card__bars" aria-label="@T("Czynniki rankingu dla {0}", result.Asset.Id)">
                 @foreach (var bar in insight.FactorBars)
                 {
                     <li class="insight-card__bar @(bar.IsAvailable ? null : "insight-card__bar--unavailable")"
@@ -122,13 +122,13 @@
             </ul>
 
             <p class="insight-card__insight">
-                <span class="insight-card__insight-label">Wniosek z danych</span>
+                <span class="insight-card__insight-label">@T("Wniosek z danych")</span>
                 @insight.Takeaway
             </p>
 
             @if (result.Warnings.Count > 0)
             {
-                <ul class="insight-card__warnings analysis-result-card__warnings" aria-label="Ostrzeżenia dla @result.Asset.Id">
+                <ul class="insight-card__warnings analysis-result-card__warnings" aria-label="@T("Ostrzeżenia dla {0}", result.Asset.Id)">
                     @foreach (var warning in result.Warnings.Select(warning => AnalysisFormatting.Warning(warning.Category)).Distinct())
                     {
                         <li>@warning</li>
@@ -137,32 +137,32 @@
             }
 
             <section class="analysis-result-card__summary"
-                     aria-label="Podsumowanie analizy dla @result.Asset.Id">
+                     aria-label="@T("Podsumowanie analizy dla {0}", result.Asset.Id)">
                 @if (result.SummaryResult is { Status: AnalysisSummaryStatus.Generated, Text: not null } generatedSummary)
                 {
-                    <h4 class="visually-hidden">Podsumowanie</h4>
-                    <p>@generatedSummary.Text</p>
+                    <h4 class="visually-hidden">@T("Podsumowanie")</h4>
+                    <p>@T(generatedSummary.Text)</p>
                 }
                 else if (result.SummaryResult is { Status: var summaryStatus })
                 {
                     <p class="analysis-result-card__summary--status" role="status">
-                        <strong>Podsumowanie:</strong>
+                        <strong>@T("Podsumowanie:")</strong>
                         @Model.SummaryStatusMessage
                         @if (summaryStatus == AnalysisSummaryStatus.InsufficientEvidence)
                         {
-                            <span class="visually-hidden">Niewystarczające dane</span>
+                            <span class="visually-hidden">@T("Niewystarczające dane")</span>
                         }
                     </p>
                 }
                 else if (result.Summary is not null)
                 {
-                    <h4 class="visually-hidden">Podsumowanie</h4>
+                    <h4 class="visually-hidden">@T("Podsumowanie")</h4>
                     <p>@result.Summary</p>
                 }
                 else
                 {
                     <p class="analysis-result-card__summary--status" role="status">
-                        <strong>Podsumowanie:</strong>
+                        <strong>@T("Podsumowanie:")</strong>
                         @IndexModel.MapSummaryStatusMessage(AnalysisSummaryStatus.Unavailable)
                     </p>
                 }

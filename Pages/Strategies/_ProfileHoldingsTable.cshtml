@@ -5,10 +5,10 @@
     <table class="watchlist-table">
         <thead>
             <tr>
-                <th scope="col">Aktywo</th>
-                <th scope="col">Sektor</th>
-                <th scope="col">Klasa aktywów</th>
-                <th scope="col" class="watchlist-table__number">Waga</th>
+                <th scope="col">@T("Aktywo")</th>
+                <th scope="col">@T("Sektor")</th>
+                <th scope="col">@T("Klasa aktywów")</th>
+                <th scope="col" class="watchlist-table__number">@T("Waga")</th>
             </tr>
         </thead>
         <tbody>
@@ -23,7 +23,7 @@
                     <td>@holding.AssetClass</td>
                     <td class="watchlist-table__number">
                         <span class="strategy-meter">
-                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.WeightMeter" aria-label="Waga: @holding.AssetId">@holding.WeightText</meter>
+                            <meter class="strategy-meter__bar" min="0" max="100" value="@holding.WeightMeter" aria-label="@T("Waga: {0}", holding.AssetId)">@holding.WeightText</meter>
                             <span>@holding.WeightText</span>
                         </span>
                     </td>

@@ -1,4 +1,5 @@
 using System.Globalization;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.MarketData;
 
 namespace _bootstrap_scaffold.Analysis;
@@ -81,7 +82,7 @@ public static class AnalysisInsightPresenter
             ? percentage
             : (decimal?)null;
         var bars = FactorOrder
-            .Select(entry => CreateBar(entry.Key, entry.Label, analysis.Factors))
+            .Select(entry => CreateBar(entry.Key, Lang.T(entry.Label), analysis.Factors))
             .ToArray();
         var strongest = StrongestFactorIndex(bars);
         var trend = TrendFor(bars.Select(bar => bar.Direction));
@@ -98,7 +99,7 @@ public static class AnalysisInsightPresenter
             trend,
             trend is { } direction ? TrendLabel(direction) : null,
             AssetClassLabel(analysis.Asset.AssetClass),
-            isRanked ? $"Dlaczego miejsce #{rank}?" : "Co wiemy o tym aktywie",
+            isRanked ? Lang.T("Dlaczego miejsce #{0}?", rank) : Lang.T("Co wiemy o tym aktywie"),
             BuildWhyBullets(bars, strongest, analysis.Factors, analysis.Score, averageScore));
     }
 
@@ -121,16 +122,17 @@ public static class AnalysisInsightPresenter
     public static string TrendLabel(TrendDirection trend) =>
         trend switch
         {
-            TrendDirection.Rising => "Trend wzrostowy",
-            TrendDirection.Falling => "Trend spadkowy",
-            _ => "Trend mieszany"
+            TrendDirection.Rising => Lang.T("Trend wzrostowy"),
+            TrendDirection.Falling => Lang.T("Trend spadkowy"),
+            _ => Lang.T("Trend mieszany")
         };
 
     public static string AssetClassLabel(MarketAssetClass assetClass) =>
         assetClass switch
         {
-            MarketAssetClass.Crypto => "Krypto",
-            _ => "Akcje"
+            MarketAssetClass.Crypto => Lang.T("Krypto"),
+            // "Akcje" also means "Actions" (table column) elsewhere, so the stock label cannot be a shared key.
+            _ => Lang.IsEnglish ? "Stocks" : "Akcje"
         };
 
     // Same 0–100 scale as OpportunityScorer.Normalize, rounded for display.
@@ -159,9 +161,9 @@ public static class AnalysisInsightPresenter
     public static string BandLabel(ScoreBand band) =>
         band switch
         {
-            ScoreBand.Strong => "Silny",
-            ScoreBand.Moderate => "Umiarkowany",
-            _ => "Słaby"
+            ScoreBand.Strong => Lang.T("Silny"),
+            ScoreBand.Moderate => Lang.T("Umiarkowany"),
+            _ => Lang.T("Słaby")
         };
 
     public static FactorDirection DirectionFor(decimal? percentage) =>
@@ -174,15 +176,15 @@ public static class AnalysisInsightPresenter
         };
 
     public static string FactorLabel(string key) =>
-        FactorOrder.FirstOrDefault(entry => entry.Key == key).Label ?? "Czynnik";
+        Lang.T(FactorOrder.FirstOrDefault(entry => entry.Key == key).Label ?? "Czynnik");
 
     public static string FactorWord(FactorDirection direction) =>
         direction switch
         {
-            FactorDirection.Rising => "Rosnący",
-            FactorDirection.Falling => "Malejący",
-            FactorDirection.Stable => "Stabilny",
-            _ => "n/d"
+            FactorDirection.Rising => Lang.T("Rosnący"),
+            FactorDirection.Falling => Lang.T("Malejący"),
+            FactorDirection.Stable => Lang.T("Stabilny"),
+            _ => Lang.T("n/d")
         };
 
     private static FactorBarView CreateBar(string key, string label, IReadOnlyList<AnalysisFactor> factors)
@@ -214,15 +216,15 @@ public static class AnalysisInsightPresenter
             var difference = Math.Round(value - average, 1, MidpointRounding.AwayFromZero);
             bullets.Add(difference switch
             {
-                > 0m => $"Wynik {Format(value)} — o {Format(difference)} pkt powyżej średniej analizy",
-                < 0m => $"Wynik {Format(value)} — o {Format(-difference)} pkt poniżej średniej analizy",
-                _ => $"Wynik {Format(value)} — równy średniej analizy"
+                > 0m => Lang.T("Wynik {0} — o {1} pkt powyżej średniej analizy", Format(value), Format(difference)),
+                < 0m => Lang.T("Wynik {0} — o {1} pkt poniżej średniej analizy", Format(value), Format(-difference)),
+                _ => Lang.T("Wynik {0} — równy średniej analizy", Format(value))
             });
         }
 
         if (strongest < 0)
         {
-            bullets.Add("Za mało danych rynkowych, aby uzasadnić pozycję.");
+            bullets.Add(Lang.T("Za mało danych rynkowych, aby uzasadnić pozycję."));
             return bullets;
         }
 
@@ -237,7 +239,7 @@ public static class AnalysisInsightPresenter
         bullets.AddRange(remaining.Take(MaximumWhyBullets - bullets.Count));
         if (bullets.Count == 0)
         {
-            bullets.Add("Za mało danych rynkowych, aby uzasadnić pozycję.");
+            bullets.Add(Lang.T("Za mało danych rynkowych, aby uzasadnić pozycję."));
         }
 
         return bullets;
@@ -248,9 +250,9 @@ public static class AnalysisInsightPresenter
         var change = FormatSignedPercent(bar.Percentage!.Value);
         return bar.Direction switch
         {
-            FactorDirection.Rising => $"{bar.Label} rośnie ({change})",
-            FactorDirection.Falling => $"{bar.Label} spada ({change})",
-            _ => $"{bar.Label} bez wyraźnej zmiany ({change})"
+            FactorDirection.Rising => Lang.T("{0} rośnie ({1})", bar.Label, change),
+            FactorDirection.Falling => Lang.T("{0} spada ({1})", bar.Label, change),
+            _ => Lang.T("{0} bez wyraźnej zmiany ({1})", bar.Label, change)
         };
     }
 
@@ -278,16 +280,16 @@ public static class AnalysisInsightPresenter
     {
         if (strongest < 0)
         {
-            return "Za mało danych rynkowych, aby opisać zmianę ceny.";
+            return Lang.T("Za mało danych rynkowych, aby opisać zmianę ceny.");
         }
 
         var percentage = bars[strongest].Percentage!.Value;
-        var period = FactorOrder[strongest].Period;
+        var period = Lang.T(FactorOrder[strongest].Period);
         var movement = bars[strongest].Direction switch
         {
-            FactorDirection.Rising => $"Cena wzrosła o {Format(Math.Abs(percentage))}% w ciągu {period}",
-            FactorDirection.Falling => $"Cena spadła o {Format(Math.Abs(percentage))}% w ciągu {period}",
-            _ => $"Cena pozostała stabilna w ciągu {period} ({FormatSignedPercent(percentage)})"
+            FactorDirection.Rising => Lang.T("Cena wzrosła o {0}% w ciągu {1}", Format(Math.Abs(percentage)), period),
+            FactorDirection.Falling => Lang.T("Cena spadła o {0}% w ciągu {1}", Format(Math.Abs(percentage)), period),
+            _ => Lang.T("Cena pozostała stabilna w ciągu {0} ({1})", period, FormatSignedPercent(percentage))
         };
 
         return movement + RankSuffix(score, rank);
@@ -296,9 +298,9 @@ public static class AnalysisInsightPresenter
     private static string RankSuffix(decimal? score, int? rank) =>
         (score, rank) switch
         {
-            (null, _) => " — za mało danych, aby nadać miejsce w rankingu.",
-            (_, 1) => " — najwyżej oceniane aktywo w tej analizie.",
-            (_, { } place) => $" — miejsce {place} w tej analizie.",
+            (null, _) => Lang.T(" — za mało danych, aby nadać miejsce w rankingu."),
+            (_, 1) => Lang.T(" — najwyżej oceniane aktywo w tej analizie."),
+            (_, { } place) => Lang.T(" — miejsce {0} w tej analizie.", place),
             _ => "."
         };
 

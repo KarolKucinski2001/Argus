@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.Strategies;
 
 namespace _bootstrap_scaffold.Pages.Strategies.Portfolios;
@@ -38,13 +39,13 @@ public sealed class IndexModel(ISimulatedPortfolioStore store) : PageModel
         switch (status)
         {
             case SimulatedPortfolioStatus.Succeeded:
-                Message = "Portfel symulowany usunięto.";
+                Message = Lang.T("Portfel symulowany usunięto.");
                 break;
             case SimulatedPortfolioStatus.NotFound:
-                Message = "Ten portfel symulowany nie istnieje już na Twojej liście.";
+                Message = Lang.T("Ten portfel symulowany nie istnieje już na Twojej liście.");
                 break;
             default:
-                Message = "Nie udało się usunąć portfela. Spróbuj ponownie później.";
+                Message = Lang.T("Nie udało się usunąć portfela. Spróbuj ponownie później.");
                 IsError = true;
                 break;
         }
@@ -59,7 +60,7 @@ public sealed class IndexModel(ISimulatedPortfolioStore store) : PageModel
         if (!result.Succeeded)
         {
             Portfolios = [];
-            Message ??= "Nie udało się pobrać portfeli symulowanych.";
+            Message ??= Lang.T("Nie udało się pobrać portfeli symulowanych.");
             IsError = true;
             return;
         }

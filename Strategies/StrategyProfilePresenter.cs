@@ -1,4 +1,5 @@
 using System.Globalization;
+using _bootstrap_scaffold.Localization;
 
 namespace _bootstrap_scaffold.Strategies;
 
@@ -46,17 +47,17 @@ public sealed record SimulatedPortfolioRow(
 
 public static class StrategyProfilePresenter
 {
-    private static readonly CultureInfo Polish = CultureInfo.GetCultureInfo("pl-PL");
+    private const string SimulationPrefix = "Symulacja: ";
 
     public static ProfileCardView BuildCard(CuratedProfile profile) => new(
         profile.Id,
-        profile.Name,
-        profile.Description,
+        Lang.T(profile.Name),
+        Lang.T(profile.Description),
         profile.Monogram,
         profile.AccentIndex,
         HoldingsCount(profile.Holdings.Count),
         AsOf(profile.AsOf),
-        profile.SourceLabel);
+        Lang.T(profile.SourceLabel));
 
     public static ProfileDetailView BuildDetail(CuratedProfile profile)
     {
@@ -65,10 +66,10 @@ public static class StrategyProfilePresenter
         var classes = Shares(profile.Holdings, holding => holding.AssetClass);
         return new ProfileDetailView(
             profile.Id,
-            profile.Name,
-            profile.Description,
+            Lang.T(profile.Name),
+            Lang.T(profile.Description),
             AsOf(profile.AsOf),
-            profile.SourceLabel,
+            Lang.T(profile.SourceLabel),
             holdings,
             sectors,
             classes,
@@ -84,8 +85,8 @@ public static class StrategyProfilePresenter
                 holding.Name,
                 Percent(holding.Weight),
                 Meter(holding.Weight),
-                holding.Sector,
-                holding.AssetClass))
+                CompositionLabel(holding.Sector),
+                CompositionLabel(holding.AssetClass)))
             .ToArray();
 
     public static IReadOnlyList<ProfileShareRow> Shares(
@@ -96,7 +97,7 @@ public static class StrategyProfilePresenter
             .Select(group => (Label: group.Key, Share: group.Sum(holding => holding.Weight)))
             .OrderByDescending(item => item.Share)
             .ThenBy(item => item.Label, StringComparer.Ordinal)
-            .Select(item => new ProfileShareRow(item.Label, Percent(item.Share), Meter(item.Share)))
+            .Select(item => new ProfileShareRow(CompositionLabel(item.Label), Percent(item.Share), Meter(item.Share)))
             .ToArray();
 
     public static IReadOnlyList<string> BuildFactors(
@@ -112,27 +113,27 @@ public static class StrategyProfilePresenter
         }
 
         var top = ordered[0];
-        factors.Add($"Największa pozycja to {top.Name} ({top.AssetId}) z wagą {Percent(top.Weight)} wyświetlanych pozycji.");
+        factors.Add(Lang.T("Największa pozycja to {0} ({1}) z wagą {2} wyświetlanych pozycji.", top.Name, top.AssetId, Percent(top.Weight)));
 
         var topThree = ordered.Take(3).Sum(holding => holding.Weight);
-        factors.Add($"Trzy największe pozycje stanowią łącznie {Percent(topThree)} wyświetlanych pozycji.");
+        factors.Add(Lang.T("Trzy największe pozycje stanowią łącznie {0} wyświetlanych pozycji.", Percent(topThree)));
 
         if (sectors.Count > 0)
         {
-            factors.Add($"Największy udział ma sektor: {sectors[0].Label} ({sectors[0].ShareText}).");
+            factors.Add(Lang.T("Największy udział ma sektor: {0} ({1}).", sectors[0].Label, sectors[0].ShareText));
         }
 
         if (classes.Count == 1)
         {
-            factors.Add($"Wszystkie wyświetlane pozycje należą do jednej klasy aktywów: {classes[0].Label}.");
+            factors.Add(Lang.T("Wszystkie wyświetlane pozycje należą do jednej klasy aktywów: {0}.", classes[0].Label));
         }
         else if (classes.Count > 1)
         {
             var split = string.Join(", ", classes.Select(item => $"{item.Label} {item.ShareText}"));
-            factors.Add($"Podział na klasy aktywów: {split}.");
+            factors.Add(Lang.T("Podział na klasy aktywów: {0}.", split));
         }
 
-        factors.Add($"Profil zawiera {HoldingsCount(ordered.Length)}. Opis dotyczy składu portfela i nie jest oceną ani zaleceniem.");
+        factors.Add(Lang.T("Profil zawiera {0}. Opis dotyczy składu portfela i nie jest oceną ani zaleceniem.", HoldingsCount(ordered.Length)));
         return factors;
     }
 
@@ -146,10 +147,10 @@ public static class StrategyProfilePresenter
             holding.AssetClass)));
         return new SimulatedPortfolioRow(
             portfolio.Id,
-            portfolio.Name,
-            portfolio.ProfileName,
+            DisplayName(portfolio),
+            Lang.T(portfolio.ProfileName),
             AsOf(portfolio.AsOf),
-            "Utworzono: " + portfolio.CreatedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            Lang.T("Utworzono: {0}", portfolio.CreatedAtUtc.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
             HoldingsCount(holdings.Count),
             holdings);
     }
@@ -158,7 +159,7 @@ public static class StrategyProfilePresenter
         id,
         profile.Id,
         profile.Name,
-        "Symulacja: " + profile.Name,
+        SimulationPrefix + profile.Name,
         profile.AsOf,
         nowUtc,
         profile.Holdings
@@ -170,17 +171,27 @@ public static class StrategyProfilePresenter
                 holding.AssetClass))
             .ToArray());
 
+    // Stored portfolio names keep the Polish copy prefix; translate it only for display.
+    public static string DisplayName(SimulatedPortfolio portfolio) =>
+        portfolio.Name.StartsWith(SimulationPrefix, StringComparison.Ordinal)
+            ? Lang.T("Symulacja: {0}", Lang.T(portfolio.Name[SimulationPrefix.Length..]))
+            : Lang.T(portfolio.Name);
+
+    // "Akcje" is also the shared "Actions" column key, so the asset-class meaning is resolved here.
+    public static string CompositionLabel(string polish) =>
+        Lang.IsEnglish && polish == "Akcje" ? "Stocks" : Lang.T(polish);
+
     public static string AsOf(DateOnly date) =>
-        "Dane na dzień: " + date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        Lang.T("Dane na dzień: {0}", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
 
     public static string Percent(decimal value) =>
-        value.ToString("0.#", Polish) + "%";
+        value.ToString("0.#", Lang.Culture) + "%";
 
     public static string HoldingsCount(int count) => count switch
     {
-        1 => "1 pozycja",
-        >= 2 and <= 4 => $"{count} pozycje",
-        _ => $"{count} pozycji"
+        1 => Lang.T("1 pozycja"),
+        >= 2 and <= 4 => Lang.T("{0} pozycje", count),
+        _ => Lang.T("{0} pozycji", count)
     };
 
     private static int Meter(decimal value) => (int)Math.Clamp(Math.Round(value), 0m, 100m);

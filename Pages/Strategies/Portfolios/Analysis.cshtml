@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Strategies.Portfolios.AnalysisModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Analiza portfela symulowanego";
+    ViewData["Title"] = T("Analiza portfela symulowanego");
     var analysis = Model.Analysis;
 }
 
@@ -11,10 +11,10 @@
 <section class="watchlist-page" aria-labelledby="portfolio-analysis-title">
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <h1 id="portfolio-analysis-title">Analiza portfela symulowanego</h1>
-            <p>@(analysis?.Name ?? "Opis składu Twojego portfela symulowanego.")</p>
+            <h1 id="portfolio-analysis-title">@T("Analiza portfela symulowanego")</h1>
+            <p>@(analysis?.Name ?? T("Opis składu Twojego portfela symulowanego."))</p>
         </div>
-        <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">Moje portfele</a>
+        <a class="button button--secondary" asp-page="/Strategies/Portfolios/Index">@T("Moje portfele")</a>
     </header>
 
     @if (Model.ErrorMessage is not null)
@@ -24,22 +24,22 @@
         </div>
     }
 
-    <p class="account-note" role="note">@CuratedProfileCatalog.Disclaimer</p>
+    <p class="account-note" role="note">@T(CuratedProfileCatalog.Disclaimer)</p>
 
     @if (analysis is not null)
     {
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-concentration-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
                 <h2 id="portfolio-concentration-title">@analysis.ConcentrationLabel</h2>
-                <span class="watchlist-badge">Symulacja</span>
+                <span class="watchlist-badge">@T("Symulacja")</span>
             </header>
             <dl class="account-stats">
                 <div>
-                    <dt>Profil źródłowy</dt>
+                    <dt>@T("Profil źródłowy")</dt>
                     <dd>@analysis.ProfileName</dd>
                 </div>
                 <div>
-                    <dt>Aktualność danych</dt>
+                    <dt>@T("Aktualność danych")</dt>
                     <dd>@analysis.AsOfText</dd>
                 </div>
                 @foreach (var metric in analysis.Metrics)
@@ -50,12 +50,12 @@
                     </div>
                 }
             </dl>
-            <p class="strategy-quality__note" role="note">@analysis.ConcentrationExplanation @CuratedProfileCatalog.DataNote</p>
+            <p class="strategy-quality__note" role="note">@analysis.ConcentrationExplanation @T(CuratedProfileCatalog.DataNote)</p>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-factors-title">
             <header class="watchlist-card__header">
-                <h2 id="portfolio-factors-title">Czynniki opisujące skład</h2>
+                <h2 id="portfolio-factors-title">@T("Czynniki opisujące skład")</h2>
             </header>
             <ul class="account-note">
                 @foreach (var factor in analysis.Factors)
@@ -68,13 +68,13 @@
         <div class="account-grid">
             <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-sector-title">
                 <header class="watchlist-card__header">
-                    <h2 id="portfolio-sector-title">Udział sektorów</h2>
+                    <h2 id="portfolio-sector-title">@T("Udział sektorów")</h2>
                 </header>
                 <partial name="_ProfileShares" model="analysis.SectorShares" />
             </section>
             <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-class-title">
                 <header class="watchlist-card__header">
-                    <h2 id="portfolio-class-title">Udział klas aktywów</h2>
+                    <h2 id="portfolio-class-title">@T("Udział klas aktywów")</h2>
                 </header>
                 <partial name="_ProfileShares" model="analysis.AssetClassShares" />
             </section>
@@ -82,15 +82,15 @@
 
         <section class="watchlist-card" aria-labelledby="portfolio-holdings-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="portfolio-holdings-title">Pozycje portfela</h2>
-                <span class="watchlist-badge">@CuratedProfileCatalog.ApproximateBadge</span>
+                <h2 id="portfolio-holdings-title">@T("Pozycje portfela")</h2>
+                <span class="watchlist-badge">@T(CuratedProfileCatalog.ApproximateBadge)</span>
             </header>
             <partial name="_ProfileHoldingsTable" model="analysis.Holdings" />
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="portfolio-coverage-title">
             <header class="watchlist-card__header">
-                <h2 id="portfolio-coverage-title">Dane rynkowe dla pozycji</h2>
+                <h2 id="portfolio-coverage-title">@T("Dane rynkowe dla pozycji")</h2>
             </header>
             <p class="account-note">@analysis.CoverageText</p>
             @if (analysis.AnalyzableAssetIds.Count > 0)
@@ -100,13 +100,13 @@
                     {
                         <input type="hidden" name="SelectedAssetIds" value="@assetId" />
                     }
-                    <button class="button" type="submit">Analizuj obsługiwane pozycje</button>
+                    <button class="button" type="submit">@T("Analizuj obsługiwane pozycje")</button>
                 </form>
             }
         </section>
     }
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

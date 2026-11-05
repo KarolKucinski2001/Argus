@@ -2,26 +2,28 @@
 @model _bootstrap_scaffold.Pages.Account.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Konto";
+    ViewData["Title"] = T("Konto");
+    // Illustrative sample figures are hard-coded per language so Polish output stays unchanged.
+    string Sample(string polish, string english) => IsEnglish ? english : polish;
 }
 
 <section class="watchlist-page" aria-labelledby="account-title">
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
-            <h1 id="account-title">Konto</h1>
-            <p>Zarządzaj profilem i przeglądaj informacje o koncie w Argus.</p>
+            <h1 id="account-title">@T("Konto")</h1>
+            <p>@T("Zarządzaj profilem i przeglądaj informacje o koncie w Argus.")</p>
         </div>
     </header>
 
-    <ul class="watchlist-tabs" aria-label="Sekcje konta">
+    <ul class="watchlist-tabs" aria-label="@T("Sekcje konta")">
         <li class="watchlist-tab watchlist-tab--active" aria-current="page">
-            <strong>Profil</strong>
+            <strong>@T("Profil")</strong>
         </li>
         @foreach (var placeholder in new[] { "Portfel", "Ustawienia", "Powiadomienia" })
         {
             <li class="watchlist-tab watchlist-tab--placeholder" aria-disabled="true">
-                <strong>@placeholder</strong>
-                <span class="watchlist-badge">Przykład</span>
+                <strong>@T(placeholder)</strong>
+                <span class="watchlist-badge">@T("Przykład")</span>
             </li>
         }
     </ul>
@@ -29,38 +31,38 @@
     <div class="account-grid">
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-profile-title">
             <header class="watchlist-card__header">
-                <h2 id="account-profile-title">Informacje o profilu</h2>
+                <h2 id="account-profile-title">@T("Informacje o profilu")</h2>
             </header>
             <div class="account-profile">
                 <span class="account-avatar" aria-hidden="true">@Model.Initials</span>
                 <div class="account-profile__details">
-                    <h3>@(Model.DisplayName ?? "Nie podano")</h3>
-                    <p class="account-profile__email">@(Model.Email ?? "Nie podano")</p>
-                    <p class="account-profile__id">ID konta: <span>@Model.SubjectId</span></p>
+                    <h3>@(Model.DisplayName ?? T("Nie podano"))</h3>
+                    <p class="account-profile__email">@(Model.Email ?? T("Nie podano"))</p>
+                    <p class="account-profile__id">@T("ID konta:") <span>@Model.SubjectId</span></p>
                 </div>
             </div>
             <div class="account-actions">
-                <a class="button" href="/analysis">Rozpocznij analizę</a>
-                <a class="button button--secondary" href="/account/signout">Wyloguj się</a>
+                <a class="button" href="/analysis">@T("Rozpocznij analizę")</a>
+                <a class="button button--secondary" href="/account/signout">@T("Wyloguj się")</a>
             </div>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-overview-title">
             <header class="watchlist-card__header">
-                <h2 id="account-overview-title">Przegląd konta</h2>
+                <h2 id="account-overview-title">@T("Przegląd konta")</h2>
             </header>
             <dl class="account-stats">
                 <div>
-                    <dt>Typ konta</dt>
-                    <dd>Bezpłatny <span class="watchlist-badge">Przykład</span></dd>
+                    <dt>@T("Typ konta")</dt>
+                    <dd>@T("Bezpłatny") <span class="watchlist-badge">@T("Przykład")</span></dd>
                 </div>
                 <div>
-                    <dt>Plan</dt>
-                    <dd>Bezpłatny <span class="watchlist-badge">Przykład</span></dd>
+                    <dt>@T("Plan")</dt>
+                    <dd>@T("Bezpłatny") <span class="watchlist-badge">@T("Przykład")</span></dd>
                 </div>
                 <div>
-                    <dt>Status konta</dt>
-                    <dd class="account-status">Aktywne</dd>
+                    <dt>@T("Status konta")</dt>
+                    <dd class="account-status">@T("Aktywne")</dd>
                 </div>
             </dl>
         </section>
@@ -68,18 +70,18 @@
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-portfolio-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="account-portfolio-title">Twój wirtualny portfel</h2>
-            <span class="watchlist-badge">Przykładowe dane</span>
+            <h2 id="account-portfolio-title">@T("Twój wirtualny portfel")</h2>
+            <span class="watchlist-badge">@T("Przykładowe dane")</span>
         </header>
-        <p class="account-note">Argus nie prowadzi prawdziwego portfela. Poniższe wartości są wyłącznie ilustracją.</p>
+        <p class="account-note">@T("Argus nie prowadzi prawdziwego portfela. Poniższe wartości są wyłącznie ilustracją.")</p>
         <dl class="account-stats">
             <div>
-                <dt>Wartość (symulowana)</dt>
-                <dd>118 432</dd>
+                <dt>@T("Wartość (symulowana)")</dt>
+                <dd>@Sample("118 432", "118,432")</dd>
             </div>
             <div>
-                <dt>Zmiana w okresie</dt>
-                <dd>+18,4%</dd>
+                <dt>@T("Zmiana w okresie")</dt>
+                <dd>@Sample("+18,4%", "+18.4%")</dd>
             </div>
         </dl>
     </section>
@@ -87,34 +89,34 @@
     <div class="account-grid">
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-allocation-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="account-allocation-title">Alokacja portfela</h2>
-                <span class="watchlist-badge">Przykładowe dane</span>
+                <h2 id="account-allocation-title">@T("Alokacja portfela")</h2>
+                <span class="watchlist-badge">@T("Przykładowe dane")</span>
             </header>
-            <p class="account-note">Argus nie prowadzi prawdziwego portfela. Podział jest przykładem.</p>
+            <p class="account-note">@T("Argus nie prowadzi prawdziwego portfela. Podział jest przykładem.")</p>
             <div class="account-allocation">
-                <div class="account-donut" role="img" aria-label="Przykładowy podział: 20%, 10%, 20% i 50%">
+                <div class="account-donut" role="img" aria-label="@T("Przykładowy podział: 20%, 10%, 20% i 50%")">
                     <span class="account-donut__hole">100%</span>
                 </div>
                 <ul class="account-list">
-                    <li><span><span class="account-legend__dot account-legend__dot--1"></span>Duże fundusze</span><strong>20%</strong></li>
-                    <li><span><span class="account-legend__dot account-legend__dot--2"></span>Wybrane spółki</span><strong>10%</strong></li>
-                    <li><span><span class="account-legend__dot account-legend__dot--3"></span>Szeroki rynek</span><strong>20%</strong></li>
-                    <li><span><span class="account-legend__dot account-legend__dot--4"></span>Moja selekcja</span><strong>50%</strong></li>
+                    <li><span><span class="account-legend__dot account-legend__dot--1"></span>@T("Duże fundusze")</span><strong>20%</strong></li>
+                    <li><span><span class="account-legend__dot account-legend__dot--2"></span>@T("Wybrane spółki")</span><strong>10%</strong></li>
+                    <li><span><span class="account-legend__dot account-legend__dot--3"></span>@T("Szeroki rynek")</span><strong>20%</strong></li>
+                    <li><span><span class="account-legend__dot account-legend__dot--4"></span>@T("Moja selekcja")</span><strong>50%</strong></li>
                 </ul>
             </div>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-metrics-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="account-metrics-title">Kluczowe wskaźniki</h2>
-                <span class="watchlist-badge">Przykładowe dane</span>
+                <h2 id="account-metrics-title">@T("Kluczowe wskaźniki")</h2>
+                <span class="watchlist-badge">@T("Przykładowe dane")</span>
             </header>
-            <p class="account-note">Argus nie prowadzi prawdziwego portfela. Wskaźniki są przykładem.</p>
+            <p class="account-note">@T("Argus nie prowadzi prawdziwego portfela. Wskaźniki są przykładem.")</p>
             <ul class="account-list">
-                <li><span>Zmiana całkowita (30 dni)</span><strong>+18,4%</strong></li>
-                <li><span>Maksymalne obsunięcie</span><strong>-12,6%</strong></li>
-                <li><span>Zmienność (rocznie)</span><strong>14,2%</strong></li>
-                <li><span>Wskaźnik Sharpe'a</span><strong>1,12</strong></li>
+                <li><span>@T("Zmiana całkowita (30 dni)")</span><strong>@Sample("+18,4%", "+18.4%")</strong></li>
+                <li><span>@T("Maksymalne obsunięcie")</span><strong>@Sample("-12,6%", "-12.6%")</strong></li>
+                <li><span>@T("Zmienność (rocznie)")</span><strong>@Sample("14,2%", "14.2%")</strong></li>
+                <li><span>@T("Wskaźnik Sharpe'a")</span><strong>@Sample("1,12", "1.12")</strong></li>
             </ul>
         </section>
     </div>
@@ -122,43 +124,43 @@
     <div class="account-grid">
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-activity-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="account-activity-title">Ostatnia aktywność</h2>
-                <span class="watchlist-badge">Przykładowe dane</span>
+                <h2 id="account-activity-title">@T("Ostatnia aktywność")</h2>
+                <span class="watchlist-badge">@T("Przykładowe dane")</span>
             </header>
-            <p class="account-note">Argus nie prowadzi prawdziwego portfela. Wpisy są przykładem.</p>
+            <p class="account-note">@T("Argus nie prowadzi prawdziwego portfela. Wpisy są przykładem.")</p>
             <ul class="account-list">
-                <li><span>Dodano profil strategii <small>Duże fundusze</small></span><small>28 kwi 2025</small></li>
-                <li><span>Zaktualizowano listę obserwowanych <small>Dodano 3 aktywa</small></span><small>24 kwi 2025</small></li>
-                <li><span>Zakończono analizę <small>AAPL – trend ceny</small></span><small>22 kwi 2025</small></li>
+                <li><span>@T("Dodano profil strategii") <small>@T("Duże fundusze")</small></span><small>@Sample("28 kwi 2025", "Apr 28, 2025")</small></li>
+                <li><span>@T("Zaktualizowano listę obserwowanych") <small>@T("Dodano 3 aktywa")</small></span><small>@Sample("24 kwi 2025", "Apr 24, 2025")</small></li>
+                <li><span>@T("Zakończono analizę") <small>@T("AAPL – trend ceny")</small></span><small>@Sample("22 kwi 2025", "Apr 22, 2025")</small></li>
             </ul>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="account-quick-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="account-quick-title">Szybkie akcje</h2>
-                <span class="watchlist-badge">Przykładowe dane</span>
+                <h2 id="account-quick-title">@T("Szybkie akcje")</h2>
+                <span class="watchlist-badge">@T("Przykładowe dane")</span>
             </header>
-            <p class="account-note">Argus nie prowadzi prawdziwego portfela. Aktywne są tylko akcje z odnośnikami.</p>
+            <p class="account-note">@T("Argus nie prowadzi prawdziwego portfela. Aktywne są tylko akcje z odnośnikami.")</p>
             <div class="account-list">
                 <a class="account-quick-action" href="/analysis">
-                    <span>Przejdź do analizy <small>Sprawdź dane rynkowe wybranych aktywów</small></span>
+                    <span>@T("Przejdź do analizy") <small>@T("Sprawdź dane rynkowe wybranych aktywów")</small></span>
                 </a>
                 <a class="account-quick-action" href="/watchlist">
-                    <span>Zarządzaj obserwowanymi <small>Przeglądaj zapisane aktywa</small></span>
+                    <span>@T("Zarządzaj obserwowanymi") <small>@T("Przeglądaj zapisane aktywa")</small></span>
                 </a>
                 <span class="account-quick-action" aria-disabled="true">
-                    <span>Edytuj portfel <small>Niedostępne w tej wersji</small></span>
-                    <span class="watchlist-badge">Przykład</span>
+                    <span>@T("Edytuj portfel") <small>@T("Niedostępne w tej wersji")</small></span>
+                    <span class="watchlist-badge">@T("Przykład")</span>
                 </span>
                 <span class="account-quick-action" aria-disabled="true">
-                    <span>Profile strategii <small>Niedostępne w tej wersji</small></span>
-                    <span class="watchlist-badge">Przykład</span>
+                    <span>@T("Profile strategii") <small>@T("Niedostępne w tej wersji")</small></span>
+                    <span class="watchlist-badge">@T("Przykład")</span>
                 </span>
             </div>
         </section>
     </div>
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

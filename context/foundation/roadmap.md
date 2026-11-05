@@ -3,7 +3,7 @@ project: "Argus"
 version: 2
 status: draft
 created: 2026-09-30
-updated: 2026-10-26
+updated: 2026-10-27
 prd_version: 1
 main_goal: low-complexity
 top_blocker: decisions
@@ -43,7 +43,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | done |
 | S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | done |
-| S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | proposed |
+| S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | in-progress |
 | S-07 | strategy-profiles-simulation | browse curated public strategy profiles, see their holdings with explained factors, copy one into a private simulated model portfolio they can list and delete, and see a composition-based analysis of it | S-04 (per-user storage pattern) | PRD v2 FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007 | in-progress |
 
 ## Baseline
@@ -98,12 +98,12 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **PRD refs:** FR-004, FR-006, FR-007
 - **Prerequisites:** provider decision (GitHub issue #1)
 - **Parallel with:** PRD v2 shaping (strategy profiles); static-data strategy slices
-- **Blockers:** Open Roadmap Question 1
+- **Blockers:** — (provider decided; live providers implemented in `context/changes/production-market-data/`)
 - **Unknowns:**
-  - Which approved provider, and what are its rate limits, licensing, and cost? — Owner: team. Block: yes.
+  - Provider licensing confirmation for public display — Owner: user. Block: archive only.
   - How are provider outages and stale data shown to the user? — Owner: team. Block: no (decided in `/10x-plan`).
-- **Risk:** Provider limits or licensing could constrain the supported-asset list; the existing market-data contract, cache and request budget stay the seam so Analysis, Watchlist and Dashboard need no changes.
-- **Status:** proposed
+- **Risk:** Provider limits or licensing could constrain the supported-asset list; the existing market-data contract, cache and request budget stay the seam so Analysis, Watchlist and Dashboard need no changes. Free-tier rate limits can leave some assets without data when many are requested at once.
+- **Status:** in-progress (implemented; awaiting licensing confirmation, then `/10x-archive production-market-data`)
 
 ### S-07: Strategy profiles and simulated model portfolio
 
@@ -116,18 +116,18 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **Unknowns:**
   - Which public portfolios are curated and who maintains their holdings and "as of" dates? — Owner: user. Block: yes for release; first slice ships 3 approximate example profiles.
 - **Risk:** Explained factors on someone else's holdings can read as a recommendation; copy stays descriptive and data is labelled approximate.
-- **Status:** in-progress
+- **Status:** in-progress (implementation reviewed; awaiting curated-data/source-terms review and a visual check against Azurite, then `/10x-archive strategy-profiles-simulation`)
 
 | Roadmap ID | Change ID | Suggested issue title | GitHub issue | Ready for `/10x-plan` | Notes |
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | Let users save assets to a personal watchlist | — | yes | Run `/10x-plan save-assets-to-watchlist`. |
 | S-05 | watchlist-monitoring-dashboard | Add a Dashboard tab that monitors the watchlist | — | no | Requires S-04. |
-| S-06 | production-market-data | Replace the development market-data provider with a real source | — | no | Needs provider decision (#1) first. |
+| S-06 | production-market-data | Replace the development market-data provider with a real source | — | no | Implemented; see `context/changes/production-market-data/`. |
 | S-07 | strategy-profiles-simulation | Add strategy profiles and simulated model portfolios | — | in progress | PRD v2 FR-001–FR-005; see `context/changes/strategy-profiles-simulation/`. |
 
 ## Open Roadmap Questions
 
-1. **Which approved market-data source should be activated for production display?** — Owner: team. Block: real-provider activation only; S-04 and S-05 can proceed on the development provider. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
+1. **Which approved market-data source should be activated for production display?** — Resolved: live providers implemented in S-06; licensing confirmation remains user-owned. GitHub decision issue: [#1](https://github.com/KarolKucinski2001/Argus/issues/1).
 2. **Should AI Copilot be included?** — Owner: user. Block: roadmap-wide only if included. GitHub decision issue: [#2](https://github.com/KarolKucinski2001/Argus/issues/2).
 3. **Should Argus add public strategy profiles (institutional 13F funds, company insiders, congressional disclosures, known public portfolios), a simulated model-portfolio builder, and portfolio analysis?** — Owner: user. Block: M-3. Requires PRD v2 via `/10x-shape` → `/10x-prd`, rewording the "does not manage portfolios or allocate funds" non-goal into an explicit simulation-only, educational boundary, and choosing a public-filings data source.
 4. **Should search trends get their own Trends tab (PRD secondary success criterion) or only feed the score?** — Owner: user. Block: future FR-019 work.

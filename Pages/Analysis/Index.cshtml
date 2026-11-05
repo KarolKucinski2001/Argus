@@ -5,7 +5,7 @@
 @model _bootstrap_scaffold.Pages.Analysis.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Start analizy";
+    ViewData["Title"] = T("Start analizy");
     var scoreById = new Dictionary<string, decimal?>(StringComparer.OrdinalIgnoreCase);
     var summary = Model.HasResults ? AnalysisSummaryStripPresenter.Build(Model.AnalysisResults!.Results) : null;
     if (Model.HasResults)
@@ -20,21 +20,22 @@
 <section class="analysis-workspace" aria-labelledby="analysis-title">
     <aside class="analysis-workspace__sidebar">
         <div class="analysis-page__header">
-            <h1 id="analysis-title" class="analysis-workspace__title">Nowa analiza</h1>
+            <h1 id="analysis-title" class="analysis-workspace__title">@T("Nowa analiza")</h1>
         </div>
 
         <form method="post" class="analysis-form" data-analysis-form>
         <div class="analysis-form__header">
-            <h2>Dostępne aktywa</h2>
-            <p>Możesz wybrać dowolną liczbę aktywów.</p>
+            <h2>@T("Dostępne aktywa")</h2>
+            @* Constant dictionary copy is emitted raw so Polish diacritics stay unencoded, as before localization. *@
+            <p>@T("Możesz wybrać dowolną liczbę aktywów.")</p>
         </div>
 
         <div class="asset-list">
             @if (Model.Assets.Count == 0)
             {
                 <div class="status-card status-card--error" role="status">
-                    <h3>Brak skonfigurowanych aktywów</h3>
-                    <p>Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.</p>
+                    <h3>@T("Brak skonfigurowanych aktywów")</h3>
+                    <p>@T("Administrator musi skonfigurować aktywa przed rozpoczęciem analizy.")</p>
                 </div>
             }
             @foreach (var asset in Model.Assets)
@@ -63,7 +64,7 @@
         @if (Model.ProviderMessage is not null)
         {
             <div class="status-card status-card--error" role="alert">
-                <h2>Nie udało się rozpocząć analizy</h2>
+                <h2>@T("Nie udało się rozpocząć analizy")</h2>
                 <p>@Model.ProviderMessage</p>
             </div>
         }
@@ -73,10 +74,10 @@
             <div class="status-card @(Model.WatchlistSaveSucceeded ? "status-card--success" : "status-card--error")"
                  role="@(Model.WatchlistSaveSucceeded ? "status" : "alert")">
                 <h2>@(Model.WatchlistSaveSucceeded
-                    ? "Lista obserwowanych"
+                    ? T("Lista obserwowanych")
                     : Model.WatchlistSaveAttempted
-                        ? "Nie udało się zapisać aktywów"
-                        : "Nie udało się pobrać listy obserwowanych")</h2>
+                        ? T("Nie udało się zapisać aktywów")
+                        : T("Nie udało się pobrać listy obserwowanych"))</h2>
                 <p>@Model.WatchlistMessage</p>
             </div>
         }
@@ -84,7 +85,7 @@
         @if (Model.HasStarted)
         {
             <div class="status-card status-card--success" role="status">
-                <h2>Analiza rozpoczęta</h2>
+                <h2>@T("Analiza rozpoczęta")</h2>
                 <p>@Model.StartedMessage</p>
                 <ul>
                     @foreach (var assetId in Model.SelectedAssetIds.Distinct(StringComparer.OrdinalIgnoreCase))
@@ -96,7 +97,7 @@
         }
 
         <p class="analysis-form__pending" data-pending-status role="status" hidden>
-            Analiza jest przygotowywana. Nie zamykaj tej strony.
+            @T("Analiza jest przygotowywana. Nie zamykaj tej strony.")
         </p>
         <div class="analysis-form__actions">
         <button class="button"
@@ -104,26 +105,25 @@
                 asp-page-handler="Analyze"
                 data-submit-button
                 disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
-            Generuj ranking
+            @T("Generuj ranking")
         </button>
         <button class="button button--secondary"
                 type="submit"
                 asp-page-handler="Save"
                 disabled="@(Model.Assets.Count == 0 ? "disabled" : null)">
-            Zapisz na liście
+            @T("Zapisz na liście")
         </button>
         </div>
         </form>
 
         <p class="analysis-page__boundary">
-            Dane w środowisku deweloperskim są ilustracyjne i nie stanowią porady
-            inwestycyjnej.
+            @T("Dane w środowisku deweloperskim są ilustracyjne i nie stanowią porady inwestycyjnej.")
         </p>
     </aside>
 
     <div class="analysis-workspace__content">
         <header class="analysis-workspace__header">
-            <h2>Pulpit analizy</h2>
+            <h2>@T("Pulpit analizy")</h2>
             @if (Model.HasResults)
             {
                 <partial name="_SummaryStrip" model="summary" />
@@ -131,15 +131,15 @@
         </header>
 
         <section class="analysis-results" aria-labelledby="analysis-results-title">
-            <h2 id="analysis-results-title" class="visually-hidden">Ranking analizy</h2>
+            <h2 id="analysis-results-title" class="visually-hidden">@T("Ranking analizy")</h2>
             @if (Model.HasResults)
             {
                 <p class="analysis-results__boundary">
-                    Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+                    @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
                 </p>
                 @if (Model.HasPartialResults)
                 {
-                    <p role="status">Częściowe wyniki — część aktywów nie ma pełnych danych.</p>
+                    <p role="status">@T("Częściowe wyniki — część aktywów nie ma pełnych danych.")</p>
                 }
             }
 

@@ -1,3 +1,4 @@
+using _bootstrap_scaffold.Localization;
 using _bootstrap_scaffold.Watchlist;
 
 namespace _bootstrap_scaffold.Strategies;
@@ -78,5 +79,5 @@ public static class StrategyProfileCatalog
     public static string DotClass(int index) => $"account-legend__dot--{index}";
 
     public static string DonutLabel() =>
-        "Przykładowy podział: " + string.Join(", ", Allocation.Select(slice => $"{slice.Weight}%"));
+        Lang.T("Przykładowy podział: {0}", string.Join(", ", Allocation.Select(slice => $"{slice.Weight}%")));
 }

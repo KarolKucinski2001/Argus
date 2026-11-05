@@ -2,7 +2,7 @@
 @model _bootstrap_scaffold.Pages.Dashboard.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Pulpit";
+    ViewData["Title"] = T("Pulpit");
 }
 
 @using _bootstrap_scaffold.Dashboard
@@ -13,35 +13,35 @@
     <header class="watchlist-page__header">
         <div class="watchlist-page__heading">
             <h1 id="dashboard-title">@Model.Greeting</h1>
-            <p>Przeglądaj dane rynkowe, poznaj profile strategii i zbuduj wirtualny portfel.</p>
+            <p>@T("Przeglądaj dane rynkowe, poznaj profile strategii i zbuduj wirtualny portfel.")</p>
         </div>
     </header>
 
     <section class="watchlist-card watchlist-card--padded dashboard-welcome" aria-labelledby="dashboard-welcome-title">
         <div>
-            <h2 id="dashboard-welcome-title">Witaj w Argus</h2>
-            <p class="account-note">Argus pomaga uczyć się inwestowania na podstawie publicznie dostępnych danych: zgłoszeń instytucji, osób z wewnątrz spółek i innych źródeł. Możesz zbudować wirtualny portfel i przeglądać dane historyczne — wszystko bez prawdziwych pieniędzy.</p>
+            <h2 id="dashboard-welcome-title">@T("Witaj w Argus")</h2>
+            <p class="account-note">@T("Argus pomaga uczyć się inwestowania na podstawie publicznie dostępnych danych: zgłoszeń instytucji, osób z wewnątrz spółek i innych źródeł. Możesz zbudować wirtualny portfel i przeglądać dane historyczne — wszystko bez prawdziwych pieniędzy.")</p>
         </div>
-        <a class="button" asp-page="/Strategies/Index">Poznaj profile strategii</a>
+        <a class="button" asp-page="/Strategies/Index">@T("Poznaj profile strategii")</a>
     </section>
 
     <section class="watchlist-card" aria-labelledby="dashboard-watchlist-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="dashboard-watchlist-title">Twoja lista obserwowanych</h2>
-            <a asp-page="/Watchlist/Index">Zobacz wszystkie</a>
+            <h2 id="dashboard-watchlist-title">@T("Twoja lista obserwowanych")</h2>
+            <a asp-page="/Watchlist/Index">@T("Zobacz wszystkie")</a>
         </header>
         @if (Model.WatchlistFailed)
         {
             <div class="status-card status-card--error" role="status">
-                <p>@DashboardPresenter.WatchlistFailedMessage</p>
+                <p>@T(DashboardPresenter.WatchlistFailedMessage)</p>
             </div>
         }
         else if (Model.WatchlistEmpty)
         {
             <div class="watchlist-empty status-card" role="status">
-                <h3>Lista obserwowanych jest pusta</h3>
-                <p>Zapisz aktywa na stronie analizy, aby zobaczyć tutaj ich ceny i zmiany.</p>
-                <a class="button" asp-page="/Analysis/Index">Przejdź do analizy</a>
+                <h3>@T("Lista obserwowanych jest pusta")</h3>
+                <p>@T("Zapisz aktywa na stronie analizy, aby zobaczyć tutaj ich ceny i zmiany.")</p>
+                <a class="button" asp-page="/Analysis/Index">@T("Przejdź do analizy")</a>
             </div>
         }
         else
@@ -51,12 +51,12 @@
                     <thead>
                         <tr>
                             <th scope="col">Symbol</th>
-                            <th scope="col">Nazwa</th>
-                            <th scope="col" class="watchlist-table__number">Ostatnia cena</th>
-                            <th scope="col" class="watchlist-table__number">Zmiana 24h</th>
-                            <th scope="col" class="watchlist-table__number">7 dni</th>
-                            <th scope="col" class="watchlist-table__number">30 dni</th>
-                            <th scope="col" title="@WatchlistTablePresenter.TrendHint">@WatchlistTablePresenter.TrendHeader</th>
+                            <th scope="col">@T("Nazwa")</th>
+                            <th scope="col" class="watchlist-table__number">@T("Ostatnia cena")</th>
+                            <th scope="col" class="watchlist-table__number">@T("Zmiana 24h")</th>
+                            <th scope="col" class="watchlist-table__number">@T("7 dni")</th>
+                            <th scope="col" class="watchlist-table__number">@T("30 dni")</th>
+                            <th scope="col" title="@T(WatchlistTablePresenter.TrendHint)">@T(WatchlistTablePresenter.TrendHeader)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,7 +68,7 @@
                                     <span>@row.AssetId</span>
                                     @if (!row.IsAvailable)
                                     {
-                                        <span class="watchlist-row__status">Niedostępne</span>
+                                        <span class="watchlist-row__status">@T("Niedostępne")</span>
                                     }
                                 </th>
                                 <td>@row.Name</td>
@@ -80,12 +80,12 @@
                                     @if (row.Sparkline is { } rowSparkline)
                                     {
                                         <span class="watchlist-sparkline @WatchlistTablePresenter.ToneClass(rowSparkline.Tone)">
-                                            <partial name="_Sparkline" model="rowSparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {row.Name}" }' />
+                                            <partial name="_Sparkline" model="rowSparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = T("Trend ceny: {0}", row.Name) }' />
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="watchlist-tone--unavailable">@WatchlistTablePresenter.MissingDataText</span>
+                                        <span class="watchlist-tone--unavailable">@T(WatchlistTablePresenter.MissingDataText)</span>
                                     }
                                 </td>
                             </tr>
@@ -96,7 +96,7 @@
             @if (Model.WatchlistHasMore)
             {
                 <footer class="watchlist-card__footer">
-                    <a asp-page="/Watchlist/Index">Zobacz wszystkie</a>
+                    <a asp-page="/Watchlist/Index">@T("Zobacz wszystkie")</a>
                 </footer>
             }
         }
@@ -104,13 +104,13 @@
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-market-title">
         <header class="watchlist-card__header">
-            <h2 id="dashboard-market-title">Przegląd rynku</h2>
-            <p>Zmiana 24h</p>
+            <h2 id="dashboard-market-title">@T("Przegląd rynku")</h2>
+            <p>@T("Zmiana 24h")</p>
         </header>
         @if (Model.MarketUnavailable)
         {
             <div class="status-card status-card--error" role="status">
-                <p>@DashboardPresenter.UnavailableMessage</p>
+                <p>@T(DashboardPresenter.UnavailableMessage)</p>
             </div>
         }
         <ul class="dashboard-tiles">
@@ -127,7 +127,7 @@
                     @if (tile.Sparkline is { } sparkline)
                     {
                         <span class="watchlist-sparkline @WatchlistTablePresenter.ToneClass(sparkline.Tone)">
-                            <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = $"Trend ceny: {tile.Name}" }' />
+                            <partial name="_Sparkline" model="sparkline" view-data='new ViewDataDictionary(ViewData) { ["SparklineLabel"] = T("Trend ceny: {0}", tile.Name) }' />
                         </span>
                     }
                 </li>
@@ -138,25 +138,25 @@
     <div class="account-grid">
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-portfolio-title">
             <header class="watchlist-card__header watchlist-card__header--inline">
-                <h2 id="dashboard-portfolio-title">Twój wirtualny portfel</h2>
-                <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+                <h2 id="dashboard-portfolio-title">@T("Twój wirtualny portfel")</h2>
+                <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
             </header>
-            <h3 class="dashboard-portfolio__title">Zbuduj pierwszy model portfela</h3>
-            <p class="account-note">Połącz profile strategii, ustaw alokację i zobacz, jak taki portfel zachowywałby się historycznie. Kreator portfela jest niedostępny w tej wersji.</p>
+            <h3 class="dashboard-portfolio__title">@T("Zbuduj pierwszy model portfela")</h3>
+            <p class="account-note">@T("Połącz profile strategii, ustaw alokację i zobacz, jak taki portfel zachowywałby się historycznie. Kreator portfela jest niedostępny w tej wersji.")</p>
             <div class="account-actions">
-                <button class="button" type="button" disabled>Utwórz portfel</button>
+                <button class="button" type="button" disabled>@T("Utwórz portfel")</button>
             </div>
         </section>
 
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-insights-title">
             <header class="watchlist-card__header">
-                <h2 id="dashboard-insights-title">Najważniejsze wnioski</h2>
+                <h2 id="dashboard-insights-title">@T("Najważniejsze wnioski")</h2>
             </header>
             @if (Model.Insights.Count == 0)
             {
                 <p class="watchlist-placeholder">@(Model.WatchlistEmpty
-                    ? "Wnioski pojawią się po zapisaniu aktywów na liście obserwowanych."
-                    : "Brak danych do opisania zmian obserwowanych aktywów.")</p>
+                    ? T("Wnioski pojawią się po zapisaniu aktywów na liście obserwowanych.")
+                    : T("Brak danych do opisania zmian obserwowanych aktywów."))</p>
             }
             else
             {
@@ -167,11 +167,11 @@
                             <partial name="_AssetGlyph" model="insight.AssetId" />
                             <span class="dashboard-insights__text">
                                 <strong><a asp-page="/Analysis/Index">@insight.AssetId · @insight.Name</a></strong>
-                                <small>@insight.Text</small>
+                                <small>@T(insight.Text)</small>
                             </span>
                             @if (insight.TrendLabel is { } trendLabel)
                             {
-                                <small>@trendLabel</small>
+                                <small>@T(trendLabel)</small>
                             }
                         </li>
                     }
@@ -182,20 +182,20 @@
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="dashboard-strategies-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="dashboard-strategies-title">Poznaj profile strategii</h2>
-            <span class="watchlist-badge">@StrategyProfileCatalog.SampleBadge</span>
+            <h2 id="dashboard-strategies-title">@T("Poznaj profile strategii")</h2>
+            <span class="watchlist-badge">@T(StrategyProfileCatalog.SampleBadge)</span>
         </header>
         <ul class="strategy-grid">
             @foreach (var profile in StrategyProfileCatalog.DashboardProfiles)
             {
                 <li class="strategy-card" data-strategy-profile="@profile.Id">
                     <span class="strategy-icon @StrategyProfileCatalog.AccentClass(profile.AccentIndex)" aria-hidden="true">@profile.Monogram</span>
-                    <h3><a class="strategy-card__link" asp-page="/Strategies/Index">@profile.Name</a></h3>
-                    <p>@profile.Description</p>
-                    <p class="strategy-card__range">@profile.StockRange</p>
+                    <h3><a class="strategy-card__link" asp-page="/Strategies/Index">@T(profile.Name)</a></h3>
+                    <p>@T(profile.Description)</p>
+                    <p class="strategy-card__range">@T(profile.StockRange)</p>
                     @if (profile.IsExample)
                     {
-                        <span class="watchlist-badge">Przykład</span>
+                        <span class="watchlist-badge">@T("Przykład")</span>
                     }
                 </li>
             }
@@ -203,11 +203,11 @@
     </section>
 
     <section class="status-card" aria-labelledby="dashboard-disclaimer-title">
-        <h2 id="dashboard-disclaimer-title">Narzędzie edukacyjne</h2>
-        <p>Argus służy wyłącznie do nauki i badania danych. Nie dokonuje prawdziwych transakcji i nie stanowi porady inwestycyjnej.</p>
+        <h2 id="dashboard-disclaimer-title">@T("Narzędzie edukacyjne")</h2>
+        <p>@T("Argus służy wyłącznie do nauki i badania danych. Nie dokonuje prawdziwych transakcji i nie stanowi porady inwestycyjnej.")</p>
     </section>
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.")
     </p>
 </section>

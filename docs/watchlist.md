@@ -3,7 +3,7 @@
 Authenticated users save assets from `/analysis` and manage them on
 `/watchlist`. Entries are stored in Azure Table Storage, one row per
 `(user, asset)`, scoped by the Entra `sub` claim. Each user can save up to 50
-assets, and analysis started from the watchlist accepts at most five assets.
+assets; analysis and the watchlist table request all saved, supported assets at once (there is no per-analysis asset cap).
 
 ## Settings
 

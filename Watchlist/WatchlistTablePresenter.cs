@@ -1,5 +1,5 @@
-using System.Globalization;
 using _bootstrap_scaffold.Analysis;
+using _bootstrap_scaffold.Localization;
 
 namespace _bootstrap_scaffold.Watchlist;
 
@@ -51,8 +51,6 @@ public static class WatchlistTablePresenter
         "Dzienne ceny zamknięcia z ostatnich 12 miesięcy. Zielony: cena wyższa niż 12 miesięcy temu, czerwony: niższa.";
     public const int MaximumMovers = 5;
 
-    private static readonly CultureInfo Polish = CultureInfo.GetCultureInfo("pl-PL");
-
     public static WatchlistRowView BuildRow(
         string assetId,
         string name,
@@ -79,24 +77,24 @@ public static class WatchlistTablePresenter
     {
         if (price is not { } value)
         {
-            return MissingDataText;
+            return Lang.T(MissingDataText);
         }
 
-        var amount = value.ToString("N2", Polish);
+        var amount = value.ToString("N2", Lang.Culture);
         return string.IsNullOrWhiteSpace(currency) ? amount : $"{amount} {currency}";
     }
 
     public static string SignedPercent(decimal value)
     {
         var rounded = Math.Round(value, 2, MidpointRounding.AwayFromZero);
-        return rounded.ToString("+0.00;-0.00;0.00", Polish) + "%";
+        return rounded.ToString("+0.00;-0.00;0.00", Lang.Culture) + "%";
     }
 
     public static WatchlistChangeCell Change(decimal? value)
     {
         if (value is not { } change)
         {
-            return new WatchlistChangeCell(MissingDataText, WatchlistTone.Unavailable, null);
+            return new WatchlistChangeCell(Lang.T(MissingDataText), WatchlistTone.Unavailable, null);
         }
 
         var rounded = Math.Round(change, 2, MidpointRounding.AwayFromZero);

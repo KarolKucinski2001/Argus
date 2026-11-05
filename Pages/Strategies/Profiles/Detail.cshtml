@@ -14,7 +14,7 @@
             <h1 id="profile-title">@profile.Name</h1>
             <p>@profile.Description</p>
         </div>
-        <a class="button button--secondary" asp-page="/Strategies/Profiles/Index">Wszystkie profile</a>
+        <a class="button button--secondary" asp-page="/Strategies/Profiles/Index">@T("Wszystkie profile")</a>
     </header>
 
     @if (Model.Message is not null)
@@ -26,30 +26,30 @@
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="profile-meta-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="profile-meta-title">Dane profilu</h2>
-            <span class="watchlist-badge">@CuratedProfileCatalog.ApproximateBadge</span>
+            <h2 id="profile-meta-title">@T("Dane profilu")</h2>
+            <span class="watchlist-badge">@T(CuratedProfileCatalog.ApproximateBadge)</span>
         </header>
         <dl class="account-stats">
             <div>
-                <dt>Aktualność danych</dt>
+                <dt>@T("Aktualność danych")</dt>
                 <dd>@profile.AsOfText</dd>
             </div>
             <div>
-                <dt>Źródło</dt>
+                <dt>@T("Źródło")</dt>
                 <dd>@profile.SourceLabel</dd>
             </div>
         </dl>
-        <p class="strategy-quality__note" role="note">@CuratedProfileCatalog.Disclaimer @CuratedProfileCatalog.DataNote</p>
-        <p class="account-note" role="note">@CuratedProfileCatalog.ProvenanceNote @CuratedProfileCatalog.ApproximateExplanation</p>
+        <p class="strategy-quality__note" role="note">@T(CuratedProfileCatalog.Disclaimer) @T(CuratedProfileCatalog.DataNote)</p>
+        <p class="account-note" role="note">@T(CuratedProfileCatalog.ProvenanceNote) @T(CuratedProfileCatalog.ApproximateExplanation)</p>
         <form method="post" asp-page-handler="Copy" asp-route-id="@profile.Id" class="account-actions">
-            <button class="button" type="submit">Skopiuj do portfela symulowanego</button>
+            <button class="button" type="submit">@T("Skopiuj do portfela symulowanego")</button>
         </form>
     </section>
 
     <section class="watchlist-card" aria-labelledby="profile-holdings-title">
         <header class="watchlist-card__header watchlist-card__header--inline">
-            <h2 id="profile-holdings-title">Pozycje profilu</h2>
-            <span class="watchlist-badge">@CuratedProfileCatalog.ApproximateBadge</span>
+            <h2 id="profile-holdings-title">@T("Pozycje profilu")</h2>
+            <span class="watchlist-badge">@T(CuratedProfileCatalog.ApproximateBadge)</span>
         </header>
         <partial name="_ProfileHoldingsTable" model="profile.Holdings" />
     </section>
@@ -57,13 +57,13 @@
     <div class="account-grid">
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="profile-sector-title">
             <header class="watchlist-card__header">
-                <h2 id="profile-sector-title">Udział sektorów</h2>
+                <h2 id="profile-sector-title">@T("Udział sektorów")</h2>
             </header>
             <partial name="_ProfileShares" model="profile.SectorShares" />
         </section>
         <section class="watchlist-card watchlist-card--padded" aria-labelledby="profile-class-title">
             <header class="watchlist-card__header">
-                <h2 id="profile-class-title">Udział klas aktywów</h2>
+                <h2 id="profile-class-title">@T("Udział klas aktywów")</h2>
             </header>
             <partial name="_ProfileShares" model="profile.AssetClassShares" />
         </section>
@@ -71,7 +71,7 @@
 
     <section class="watchlist-card watchlist-card--padded" aria-labelledby="profile-factors-title">
         <header class="watchlist-card__header">
-            <h2 id="profile-factors-title">Czynniki opisujące skład</h2>
+            <h2 id="profile-factors-title">@T("Czynniki opisujące skład")</h2>
         </header>
         <ul class="account-note">
             @foreach (var factor in profile.Factors)
@@ -82,6 +82,6 @@
     </section>
 
     <p class="watchlist-page__boundary">
-        Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej. @CuratedProfileCatalog.Disclaimer
+        @T("Wyniki mają charakter edukacyjny i nie stanowią porady inwestycyjnej.") @T(CuratedProfileCatalog.Disclaimer)
     </p>
 </section>

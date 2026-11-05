@@ -2,27 +2,26 @@
 @model _bootstrap_scaffold.Pages.IndexModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Zrozum rynek";
+    ViewData["Title"] = T("Zrozum rynek");
 }
 
 <div class="landing-page">
     <section class="landing-hero" aria-labelledby="hero-title">
         <div class="landing-hero__copy">
-            <p class="eyebrow">Edukacyjna analiza rynku</p>
-            <h1 id="hero-title">Zrozum rynek, zanim wybierzesz aktywa.</h1>
+            <p class="eyebrow">@T("Edukacyjna analiza rynku")</p>
+            <h1 id="hero-title">@T("Zrozum rynek, zanim wybierzesz aktywa.")</h1>
             <p class="hero-lede">
-                Argus łączy kontekst rynkowy, wyjaśnione czynniki i dane historyczne,
-                aby początkujący mogli lepiej zrozumieć, co wpływa na wynik aktywa.
+                @T("Argus łączy kontekst rynkowy, wyjaśnione czynniki i dane historyczne, aby początkujący mogli lepiej zrozumieć, co wpływa na wynik aktywa.")
             </p>
             <div class="hero-actions">
-                <a class="button" href="#how-it-works">Poznaj sposób działania</a>
+                <a class="button" href="#how-it-works">@T("Poznaj sposób działania")</a>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a class="button button--secondary" asp-page="/Dashboard/Index">Przejdź do pulpitu</a>
+                    <a class="button button--secondary" asp-page="/Dashboard/Index">@T("Przejdź do pulpitu")</a>
                 }
                 else
                 {
-                    <a class="button button--secondary" asp-page="/Account/SignIn">Zaloguj się lub utwórz konto</a>
+                    <a class="button button--secondary" asp-page="/Account/SignIn">@T("Zaloguj się lub utwórz konto")</a>
                 }
             </div>
         </div>
@@ -31,10 +30,10 @@
             <article class="analysis-card" aria-labelledby="analysis-preview-title">
                 <div class="analysis-card__header">
                     <div>
-                        <p class="analysis-card__label">Przykładowy podgląd</p>
-                        <h2 id="analysis-preview-title">Wskaźnik okazji</h2>
+                        <p class="analysis-card__label">@T("Przykładowy podgląd")</p>
+                        <h2 id="analysis-preview-title">@T("Wskaźnik okazji")</h2>
                     </div>
-                    <span class="analysis-card__note">Dane ilustracyjne</span>
+                    <span class="analysis-card__note">@T("Dane ilustracyjne")</span>
                 </div>
 
                 <div class="analysis-row">
@@ -59,10 +58,10 @@
                     <span class="score">68</span>
                 </div>
 
-                <div class="analysis-card__factors" aria-label="Przykładowe czynniki wpływające na wynik">
-                    <div class="factor-row"><span>Niedawny impet</span><strong>Pozytywny</strong></div>
-                    <div class="factor-row"><span>Zakres historyczny</span><strong>Mieszany</strong></div>
-                    <div class="factor-row"><span>Aktualność danych</span><strong>Bieżąca</strong></div>
+                <div class="analysis-card__factors" aria-label="@T("Przykładowe czynniki wpływające na wynik")">
+                    <div class="factor-row"><span>@T("Niedawny impet")</span><strong>@T("Pozytywny")</strong></div>
+                    <div class="factor-row"><span>@T("Zakres historyczny")</span><strong>@T("Mieszany")</strong></div>
+                    <div class="factor-row"><span>@T("Aktualność danych")</span><strong>@T("Bieżąca")</strong></div>
                 </div>
             </article>
         </div>
@@ -70,59 +69,57 @@
 
     <section class="section" id="how-it-works" aria-labelledby="how-it-works-title">
         <div class="section-heading">
-            <p class="eyebrow">Przejrzysty proces</p>
-            <h2 id="how-it-works-title">Od pytania do lepiej poinformowanego spojrzenia.</h2>
-            <p>Argus pokazuje dowody zamiast ukrywać sposób rozumowania za jednym sygnałem.</p>
+            <p class="eyebrow">@T("Przejrzysty proces")</p>
+            <h2 id="how-it-works-title">@T("Od pytania do lepiej poinformowanego spojrzenia.")</h2>
+            <p>@T("Argus pokazuje dowody zamiast ukrywać sposób rozumowania za jednym sygnałem.")</p>
         </div>
         <div class="workflow-grid">
             <article class="workflow-card">
                 <span class="workflow-card__number">01</span>
-                <h3>Wybierz aktywa</h3>
-                <p>Wybierz aktywa, które chcesz zrozumieć i porównać.</p>
+                <h3>@T("Wybierz aktywa")</h3>
+                <p>@T("Wybierz aktywa, które chcesz zrozumieć i porównać.")</p>
             </article>
             <article class="workflow-card">
                 <span class="workflow-card__number">02</span>
-                <h3>Sprawdź dane</h3>
-                <p>Zobacz bieżący i historyczny kontekst w jednym miejscu.</p>
+                <h3>@T("Sprawdź dane")</h3>
+                <p>@T("Zobacz bieżący i historyczny kontekst w jednym miejscu.")</p>
             </article>
             <article class="workflow-card">
                 <span class="workflow-card__number">03</span>
-                <h3>Zrozum czynniki</h3>
-                <p>Poznaj sygnały i dowody, które wpływają na każdy wynik.</p>
+                <h3>@T("Zrozum czynniki")</h3>
+                <p>@T("Poznaj sygnały i dowody, które wpływają na każdy wynik.")</p>
             </article>
         </div>
     </section>
 
     <section class="section" id="data-sources" aria-labelledby="data-sources-title">
         <div class="section-heading">
-            <p class="eyebrow">Źródła danych</p>
-            <h2 id="data-sources-title">Skąd pochodzą dane i co z nich bierzemy.</h2>
-            <p>Każdy widok pokazuje, na jakich danych się opiera. Nie ukrywamy przybliżeń.</p>
+            <p class="eyebrow">@T("Źródła danych")</p>
+            <h2 id="data-sources-title">@T("Skąd pochodzą dane i co z nich bierzemy.")</h2>
+            <p>@T("Każdy widok pokazuje, na jakich danych się opiera. Nie ukrywamy przybliżeń.")</p>
         </div>
         <div class="workflow-grid">
             <article class="workflow-card source-card" data-data-source="market">
-                <h3>Dane rynkowe</h3>
-                <p>Ceny, zmiany 24h, 7 i 30 dni oraz historia cen. Dane są ujednolicane przed analizą. W tej wersji publicznej pokazujemy dane ilustracyjne — produkcyjny dostawca danych czeka na zatwierdzenie licencji.</p>
+                <h3>@T("Dane rynkowe")</h3>
+                <p>@T("Ceny, zmiany 24h, 7 i 30 dni oraz historia cen. Dane są ujednolicane przed analizą. W tej wersji publicznej pokazujemy dane ilustracyjne — produkcyjny dostawca danych czeka na zatwierdzenie licencji.")</p>
             </article>
             <article class="workflow-card source-card" data-data-source="profiles">
-                <h3>Profile publiczne</h3>
-                <p>Przybliżone składy portfeli z publicznych zgłoszeń SEC 13F oraz edukacyjne ilustracje oparte na publicznych opisach strategii. Wagi są zaokrąglone i nie zastępują oficjalnych dokumentów.</p>
+                <h3>@T("Profile publiczne")</h3>
+                <p>@T("Przybliżone składy portfeli z publicznych zgłoszeń SEC 13F oraz edukacyjne ilustracje oparte na publicznych opisach strategii. Wagi są zaokrąglone i nie zastępują oficjalnych dokumentów.")</p>
             </article>
             <article class="workflow-card source-card" data-data-source="ai">
-                <h3>Podsumowania AI</h3>
-                <p>Podsumowania powstają wyłącznie z danych widocznych na stronie wyników. Nie dodają informacji spoza nich.</p>
+                <h3>@T("Podsumowania AI")</h3>
+                <p>@T("Podsumowania powstają wyłącznie z danych widocznych na stronie wyników. Nie dodają informacji spoza nich.")</p>
             </article>
         </div>
     </section>
 
     <section class="section" aria-labelledby="boundary-title">
         <div class="boundary-card">
-            <p class="eyebrow">Ważne ograniczenie</p>
-            <h2 id="boundary-title">Ucz się z danych. Podejmuj własne decyzje.</h2>
+            <p class="eyebrow">@T("Ważne ograniczenie")</p>
+            <h2 id="boundary-title">@T("Ucz się z danych. Podejmuj własne decyzje.")</h2>
             <p>
-                Argus udostępnia analizę edukacyjną i nie oferuje spersonalizowanych
-                porad inwestycyjnych ani gwarancji przyszłych wyników. Oceny i przykłady
-                na tej stronie są ilustracyjne.
+                @T("Argus udostępnia analizę edukacyjną i nie oferuje spersonalizowanych porad inwestycyjnych ani gwarancji przyszłych wyników. Oceny i przykłady na tej stronie są ilustracyjne.")
             </p>
         </div>
     </section>
