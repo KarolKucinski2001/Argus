@@ -1,9 +1,10 @@
 ---
 change_id: strategy-profiles-simulation
 title: Strategy profiles and simulated model portfolio
-status: impl_reviewed
+status: archived
 created: 2026-10-27
-updated: 2026-11-02
+updated: 2026-11-12
+archived_at: 2026-11-12T12:34:27Z
 ---
 
 ## Notes
