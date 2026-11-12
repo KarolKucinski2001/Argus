@@ -62,13 +62,17 @@ Who can sign in is decided by the Entra app registration, not by Argus code:
 - **Single tenant (current setup)** — `Entra:Authority` is
   `https://login.microsoftonline.com/<tenant-id>/v2.0`. Only members of that
   tenant and invited guests can sign in.
-- **Any Microsoft account** — in the Azure portal set the app registration's
-  *Supported account types* to *Accounts in any organizational directory and
-  personal Microsoft accounts*, then set
+- **Any Microsoft account** — in the app registration's *Manifest* set
+  `api.requestedAccessTokenVersion` to `2` (the portal refuses the next step
+  without it), then set *Supported account types* to *Accounts in any
+  organizational directory and personal Microsoft accounts*. Finally set
   `Entra:Authority` = `https://login.microsoftonline.com/common/v2.0` and
   `Entra:AllowAnyTenant` = `true`. `AllowAnyTenant` replaces the default
   issuer check (which cannot match `common`) with one that accepts only the
-  v2.0 issuer of the tenant named in the token's `tid` claim.
+  v2.0 issuer of the tenant named in the token's `tid` claim; personal
+  accounts use the fixed consumer tenant `9188040d-6c67-4c5b-b112-36a304b66dad`.
+  People without a Microsoft account can create one ("Create one!") on the
+  Microsoft sign-in page.
 - **Self-service sign-up with any email** — use an Entra External ID tenant with
   a sign-up user flow and point `Entra:Authority` at its `ciamlogin.com`
   authority; `AllowAnyTenant` stays `false`.

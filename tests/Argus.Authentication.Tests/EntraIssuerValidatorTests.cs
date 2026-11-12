@@ -17,6 +17,15 @@ public sealed class EntraIssuerValidatorTests
                 $"https://login.microsoftonline.com/{TenantId}/v2.0",
                 Token(TenantId)));
 
+    [Fact]
+    public void Accepts_personal_microsoft_account_tokens()
+    {
+        const string ConsumerTenantId = "9188040d-6c67-4c5b-b112-36a304b66dad";
+        var issuer = $"https://login.microsoftonline.com/{ConsumerTenantId}/v2.0";
+
+        Assert.Equal(issuer, EntraIssuerValidator.ValidateAnyTenant(issuer, Token(ConsumerTenantId)));
+    }
+
     [Theory]
     [InlineData("https://login.microsoftonline.com/99999999-2222-3333-4444-555555555555/v2.0", TenantId)]
     [InlineData("https://evil.example/" + TenantId + "/v2.0", TenantId)]
