@@ -1,8 +1,9 @@
 ---
 change_id: production-market-data
-status: implemented
+status: archived
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-11-12
+archived_at: 2026-11-12T12:34:27Z
 ---
 
 # production-market-data (roadmap S-06)

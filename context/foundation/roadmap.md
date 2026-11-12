@@ -3,7 +3,7 @@ project: "Argus"
 version: 2
 status: draft
 created: 2026-09-30
-updated: 2026-10-27
+updated: 2026-11-12
 prd_version: 1
 main_goal: low-complexity
 top_blocker: decisions
@@ -43,7 +43,7 @@ Argus helps beginners or prospective first-time investors understand how selecte
 | --- | --- | --- | --- | --- | --- |
 | S-04 | save-assets-to-watchlist | save assets to a personal watchlist, review and remove them, and start an analysis from it | M-1 analysis workflow (closed) | FR-017, FR-002, FR-003 | done |
 | S-05 | watchlist-monitoring-dashboard | land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, with tab navigation to Analysis and Watchlist | S-04 | FR-017, FR-004, FR-006, FR-009, FR-010, FR-011, FR-014 | done |
-| S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | in-progress |
+| S-06 | production-market-data | see real market data for supported assets in Analysis, Watchlist, and Dashboard | provider decision (#1) | FR-004, FR-006, FR-007 | done |
 | S-07 | strategy-profiles-simulation | browse curated public strategy profiles, see their holdings with explained factors, copy one into a private simulated model portfolio they can list and delete, and see a composition-based analysis of it | S-04 (per-user storage pattern) | PRD v2 FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007 | in-progress |
 
 ## Baseline
@@ -103,7 +103,7 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
   - Provider licensing confirmation for public display — Owner: user. Block: archive only.
   - How are provider outages and stale data shown to the user? — Owner: team. Block: no (decided in `/10x-plan`).
 - **Risk:** Provider limits or licensing could constrain the supported-asset list; the existing market-data contract, cache and request budget stay the seam so Analysis, Watchlist and Dashboard need no changes. Free-tier rate limits can leave some assets without data when many are requested at once.
-- **Status:** in-progress (implemented; awaiting licensing confirmation, then `/10x-archive production-market-data`)
+- **Status:** done
 
 ### S-07: Strategy profiles and simulated model portfolio
 
@@ -146,6 +146,7 @@ None. Under the simplicity goal, per-user storage is introduced inside S-04, the
 - **M-1: First explained market analysis** (`first-explained-market-analysis`) — closed 2026-10-23. An authenticated beginner selects assets and gets a ranked, explained analysis with market data, factors, a compact trend view, a grounded AI summary, and the educational boundary.
 
 ## Done
+- **S-06: user sees real current and historical market data for the supported assets in Analysis, Watchlist, and Dashboard instead of development data.** — Archived 2026-11-12 → `context/archive/2026-10-27-production-market-data/`. Lesson: —.
 - **S-04: user can save assets to a personal watchlist, review and remove them, and start an analysis from the watchlist.** — Archived 2026-10-26 → `context/archive/2026-10-23-save-assets-to-watchlist/`. Lesson: —.
 - **S-05: user can land on a Dashboard tab that shows watched assets with current price, 24h/7d/30d changes, compact trend, and top explained insights, and move between Dashboard, Analysis, and Watchlist tabs.** — Archived 2026-10-26 → `context/archive/2026-10-26-watchlist-monitoring-dashboard/`. Lesson: —.
 - **S-02: user can select one or more supported assets and start a market analysis.** — Archived 2026-10-16 → `context/archive/2026-10-14-select-and-start-analysis/`. Lesson: —.
